@@ -1,5 +1,4 @@
 import FuseDialog from '@fuse/core/FuseDialog';
-import FuseMessage from '@fuse/core/FuseMessage';
 import FuseSuspense from '@fuse/core/FuseSuspense';
 import { makeStyles } from '@material-ui/core/styles';
 import AppContext from 'app/AppContext';
@@ -50,9 +49,9 @@ function Layout1(props) {
 						<ToolbarLayout1 className={config.toolbar.style === 'fixed' && 'sticky top-0'} />
 					)}
 
-					<div className="sticky top-0 z-99">
+					{/* <div className="sticky top-0 z-99">
 						<SettingsPanel />
-					</div>
+					</div> */}
 
 					<div className="flex flex-col flex-auto min-h-0 relative z-10">
 						<FuseDialog />
@@ -69,9 +68,6 @@ function Layout1(props) {
 
 				{config.navbar.display && config.navbar.position === 'right' && <NavbarWrapperLayout1 />}
 			</div>
-
-			{config.rightSidePanel.display && <RightSideLayout1 />}
-			<FuseMessage />
 		</div>
 	);
 }
