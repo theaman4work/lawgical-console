@@ -23,7 +23,6 @@ const RegisterConfig = {
 			}
 		}
 	},
-	auth: authRoles.onlyGuest,
 	routes: [
 		{
 			path: '/register',
