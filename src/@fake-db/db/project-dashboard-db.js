@@ -11,7 +11,7 @@ const projectDashboardAppDB = {
 			},
 			currentRange: 'DT',
 			data: {
-				name: 'Due Tasks',
+				name: 'Trademarks',
 				count: {
 					DY: 21,
 					DT: 25,
@@ -30,9 +30,9 @@ const projectDashboardAppDB = {
 		},
 		{
 			id: 'widget2',
-			title: 'Overdue',
+			//title: 'Overdue',
 			data: {
-				name: 'Tasks',
+				name: 'Patents',
 				count: 4,
 				extra: {
 					name: "Yesterday's overdue",
@@ -43,9 +43,9 @@ const projectDashboardAppDB = {
 		},
 		{
 			id: 'widget3',
-			title: 'Issues',
+			//title: 'Issues',
 			data: {
-				name: 'Open',
+				name: 'Copyrights',
 				count: 32,
 				extra: {
 					name: 'Closed today',
@@ -56,9 +56,9 @@ const projectDashboardAppDB = {
 		},
 		{
 			id: 'widget4',
-			title: 'Features',
+			//title: 'Features',
 			data: {
-				name: 'Proposals',
+				name: 'Any Legal Services',
 				count: 42,
 				extra: {
 					name: 'Implemented',
@@ -69,7 +69,7 @@ const projectDashboardAppDB = {
 		},
 		{
 			id: 'widget5',
-			title: 'Github Issues',
+			title: 'TradeMark',
 			ranges: {
 				TW: 'This Week',
 				LW: 'Last Week',

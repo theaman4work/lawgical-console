@@ -26,9 +26,6 @@ function WidgetNow() {
 				<Typography className="text-16 px-16 font-medium tracking-tighter" color="textSecondary">
 					{format(time, 'eee, HH:mm:ss')}
 				</Typography>
-				<IconButton aria-label="more">
-					<Icon>more_vert</Icon>
-				</IconButton>
 			</div>
 			<div className="text-center px-20 pt-20 pb-32">
 				<Typography className="text-24 leading-tight font-normal" color="textSecondary">
