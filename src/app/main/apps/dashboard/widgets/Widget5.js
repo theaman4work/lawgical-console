@@ -15,7 +15,7 @@ import { memo, useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import ReactApexChart from 'react-apexcharts';
 import { motion } from 'framer-motion';
-import TodoListItem from 'app/main/apps/dashboards/project/TodoListItem';
+import TodoListItem from 'app/main/apps/dashboard/TodoListItem';
 import { todosList } from '../store/Todos';
 
 function Widget5(props) {
