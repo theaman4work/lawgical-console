@@ -9,7 +9,7 @@ const useStyles = makeStyles(theme => ({
 	root: {}
 }));
 
-function MaintenancePage() {
+function Maintenance() {
 	const classes = useStyles();
 
 	return (
@@ -35,4 +35,4 @@ function MaintenancePage() {
 	);
 }
 
-export default MaintenancePage;
+export default Maintenance;
