@@ -1,7 +1,6 @@
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
-import Divider from '@material-ui/core/Divider';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
@@ -12,10 +11,18 @@ const useStyles = makeStyles(theme => ({
 		height: 600,
 		background: `linear-gradient(to right, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
 		color: theme.palette.primary.contrastText
+	},
+	badge: {
+		backgroundColor: theme.palette.error.main,
+		color: theme.palette.getContrastText(theme.palette.error.main)
+	},
+	price: {
+		backgroundColor: theme.palette.primary[600],
+		color: theme.palette.getContrastText(theme.palette.primary[600])
 	}
 }));
 
-function PricingStyle1Page() {
+function Pricing() {
 	const classes = useStyles();
 
 	const container = {
@@ -63,163 +70,160 @@ function PricingStyle1Page() {
 						className="flex items-center justify-center flex-wrap"
 					>
 						<motion.div variants={item} className="w-full max-w-320 sm:w-1/3 p-12">
-							<Card className="rounded-16">
-								<div className={clsx('px-24 py-16')}>
-									<Typography variant="subtitle1" className="font-medium">
-										BASIC
+							<Card className="relative rounded-16">
+								<div className="p-32 text-center">
+									<Typography className="text-32 font-semibold">Starter</Typography>
+									<Typography color="textSecondary" className="text-16 font-normal">
+										For small teams
 									</Typography>
 								</div>
 
-								<CardContent className="p-32">
-									<div className="flex justify-center">
-										<Typography variant="h5" color="textSecondary">
-											$
-										</Typography>
-										<div className="flex items-end">
-											<Typography className="text-72 mx-4 tracking-tight font-semibold leading-none">
-												4
+								<CardContent className="text-center p-0">
+									<div className={clsx(classes.price, 'flex items-end justify-center py-16 px-32')}>
+										<div className="flex justify-center">
+											<Typography color="inherit" className="font-normal">
+												$
 											</Typography>
 											<Typography
-												variant="subtitle1"
-												color="textSecondary"
-												className="font-normal"
+												color="inherit"
+												className="text-32 mx-4  tracking-tight font-semibold leading-none"
 											>
-												/ month
+												29
 											</Typography>
 										</div>
+										<Typography color="inherit" className="mx-4 font-normal">
+											monthly per user
+										</Typography>
 									</div>
 
-									<Divider className="my-32" />
-
-									<div className="flex flex-col">
-										<Typography variant="subtitle1" className="">
-											<span className="font-semibold mx-4">10</span>
-											Projects
+									<div className="flex flex-col p-32">
+										<Typography color="textSecondary" className="mb-16">
+											Unlimited projects
 										</Typography>
-										<Typography variant="subtitle1" className="">
-											<span className="font-semibold mx-4">10</span>
-											Pages
+										<Typography color="textSecondary" className="mb-16">
+											Unlimited pages
 										</Typography>
-										<Typography variant="subtitle1" className="">
-											<span className="font-semibold mx-4">100</span>
-											Mb Disk Space
+										<Typography color="textSecondary" className="mb-16">
+											Unlimited disk space
 										</Typography>
+										<Typography color="textSecondary">24 / 7 Free support</Typography>
 									</div>
 								</CardContent>
 
-								<div className="flex justify-center pb-32">
-									<Button variant="outlined" className="w-128">
-										Buy Now
+								<div className="flex flex-col items-center justify-center pb-32 px-32">
+									<Button variant="outlined" className="w-full">
+										Get Started Free
 									</Button>
+									<Typography color="textSecondary" className="mt-16">
+										7 day free trial to start
+									</Typography>
 								</div>
 							</Card>
 						</motion.div>
 
 						<motion.div variants={item} className="w-full max-w-320 sm:w-1/3 p-12">
-							<Card className="rounded-16" raised>
-								<div className={clsx('flex items-center justify-between px-24 py-16')}>
-									<Typography variant="subtitle1" className="font-medium">
-										STANDART
-									</Typography>
-									<Typography variant="caption" color="inherit" className="font-normal">
-										Save 15%
+							<Card className="relative rounded-16" raised>
+								<div className="p-32 text-center">
+									<Typography className="text-32 font-semibold">Pro</Typography>
+									<Typography color="textSecondary" className="text-16 font-normal">
+										For larger teams
 									</Typography>
 								</div>
 
-								<CardContent className="p-32">
-									<div className="flex justify-center">
-										<Typography variant="h5" color="textSecondary">
-											$
-										</Typography>
-										<div className="flex items-end">
-											<Typography className="text-72 mx-4 tracking-tight font-semibold leading-none">
-												8
+								<CardContent className="text-center p-0">
+									<div className={clsx(classes.price, 'flex items-end justify-center py-16 px-32')}>
+										<div className="flex justify-center">
+											<Typography color="inherit" className="font-normal">
+												$
 											</Typography>
 											<Typography
-												variant="subtitle1"
-												color="textSecondary"
-												className="font-normal"
+												color="inherit"
+												className="text-32 mx-4  tracking-tight font-semibold leading-none"
 											>
-												/ month
+												59
 											</Typography>
 										</div>
+										<Typography color="inherit" className="mx-4 font-normal">
+											monthly per user
+										</Typography>
 									</div>
 
-									<Divider className="my-32" />
-
-									<div className="flex flex-col">
-										<Typography variant="subtitle1" className="">
-											<span className="font-semibold mx-4">20</span>
-											Projects
+									<div className="flex flex-col p-32">
+										<Typography color="textSecondary" className="mb-16">
+											Unlimited projects
 										</Typography>
-										<Typography variant="subtitle1" className="">
-											<span className="font-semibold mx-4">20</span>
-											Pages
+										<Typography color="textSecondary" className="mb-16">
+											Unlimited pages
 										</Typography>
-										<Typography variant="subtitle1" className="">
-											<span className="font-semibold mx-4">200</span>
-											Mb Disk Space
+										<Typography color="textSecondary" className="mb-16">
+											Unlimited disk space
 										</Typography>
+										<Typography color="textSecondary">24 / 7 Free support</Typography>
+										<Typography color="textSecondary">Advanced reporting</Typography>
+										<Typography color="textSecondary">Customizable interface</Typography>
+										<Typography color="textSecondary">CRM Integration</Typography>
 									</div>
 								</CardContent>
 
-								<div className="flex justify-center pb-32">
-									<Button variant="contained" color="secondary" className="w-128">
-										Buy Now
+								<div className="flex flex-col items-center justify-center pb-32 px-32">
+									<Button variant="contained" color="secondary" className="w-full">
+										Get Started Free
 									</Button>
+									<Typography color="textSecondary" className="mt-16">
+										30 day free trial to start
+									</Typography>
 								</div>
 							</Card>
 						</motion.div>
 
 						<motion.div variants={item} className="w-full max-w-320 sm:w-1/3 p-12">
-							<Card className="rounded-16">
-								<div className={clsx('px-24 py-16')}>
-									<Typography variant="subtitle1" className="font-medium">
-										ADVANCED
+							<Card className="relative rounded-16">
+								<div className="p-32 text-center">
+									<Typography className="text-32 font-semibold">Enterprise</Typography>
+									<Typography color="textSecondary" className="text-16 font-normal">
+										For big teams
 									</Typography>
 								</div>
 
-								<CardContent className="p-32">
-									<div className="flex justify-center">
-										<Typography variant="h5" color="textSecondary" className="font-normal">
-											$
-										</Typography>
-										<div className="flex items-end">
-											<Typography className="text-72 mx-4 tracking-tight font-semibold leading-none">
-												12
+								<CardContent className="text-center p-0">
+									<div className={clsx(classes.price, 'flex items-end justify-center py-16 px-32')}>
+										<div className="flex justify-center">
+											<Typography color="inherit" className="font-normal">
+												$
 											</Typography>
 											<Typography
-												variant="subtitle1"
-												color="textSecondary"
-												className="font-normal"
+												color="inherit"
+												className="text-32 mx-4  tracking-tight font-semibold leading-none"
 											>
-												/ month
+												29
 											</Typography>
 										</div>
+										<Typography color="inherit" className="mx-4 font-normal">
+											monthly per user
+										</Typography>
 									</div>
 
-									<Divider className="my-32" />
-
-									<div className="flex flex-col">
-										<Typography variant="subtitle1" className="">
-											<span className="font-semibold mx-4">40</span>
-											Projects
+									<div className="flex flex-col p-32">
+										<Typography color="textSecondary" className="mb-16">
+											Unlimited projects
 										</Typography>
-										<Typography variant="subtitle1" className="">
-											<span className="font-semibold mx-4">40</span>
-											Pages
+										<Typography color="textSecondary" className="mb-16">
+											Unlimited pages
 										</Typography>
-										<Typography variant="subtitle1" className="">
-											<span className="font-semibold mx-4">500</span>
-											Mb Disk Space
+										<Typography color="textSecondary" className="mb-16">
+											Unlimited disk space
 										</Typography>
+										<Typography color="textSecondary">For full feature list, call us</Typography>
 									</div>
 								</CardContent>
 
-								<div className="flex justify-center pb-32">
-									<Button variant="outlined" className="w-128">
-										Buy Now
+								<div className="flex flex-col items-center justify-center pb-32 px-32">
+									<Button variant="outlined" className="w-full">
+										Call Us
 									</Button>
+									<Typography color="textSecondary" className="mt-16">
+										90 day free trial to start
+									</Typography>
 								</div>
 							</Card>
 						</motion.div>
@@ -270,4 +274,4 @@ function PricingStyle1Page() {
 	);
 }
 
-export default PricingStyle1Page;
+export default Pricing;
