@@ -64,7 +64,7 @@ const navigationConfig = [
 		title: 'Profile',
 		type: 'item',
 		icon: 'account_circle',
-		url: '/pages/profile'
+		url: '/profile'
 	},
 	{
 		id: 'invoice-list',
@@ -72,7 +72,7 @@ const navigationConfig = [
 		translate: 'INVOICE',
 		type: 'item',
 		icon: 'receipt',
-		url: '/pages/invoices/compact'
+		url: '/invoice'
 		// badge: {
 		// 	title: 25,
 		// 	bg: '#F44336',
@@ -84,7 +84,7 @@ const navigationConfig = [
 		title: 'Faq',
 		type: 'item',
 		icon: 'help_outline',
-		url: '/pages/faq'
+		url: '/faq'
 		// badge: {
 		// 	title: 3,
 		// 	bg: 'rgb(255, 111, 0)',

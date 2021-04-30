@@ -1,7 +1,17 @@
-import ServicesAppConfig from './service/ServicesAppConfig';
 import CalendarAppConfig from './calendar/CalendarAppConfig';
-import ProjectDashboardAppConfig from './dashboards/project/ProjectDashboardAppConfig';
+import ProjectDashboardAppConfig from './dashboard/ProjectDashboardAppConfig';
+import FaqConfig from './faq/FaqConfig';
+import InvoiceConfig from './invoice/InvoiceConfig';
+import ServicesAppConfig from './service/ServicesAppConfig';
+import PricingConfig from './pricing/PricingConfig';
 
-const appsConfigs = [ProjectDashboardAppConfig, CalendarAppConfig, ServicesAppConfig];
+const appsConfigs = [
+	CalendarAppConfig,
+	ProjectDashboardAppConfig,
+	FaqConfig,
+	InvoiceConfig,
+	ServicesAppConfig,
+	PricingConfig
+];
 
 export default appsConfigs;
