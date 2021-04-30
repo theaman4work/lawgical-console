@@ -2,10 +2,14 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import { motion } from 'framer-motion';
 import { Controller, useForm } from 'react-hook-form';
-
+import { submitRegister } from 'app/auth/store/registerSlice';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import Icon from '@material-ui/core/Icon';
+import InputAdornment from '@material-ui/core/InputAdornment';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -22,11 +26,9 @@ const useStyles = makeStyles(theme => ({
 	root: {},
 	leftSection: {},
 	rightSection: {
-		// background: `linear-gradient(to right, ${theme.palette.primary.dark} 0%, ${darken(
-		// 	theme.palette.primary.dark,
-		// 	0.5
-		// )} 100%)`,
-		background: `linear-gradient(to right, #0494AC 0%, ${darken('#274760', 0.5)} 100%)`,
+		// #0494AC- rgb(4, 148, 172)
+		// #274760 rgb(39, 71, 96)
+		background: `linear-gradient(to bottom left, rgb(39, 71, 96) 0%, rgb(4, 148, 172) 100%)`,
 		color: theme.palette.primary.contrastText
 	}
 }));
@@ -55,8 +57,10 @@ const defaultValues = {
 
 function Register() {
 	const classes = useStyles();
+	const dispatch = useDispatch();
+	const authRegister = useSelector(({ auth }) => auth.register);
 
-	const { control, formState, handleSubmit, reset } = useForm({
+	const { control, formState, handleSubmit, reset, setError } = useForm({
 		mode: 'onChange',
 		defaultValues,
 		resolver: yupResolver(schema)
@@ -64,8 +68,18 @@ function Register() {
 
 	const { isValid, dirtyFields, errors } = formState;
 
-	function onSubmit() {
-		reset(defaultValues);
+	useEffect(() => {
+		authRegister.errors.forEach(error => {
+			setError(error.type, {
+				type: 'manual',
+				message: error.message
+			});
+		});
+	}, [authRegister.errors, setError]);
+
+	function onSubmit(model) {
+		// reset(defaultValues);
+		dispatch(submitRegister(model));
 	}
 
 	return (
@@ -96,27 +110,29 @@ function Register() {
 							/>
 						</motion.div>
 
-						<form
-							name="registerForm"
-							noValidate
-							className="flex flex-col justify-center w-full"
-							onSubmit={handleSubmit(onSubmit)}
-						>
+						<form className="flex flex-col justify-center w-full" onSubmit={handleSubmit(onSubmit)}>
 							<Controller
-								name="name"
+								name="Name"
 								control={control}
 								render={({ field }) => (
 									<TextField
 										{...field}
 										className="mb-16"
+										type="text"
 										label="Name"
-										autoFocus
-										type="name"
-										error={!!errors.name}
-										helperText={errors?.name?.message}
+										error={!!errors.displayName}
+										helperText={errors?.displayName?.message}
+										InputProps={{
+											endAdornment: (
+												<InputAdornment position="end">
+													<Icon className="text-20" color="action">
+														person
+													</Icon>
+												</InputAdornment>
+											)
+										}}
 										variant="outlined"
 										required
-										fullWidth
 									/>
 								)}
 							/>
@@ -128,13 +144,21 @@ function Register() {
 									<TextField
 										{...field}
 										className="mb-16"
-										label="Email"
-										type="email"
+										type="text"
 										error={!!errors.email}
 										helperText={errors?.email?.message}
+										label="Email"
+										InputProps={{
+											endAdornment: (
+												<InputAdornment position="end">
+													<Icon className="text-20" color="action">
+														email
+													</Icon>
+												</InputAdornment>
+											)
+										}}
 										variant="outlined"
 										required
-										fullWidth
 									/>
 								)}
 							/>
@@ -146,13 +170,21 @@ function Register() {
 									<TextField
 										{...field}
 										className="mb-16"
-										label="Password"
 										type="password"
+										label="Password"
 										error={!!errors.password}
 										helperText={errors?.password?.message}
+										InputProps={{
+											endAdornment: (
+												<InputAdornment position="end">
+													<Icon className="text-20" color="action">
+														vpn_key
+													</Icon>
+												</InputAdornment>
+											)
+										}}
 										variant="outlined"
 										required
-										fullWidth
 									/>
 								)}
 							/>
@@ -164,13 +196,21 @@ function Register() {
 									<TextField
 										{...field}
 										className="mb-16"
-										label="Password (Confirm)"
 										type="password"
+										label="Confirm Password"
 										error={!!errors.passwordConfirm}
 										helperText={errors?.passwordConfirm?.message}
+										InputProps={{
+											endAdornment: (
+												<InputAdornment position="end">
+													<Icon className="text-20" color="action">
+														vpn_key
+													</Icon>
+												</InputAdornment>
+											)
+										}}
 										variant="outlined"
 										required
-										fullWidth
 									/>
 								)}
 							/>
@@ -190,14 +230,15 @@ function Register() {
 							/> */}
 
 							<Button
+								type="submit"
 								variant="contained"
 								color="primary"
 								className="w-full mx-auto mt-16"
-								aria-label="Register"
+								aria-label="REGISTER"
 								disabled={_.isEmpty(dirtyFields) || !isValid}
-								type="submit"
+								value="legacy"
 							>
-								Create an account
+								Register
 							</Button>
 						</form>
 					</CardContent>
