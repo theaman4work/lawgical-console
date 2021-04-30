@@ -27,7 +27,7 @@ const defaultValues = {
 	email: ''
 };
 
-function ForgotPassword2Page() {
+function ForgotPassword() {
 	const classes = useStyles();
 	const { control, formState, handleSubmit, reset } = useForm({
 		mode: 'onChange',
@@ -126,4 +126,4 @@ function ForgotPassword2Page() {
 	);
 }
 
-export default ForgotPassword2Page;
+export default ForgotPassword;
