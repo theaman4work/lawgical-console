@@ -2,7 +2,7 @@ import Typography from '@material-ui/core/Typography';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
-function Error500Page() {
+function Error500() {
 	return (
 		<div className="flex flex-col flex-1 items-center justify-center p-16">
 			<div className="max-w-512 text-center">
@@ -35,4 +35,4 @@ function Error500Page() {
 	);
 }
 
-export default Error500Page;
+export default Error500;

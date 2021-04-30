@@ -5,7 +5,7 @@ import Typography from '@material-ui/core/Typography';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
-function Error404Page() {
+function Error404() {
 	return (
 		<div className="flex flex-col flex-1 items-center justify-center p-16">
 			<div className="max-w-512 text-center">
@@ -45,4 +45,4 @@ function Error404Page() {
 	);
 }
 
-export default Error404Page;
+export default Error404;

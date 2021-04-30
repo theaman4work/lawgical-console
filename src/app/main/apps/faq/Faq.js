@@ -36,7 +36,7 @@ const useStyles = makeStyles(theme => ({
 	expanded: {}
 }));
 
-function FaqPage() {
+function Faq() {
 	const classes = useStyles();
 	const [data, setData] = useState([]);
 	const [filteredData, setFilteredData] = useState([]);
@@ -173,4 +173,4 @@ function FaqPage() {
 	);
 }
 
-export default FaqPage;
+export default Faq;

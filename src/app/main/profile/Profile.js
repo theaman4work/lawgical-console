@@ -33,7 +33,7 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-function ProfilePage() {
+function Profile() {
 	const classes = useStyles();
 	const [selectedTab, setSelectedTab] = useState(0);
 
@@ -118,4 +118,4 @@ function ProfilePage() {
 	);
 }
 
-export default ProfilePage;
+export default Profile;
