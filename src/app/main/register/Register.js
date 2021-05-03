@@ -3,7 +3,7 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import { motion } from 'framer-motion';
 import { Controller, useForm } from 'react-hook-form';
 import { submitRegister } from 'app/auth/store/registerSlice';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
@@ -14,13 +14,13 @@ import Checkbox from '@material-ui/core/Checkbox';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { makeStyles } from '@material-ui/core/styles';
-import { darken } from '@material-ui/core/styles/colorManipulator';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
 import { Link } from 'react-router-dom';
 import * as yup from 'yup';
 import _ from '@lodash';
+import AlertMessage from './AlertMessage';
 
 const useStyles = makeStyles(theme => ({
 	root: {},
@@ -42,7 +42,7 @@ const schema = yup.object().shape({
 	password: yup
 		.string()
 		.required('Please enter your password.')
-		.min(8, 'Password is too short - should be 8 chars minimum.'),
+		.min(4, 'Password is too short - should be 4 chars minimum.'),
 	passwordConfirm: yup.string().oneOf([yup.ref('password'), null], 'Passwords must match'),
 	acceptTermsConditions: yup.boolean().oneOf([true], 'The terms and conditions must be accepted.')
 });
@@ -51,8 +51,8 @@ const defaultValues = {
 	name: '',
 	email: '',
 	password: '',
-	passwordConfirm: '',
-	acceptTermsConditions: false
+	passwordConfirm: ''
+	// acceptTermsConditions: false
 };
 
 function Register() {
@@ -66,14 +66,19 @@ function Register() {
 		resolver: yupResolver(schema)
 	});
 
-	const { isValid, dirtyFields, errors } = formState;
+	const [status, setStatusBase] = useState('');
+	const { isValid, errors } = formState;
 
 	useEffect(() => {
 		authRegister.errors.forEach(error => {
-			setError(error.type, {
-				type: 'manual',
-				message: error.message
-			});
+			if (error.type === 'custom') {
+				setStatusBase({ msg: error.message, key: Math.random() });
+			} else {
+				setError(error.type, {
+					type: 'manual',
+					message: error.message
+				});
+			}
 		});
 	}, [authRegister.errors, setError]);
 
@@ -89,6 +94,7 @@ function Register() {
 				'flex flex-col flex-auto items-center justify-center flex-shrink-0 p-16 md:p-24'
 			)}
 		>
+			{status ? <AlertMessage key={status.key} message={status.msg} /> : null}
 			<motion.div
 				initial={{ opacity: 0, scale: 0.6 }}
 				animate={{ opacity: 1, scale: 1 }}
@@ -112,7 +118,7 @@ function Register() {
 
 						<form className="flex flex-col justify-center w-full" onSubmit={handleSubmit(onSubmit)}>
 							<Controller
-								name="Name"
+								name="name"
 								control={control}
 								render={({ field }) => (
 									<TextField
@@ -235,7 +241,7 @@ function Register() {
 								color="primary"
 								className="w-full mx-auto mt-16"
 								aria-label="REGISTER"
-								disabled={_.isEmpty(dirtyFields) || !isValid}
+								disabled={!isValid}
 								value="legacy"
 							>
 								Register
@@ -244,13 +250,15 @@ function Register() {
 					</CardContent>
 
 					<div className="flex flex-col items-center justify-center pb-72">
-						<span className="font-normal">Already have an account?</span>
-						<Link className="font-normal" to="/login">
-							Login
-						</Link>
-						<Link className="font-normal" to="/dashboard">
+						<span className="font-normal">
+							Already have an account?&nbsp;&nbsp;
+							<Link className="font-normal" to="/login">
+								Login
+							</Link>
+						</span>
+						{/* <Link className="font-normal" to="/dashboard">
 							Back to Dashboard
-						</Link>
+						</Link> */}
 					</div>
 				</Card>
 

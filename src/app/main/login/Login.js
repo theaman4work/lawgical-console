@@ -22,6 +22,7 @@ import clsx from 'clsx';
 import { Link } from 'react-router-dom';
 import * as yup from 'yup';
 import _ from '@lodash';
+import AlertMessage from '../register/AlertMessage';
 
 const useStyles = makeStyles(theme => ({
 	root: {},
@@ -42,7 +43,7 @@ const schema = yup.object().shape({
 	password: yup
 		.string()
 		.required('Please enter your password.')
-		.min(5, 'Password is too short - should be 5 chars minimum.')
+		.min(4, 'Password is too short - should be 4 chars minimum.')
 });
 
 const defaultValues = {
@@ -63,14 +64,19 @@ function Login() {
 
 	const { isValid, dirtyFields, errors } = formState;
 
+	const [status, setStatusBase] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
 
 	useEffect(() => {
 		login.errors.forEach(error => {
-			setError(error.type, {
-				type: 'manual',
-				message: error.message
-			});
+			if (error.type === 'custom') {
+				setStatusBase({ msg: error.message, key: Math.random() });
+			} else {
+				setError(error.type, {
+					type: 'manual',
+					message: error.message
+				});
+			}
 		});
 	}, [login.errors, setError]);
 
@@ -86,6 +92,7 @@ function Login() {
 				'flex flex-col flex-auto items-center justify-center flex-shrink-0 p-16 md:p-24'
 			)}
 		>
+			{status ? <AlertMessage key={status.key} message={status.msg} /> : null}
 			<motion.div
 				initial={{ opacity: 0, scale: 0.6 }}
 				animate={{ opacity: 1, scale: 1 }}
@@ -192,13 +199,15 @@ function Login() {
 						</form>
 
 						<div className="my-24 flex flex-col items-center justify-center pb-32">
-							<span className="font-normal">Don't have an account?</span>
-							<Link className="font-normal" to="/register">
-								Register
-							</Link>
-							<Link className="font-normal" to="/dashboard">
+							<span className="font-normal">
+								Don't have an account?&nbsp;&nbsp;
+								<Link className="font-normal" to="/register">
+									Sign Up
+								</Link>
+							</span>
+							{/* <Link className="font-normal" to="/dashboard">
 								Back to Dashboard
-							</Link>
+							</Link> */}
 						</div>
 					</CardContent>
 				</Card>
