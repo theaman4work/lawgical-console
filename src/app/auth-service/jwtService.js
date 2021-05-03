@@ -1,6 +1,7 @@
 import FuseUtils from '@fuse/utils/FuseUtils';
 import axios from 'axios';
 import jwtDecode from 'jwt-decode';
+import { axiosInstance } from './axiosInstance';
 /* eslint-disable camelcase */
 
 class JwtService extends FuseUtils.EventEmitter {
@@ -10,7 +11,7 @@ class JwtService extends FuseUtils.EventEmitter {
 	}
 
 	setInterceptors = () => {
-		axios.interceptors.response.use(
+		axiosInstance.interceptors.response.use(
 			response => {
 				return response;
 			},
@@ -19,7 +20,8 @@ class JwtService extends FuseUtils.EventEmitter {
 					if (err.response.status === 401 && err.config && !err.config.__isRetryRequest) {
 						// if you ever get an unauthorized response, logout the user
 						this.emit('onAutoLogout', 'Invalid access_token');
-						this.setSession(null);
+						this.setSession(null, null);
+						// console.warn('onAutoLogout');
 					}
 					throw err;
 				});
@@ -29,6 +31,7 @@ class JwtService extends FuseUtils.EventEmitter {
 
 	handleAuthentication = () => {
 		const access_token = this.getAccessToken();
+		const email = this.getLgLoggedInEmail();
 
 		if (!access_token) {
 			this.emit('onNoAccessToken');
@@ -37,67 +40,173 @@ class JwtService extends FuseUtils.EventEmitter {
 		}
 
 		if (this.isAuthTokenValid(access_token)) {
-			this.setSession(access_token);
+			this.setSession(access_token, email);
 			this.emit('onAutoLogin', true);
 		} else {
-			this.setSession(null);
+			this.setSession(null, null);
 			this.emit('onAutoLogout', 'access_token expired');
 		}
 	};
 
 	createUser = data => {
 		return new Promise((resolve, reject) => {
-			axios.post('/api/auth/register', data).then(response => {
-				if (response.data.user) {
-					this.setSession(response.data.access_token);
-					resolve(response.data.user);
-				} else {
-					reject(response.data.error);
-				}
-			});
-		});
-	};
+			const managedUserVM = {
+				email: data.email,
+				password: data.password,
+				login: data.email,
+				firstName: data.name
+			};
 
-	signInWithEmailAndPassword = (email, password) => {
-		return new Promise((resolve, reject) => {
-			axios
-				.get('/api/auth', {
-					data: {
-						email,
-						password
-					}
-				})
+			const reqData = {
+				managedUserVM,
+				roleType: 1
+			};
+
+			axiosInstance
+				.post('/api/users/complete-registration', reqData)
 				.then(response => {
-					if (response.data.user) {
-						this.setSession(response.data.access_token);
-						resolve(response.data.user);
-					} else {
-						reject(response.data.error);
+					if (response.status === 200) {
+						// console.log('authenticate (success)');
+						const userData = {
+							uuid: response.data.endUserDTO.id,
+							from: 'lawgical',
+							role: 'admin',
+							data: {
+								displayName: response.data.endUserDTO.name,
+								photoURL: 'assets/images/avatars/profile.jpg',
+								email: response.data.endUserDTO.email,
+								settings: {
+									layout: {
+										style: 'layout1',
+										config: {}
+									},
+									customScrollbars: true,
+									theme: {}
+								},
+								shortcuts: []
+							}
+						};
+						this.setSession(response.data.id_token, response.data.endUserDTO.email);
+						resolve(userData);
+					}
+					// else {}
+				})
+				.catch(function errror(error) {
+					if (error.response) {
+						// console.warn('registration failed');
+						// console.log(error.response.data);
+						// console.log(error.response.status);
+						// console.log(error.response.headers);
+						const errorArr = [];
+						errorArr.push({
+							type: 'custom',
+							message: error.response.data.errorMessage
+						});
+						reject(errorArr);
 					}
 				});
 		});
 	};
 
-	signInWithToken = () => {
+	signInWithEmailAndPassword = (email, password) => {
 		return new Promise((resolve, reject) => {
-			axios
-				.get('/api/auth/access-token', {
-					data: {
-						access_token: this.getAccessToken()
+			const reqAuthData = {
+				username: email,
+				password,
+				rememberMe: 'true'
+			};
+			axiosInstance
+				.post('/api/users/authentication', reqAuthData)
+				.then(response => {
+					if (response.data.id_token) {
+						// console.log('authentication (success)');
+						const userData = {
+							uuid: response.data.gwId,
+							from: 'lawgical',
+							role: 'admin',
+							data: {
+								displayName: response.data.endUserDTO.name,
+								photoURL: 'assets/images/avatars/profile.jpg',
+								email,
+								settings: {
+									layout: {
+										style: 'layout1',
+										config: {}
+									},
+									customScrollbars: true,
+									theme: {}
+								},
+								shortcuts: []
+							}
+						};
+						this.setSession(response.data.id_token, email);
+						resolve(userData);
+					} else {
+						const errorArr = [];
+						errorArr.push({
+							type: 'custom',
+							message: 'Authentication failed, please try again!'
+						});
+						reject(errorArr);
 					}
 				})
+				.catch(function errror(error) {
+					if (error.response) {
+						// console.warn('authentication failed');
+						// console.log(error.response.data);
+						// console.log(error.response.status);
+						// console.log(error.response.headers);
+						const errorArr = [];
+						errorArr.push({
+							type: 'custom',
+							message: error.response.data.errorMessage
+						});
+						reject(errorArr);
+					}
+				});
+		});
+	};
+
+	signInWithToken = email => {
+		return new Promise((resolve, reject) => {
+			axiosInstance
+				.get(`/api/users/get-data-using-token/${this.getLgLoggedInEmail()}`, {
+					// params: {
+					// 	email: this.getLgLoggedInEmail()
+					// }
+				})
 				.then(response => {
-					if (response.data.user) {
-						this.setSession(response.data.access_token);
-						resolve(response.data.user);
+					if (response.status === 200) {
+						const userData = {
+							uuid: response.data.gwId,
+							from: 'lawgical',
+							role: 'admin',
+							data: {
+								displayName: response.data.gwUserName,
+								photoURL: 'assets/images/avatars/profile.jpg',
+								email,
+								settings: {
+									layout: {
+										style: 'layout1',
+										config: {}
+									},
+									customScrollbars: true,
+									theme: {}
+								},
+								shortcuts: []
+							}
+						};
+						this.setSession(response.data.id_token, email);
+						resolve(userData);
 					} else {
 						this.logout();
-						reject(new Error('Failed to login with token.'));
+						reject(new Error('Failed to login (1301)'));
 					}
 				})
 				.catch(error => {
 					this.logout();
-					reject(new Error('Failed to login with token.'));
+					console.warn(error);
+					reject(new Error('Failed to login (1302)'));
 				});
 		});
 	};
@@ -108,13 +217,17 @@ class JwtService extends FuseUtils.EventEmitter {
 		});
 	};
 
-	setSession = access_token => {
+	setSession = (access_token, email) => {
 		if (access_token) {
 			localStorage.setItem('jwt_access_token', access_token);
+			localStorage.setItem('lg_logged_in_email', email);
 			axios.defaults.headers.common.Authorization = `Bearer ${access_token}`;
+			axiosInstance.defaults.headers.common.Authorization = `Bearer ${access_token}`;
 		} else {
 			localStorage.removeItem('jwt_access_token');
+			localStorage.removeItem('lg_logged_in_email');
 			delete axios.defaults.headers.common.Authorization;
+			delete axiosInstance.defaults.headers.common.Authorization;
 		}
 	};
 
@@ -138,6 +251,10 @@ class JwtService extends FuseUtils.EventEmitter {
 
 	getAccessToken = () => {
 		return window.localStorage.getItem('jwt_access_token');
+	};
+
+	getLgLoggedInEmail = () => {
+		return window.localStorage.getItem('lg_logged_in_email');
 	};
 }
 
