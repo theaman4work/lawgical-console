@@ -1,11 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
 import jwtService from 'app/auth-service/jwtService';
+import { showMessage } from 'app/store/fuse/messageSlice';
 import { setUserData } from './userSlice';
 
-export const submitRegister = ({ displayName, password, email }) => async dispatch => {
+export const submitRegister = ({ name, password, email }) => async dispatch => {
 	return jwtService
 		.createUser({
-			displayName,
+			name,
 			password,
 			email
 		})
