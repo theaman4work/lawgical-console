@@ -167,10 +167,11 @@ class JwtService extends FuseUtils.EventEmitter {
 		});
 	};
 
-	signInWithToken = email => {
+	signInWithToken = () => {
 		return new Promise((resolve, reject) => {
+			const email = this.getLgLoggedInEmail();
 			axiosInstance
-				.get(`/api/users/get-data-using-token/${this.getLgLoggedInEmail()}`, {
+				.get(`/api/users/get-data-using-token/${email}`, {
 					// params: {
 					// 	email: this.getLgLoggedInEmail()
 					// }
@@ -205,7 +206,7 @@ class JwtService extends FuseUtils.EventEmitter {
 				})
 				.catch(error => {
 					this.logout();
-					console.warn(error);
+					// console.warn(error);
 					reject(new Error('Failed to login (1302)'));
 				});
 		});
@@ -242,7 +243,7 @@ class JwtService extends FuseUtils.EventEmitter {
 		const decoded = jwtDecode(access_token);
 		const currentTime = Date.now() / 1000;
 		if (decoded.exp < currentTime) {
-			console.warn('access token expired');
+			// console.warn('access token expired');
 			return false;
 		}
 
