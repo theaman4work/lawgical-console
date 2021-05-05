@@ -4,11 +4,9 @@ import Typography from '@material-ui/core/Typography';
 import { memo, useState } from 'react';
 
 function Widget1(props) {
-	const [currentRange, setCurrentRange] = useState(props.widget.currentRange);
-	// console.log("Widget1 props:" ,props);
-	function handleChangeRange(ev) {
-		setCurrentRange(ev.target.value);
-	}
+	const [currentRange, setCurrentRange] = useState(props.count);
+
+	const productName = props.product !== null ? props.product : 'Patents';
 
 	return (
 		<Paper className="w-full rounded-20 shadow flex flex-col justify-between">
@@ -20,9 +18,9 @@ function Widget1(props) {
 			</div>
 			<div className="text-center">
 				<Typography className="text-48 font-semibold leading-none text-blue tracking-tighter">
-					{props.widget.data.count[currentRange]}
+					{currentRange}
 				</Typography>
-				<Typography className="text-16 text-blue-800 font-normal pb-40">{props.widget.data.name}</Typography>
+				<Typography className="text-16 text-blue-800 font-normal pb-40">{productName}</Typography>
 			</div>
 		</Paper>
 	);

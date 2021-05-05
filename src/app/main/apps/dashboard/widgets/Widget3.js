@@ -1,10 +1,13 @@
 import Icon from '@material-ui/core/Icon';
-import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
-import { memo } from 'react';
+import { memo, useState } from 'react';
 
 function Widget3(props) {
+	const [currentRange, setCurrentRange] = useState(props.count);
+
+	const productName = props.product !== null ? props.product : 'Design';
+
 	return (
 		<Paper className="w-full rounded-20 shadow flex flex-col justify-between">
 			<div className="flex items-center justify-between px-4">
@@ -15,9 +18,9 @@ function Widget3(props) {
 			</div>
 			<div className="text-center">
 				<Typography className="text-48 font-semibold leading-none text-orange tracking-tighter">
-					{props.widget.data.count}
+					{currentRange}
 				</Typography>
-				<Typography className="text-16 font-normal text-orange-800 pb-40">{props.widget.data.name}</Typography>
+				<Typography className="text-16 font-normal text-orange-800 pb-40">{productName}</Typography>
 			</div>
 		</Paper>
 	);
