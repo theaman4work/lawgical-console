@@ -3,18 +3,47 @@ import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
+import { amber, blue, blueGrey, green } from '@material-ui/core/colors';
 import { useTheme } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { categories } from '../CategoriesList';
+import { useSelector } from 'react-redux';
+import { selectProductServices } from '../store/productServicesSlice';
+import { selectServices } from '../store/servicesSlice';
 import { courses } from '../CoursesList';
 
 function AnyLegalServicesTab() {
 	const theme = useTheme();
 	const coursesTemp = courses;
-	const categoriesTemp = categories;
+	const productServices = useSelector(selectProductServices);
+	const subservices = useSelector(selectServices);
+
+	const productServicesForAnyLegalServ = [];
+	const subServicesForTradeMark = [];
+
+	// eslint-disable-next-line
+	Object.keys(productServices).map(function (keyName) {
+		if (productServices[keyName].productId === 6) {
+			productServicesForAnyLegalServ.push(productServices[keyName]);
+
+			// eslint-disable-next-line
+			Object.keys(subservices).map(function (keyNameSubService) {
+				if (subservices[keyNameSubService].productLserviceId === productServices[keyName].id) {
+					subServicesForTradeMark.push(subservices[keyNameSubService]);
+				}
+			});
+		}
+	});
+
+	if (productServicesForAnyLegalServ.length < 1) {
+		return null;
+	}
 
 	const container = {
 		show: {
@@ -48,66 +77,60 @@ function AnyLegalServicesTab() {
 
 	return (
 		<div className="flex flex-col flex-auto flex-shrink-0 w-full">
-			{coursesTemp &&
-				(coursesTemp.length > 0 ? (
+			{productServicesForAnyLegalServ &&
+				(productServicesForAnyLegalServ.length > 0 ? (
 					<motion.div className="flex flex-wrap py-24" variants={container} initial="hidden" animate="show">
-						{coursesTemp.map(course => {
-							const category = categoriesTemp.find(_cat => _cat.value === course.category);
+						{productServicesForAnyLegalServ.map(productService => {
 							return (
 								<motion.div
 									variants={item}
 									className="w-full pb-24 sm:w-1/2 lg:w-1/3 sm:p-16"
-									key={course.id}
+									key={productService.id}
 								>
 									<Card className="flex flex-col h-256 shadow">
 										<div
 											className="flex flex-shrink-0 items-center justify-between px-24 h-64"
 											style={{
-												background: category.color,
-												color: theme.palette.getContrastText(category.color)
+												background: productService.id % 2 === 0 ? blue[500] : amber[500],
+												color: theme.palette.getContrastText(
+													productService.id % 2 === 0 ? blue[500] : amber[500]
+												)
 											}}
 										>
 											<Typography className="font-medium truncate" color="inherit">
-												{category.label}
+												{productService.name}
 											</Typography>
-											<div className="flex items-center justify-center opacity-75">
-												<Icon className="text-20 mx-8" color="inherit">
-													access_time
-												</Icon>
-												<div className="text-14 font-medium whitespace-nowrap">
-													{course.length}
-													min
-												</div>
-											</div>
 										</div>
-										<CardContent className="flex flex-col flex-auto items-center justify-center">
-											<Typography className="text-center text-16 font-medium">
-												{course.title}
-											</Typography>
-											<Typography
-												className="text-center text-13 mt-8 font-normal"
-												color="textSecondary"
-											>
-												{course.updated}
-											</Typography>
+										<CardContent className="flex flex-col flex-auto items-start justify-start">
+											<List component="nav" className="p-0 pt-0">
+												{
+													// eslint-disable-next-line
+												subServicesForTradeMark.map((subService, i) => {												
+													if (subService.productLserviceId === productService.id) {
+															return (
+																<ListItem
+																	key={i}
+																	// onClick={() => handleOpenDialog(article)}
+																	className="pl-12"
+																	button
+																>
+																	<ListItemIcon className="min-w-40">
+																		<Icon className="text-20">import_contacts</Icon>
+																	</ListItemIcon>
+																	<ListItemText primary={subService.name} />
+																</ListItem>
+															);
+														}
+													})
+												}
+											</List>
 										</CardContent>
-										<CardActions className="justify-center pb-24">
-											<Button
-												to={`/apps/service/courses/${course.id}/${course.slug}`}
-												component={Link}
-												className="justify-start px-32"
-												color="primary"
-												variant="outlined"
-											>
-												{buttonStatus(course)}
-											</Button>
-										</CardActions>
-										<LinearProgress
+										{/* <LinearProgress
 											className="w-full"
 											variant="determinate"
-											value={(course.activeStep * 100) / course.totalSteps}
+											value={(productService.activeStep * 100) / productService.totalSteps}
 											color="secondary"
-										/>
+										/> */}
 									</Card>
 								</motion.div>
 							);
@@ -116,7 +139,7 @@ function AnyLegalServicesTab() {
 				) : (
 					<div className="flex flex-1 items-center justify-center">
 						<Typography color="textSecondary" className="text-24 my-24">
-							No courses found!
+							No Trademark services found!
 						</Typography>
 					</div>
 				))}

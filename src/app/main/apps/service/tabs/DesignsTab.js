@@ -18,30 +18,30 @@ import { selectProductServices } from '../store/productServicesSlice';
 import { selectServices } from '../store/servicesSlice';
 import { courses } from '../CoursesList';
 
-function TradeMarkTab() {
+function DesignsTab() {
 	const theme = useTheme();
 	const coursesTemp = courses;
 	const productServices = useSelector(selectProductServices);
 	const subservices = useSelector(selectServices);
 
-	const productServicesForTradeMark = [];
-	const subServicesForTradeMark = [];
+	const productServicesForDesign = [];
+	const subServicesForDesign = [];
 
 	// eslint-disable-next-line
 	Object.keys(productServices).map(function (keyName) {
-		if (productServices[keyName].productId === 1) {
-			productServicesForTradeMark.push(productServices[keyName]);
+		if (productServices[keyName].productId === 5) {
+			productServicesForDesign.push(productServices[keyName]);
 
 			// eslint-disable-next-line
 			Object.keys(subservices).map(function (keyNameSubService) {
 				if (subservices[keyNameSubService].productLserviceId === productServices[keyName].id) {
-					subServicesForTradeMark.push(subservices[keyNameSubService]);
+					subServicesForDesign.push(subservices[keyNameSubService]);
 				}
 			});
 		}
 	});
 
-	if (productServicesForTradeMark.length < 1) {
+	if (productServicesForDesign.length < 1) {
 		return null;
 	}
 
@@ -77,10 +77,10 @@ function TradeMarkTab() {
 
 	return (
 		<div className="flex flex-col flex-auto flex-shrink-0 w-full">
-			{productServicesForTradeMark &&
-				(productServicesForTradeMark.length > 0 ? (
+			{productServicesForDesign &&
+				(productServicesForDesign.length > 0 ? (
 					<motion.div className="flex flex-wrap py-24" variants={container} initial="hidden" animate="show">
-						{productServicesForTradeMark.map(productService => {
+						{productServicesForDesign.map(productService => {
 							return (
 								<motion.div
 									variants={item}
@@ -105,7 +105,7 @@ function TradeMarkTab() {
 											<List component="nav" className="p-0 pt-0">
 												{
 													// eslint-disable-next-line
-												subServicesForTradeMark.map((subService, i) => {												
+												subServicesForDesign.map((subService, i) => {												
 													if (subService.productLserviceId === productService.id) {
 															return (
 																<ListItem
@@ -147,4 +147,4 @@ function TradeMarkTab() {
 	);
 }
 
-export default TradeMarkTab;
+export default DesignsTab;
