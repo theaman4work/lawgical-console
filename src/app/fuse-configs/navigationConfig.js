@@ -23,7 +23,7 @@ const navigationConfig = [
 		translate: 'SERVICES',
 		type: 'collapse',
 		icon: 'gavel',
-		// url: '/apps/services/courses',
+		// url: '/services/trademarks',
 		children: [
 			{
 				id: 'service-trademark',

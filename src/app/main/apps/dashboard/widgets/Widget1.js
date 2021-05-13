@@ -1,7 +1,18 @@
+import { Button, IconButton } from '@material-ui/core';
 import Icon from '@material-ui/core/Icon';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
+import { AddCircle } from '@material-ui/icons';
 import { memo, useState } from 'react';
+import { Link } from 'react-router-dom';
+
+const styles = {
+	largeIcon: {
+		width: 32,
+		height: 32,
+		color: '#0494AC'
+	}
+};
 
 function Widget1(props) {
 	const [currentRange, setCurrentRange] = useState(props.count);
@@ -12,9 +23,7 @@ function Widget1(props) {
 		<Paper className="w-full rounded-20 shadow flex flex-col justify-between">
 			<div className="flex items-center justify-between px-4">
 				<div />
-				<Icon className="text-32" style={{ color: '#0494AC' }}>
-					add_circle
-				</Icon>
+				<AddCircle style={styles.largeIcon} onClick={() => window.open('/services', '_self')} />
 			</div>
 			<div className="text-center">
 				<Typography className="text-48 font-semibold leading-none text-blue tracking-tighter">
