@@ -25,7 +25,7 @@ function AnyLegalServicesTab() {
 	const subservices = useSelector(selectServices);
 
 	const productServicesForAnyLegalServ = [];
-	const subServicesForTradeMark = [];
+	const subServicesForAnyLegalServ = [];
 
 	// eslint-disable-next-line
 	Object.keys(productServices).map(function (keyName) {
@@ -35,7 +35,7 @@ function AnyLegalServicesTab() {
 			// eslint-disable-next-line
 			Object.keys(subservices).map(function (keyNameSubService) {
 				if (subservices[keyNameSubService].productLserviceId === productServices[keyName].id) {
-					subServicesForTradeMark.push(subservices[keyNameSubService]);
+					subServicesForAnyLegalServ.push(subservices[keyNameSubService]);
 				}
 			});
 		}
@@ -101,18 +101,26 @@ function AnyLegalServicesTab() {
 												{productService.name}
 											</Typography>
 										</div>
-										<CardContent className="flex flex-col flex-auto items-start justify-start">
-											<List component="nav" className="p-0 pt-0">
+										<CardContent className="flex flex-col flex-auto items-start justify-start pl-6 pt-1 pr-6">
+											<List
+												component="nav"
+												style={{ maxHeight: '200px', overflow: 'auto', width: '100%' }}
+												className="p-0 pt-0"
+												autoFocus
+											>
 												{
 													// eslint-disable-next-line
-												subServicesForTradeMark.map((subService, i) => {												
-													if (subService.productLserviceId === productService.id) {
+													subServicesForAnyLegalServ.map((subService, i) => {												
+														const url = `/apps/services/steps/${subService.id}`;
+														if (subService.productLserviceId === productService.id) {
 															return (
 																<ListItem
 																	key={i}
 																	// onClick={() => handleOpenDialog(article)}
 																	className="pl-12"
 																	button
+																	component={Link}
+																	to={url}
 																>
 																	<ListItemIcon className="min-w-40">
 																		<Icon className="text-20">import_contacts</Icon>
@@ -139,7 +147,7 @@ function AnyLegalServicesTab() {
 				) : (
 					<div className="flex flex-1 items-center justify-center">
 						<Typography color="textSecondary" className="text-24 my-24">
-							No Trademark services found!
+							No Other Legal Services found!
 						</Typography>
 					</div>
 				))}

@@ -101,18 +101,26 @@ function PatentsTab() {
 												{productService.name}
 											</Typography>
 										</div>
-										<CardContent className="flex flex-col flex-auto items-start justify-start">
-											<List component="nav" className="p-0 pt-0">
+										<CardContent className="flex flex-col flex-auto items-start justify-start pl-6 pt-1 pr-6">
+											<List
+												component="nav"
+												style={{ maxHeight: '200px', overflow: 'auto', width: '100%' }}
+												className="p-0 pt-0"
+												autoFocus
+											>
 												{
 													// eslint-disable-next-line
-												subServicesForPatent.map((subService, i) => {												
-													if (subService.productLserviceId === productService.id) {
+												subServicesForPatent.map((subService, i) => {
+														const url = `/apps/services/steps/${subService.id}`;
+														if (subService.productLserviceId === productService.id) {
 															return (
 																<ListItem
 																	key={i}
 																	// onClick={() => handleOpenDialog(article)}
 																	className="pl-12"
 																	button
+																	component={Link}
+																	to={url}
 																>
 																	<ListItemIcon className="min-w-40">
 																		<Icon className="text-20">import_contacts</Icon>
