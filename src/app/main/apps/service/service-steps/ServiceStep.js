@@ -12,13 +12,17 @@ import Stepper from '@material-ui/core/Stepper';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import withReducer from 'app/store/withReducer';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import { useDeepCompareEffect } from '@fuse/hooks';
 import SwipeableViews from 'react-swipeable-views';
 import reducer from '../store';
 import { getCourse, updateCourse } from '../store/courseSlice';
+import { getData } from '../store/serviceStepsSlice';
+import ModernInvoicePage from '../../invoice/Invoice';
+import PricingInfo from '../stagesForms/PricingInfo';
+import ConfidentialityAgreement from '../stagesForms/ConfidentialityAgreement';
 
 const useStyles = makeStyles(theme => ({
 	stepLabel: {
@@ -30,9 +34,11 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-function Course(props) {
+function ServiceStep(props) {
+	// const orderJs = TempOrder;
+	const [stepCount, setStepCount] = useState(1);
 	const dispatch = useDispatch();
-	const course = useSelector(({ servicesApp }) => servicesApp.course);
+	const serviceSteps = useSelector(({ servicesApp }) => servicesApp.serviceSteps);
 	const theme = useTheme();
 
 	const routeParams = useParams();
@@ -43,32 +49,66 @@ function Course(props) {
 		/**
 		 * Get the Course Data
 		 */
-		dispatch(getCourse(routeParams));
+		dispatch(getData(routeParams));
 	}, [dispatch, routeParams]);
 
-	useEffect(() => {
-		/**
-		 * If the course is opened for the first time
-		 * Change ActiveStep to 1
-		 */
-		if (course && course.activeStep === 0) {
-			dispatch(updateCourse({ activeStep: 1 }));
-		}
-	}, [dispatch, course]);
+	// useEffect(() => {
+	// 	/**
+	// 	 * If the course is opened for the first time
+	// 	 * Change ActiveStep to 1
+	// 	 */
+	// 	if (serviceSteps && serviceSteps.activeStep === 0) {
+	// 		dispatch(updateData({ activeStep: 1 }));
+	// 	}
+	// }, [dispatch, serviceSteps]);
 
 	function handleChangeActiveStep(index) {
-		dispatch(updateCourse({ activeStep: index + 1 }));
+		// dispatch(updateCourse({ activeStep: index + 1 }));
+		setStepCount(index + 1);
 	}
 
 	function handleNext() {
-		dispatch(updateCourse({ activeStep: course.activeStep + 1 }));
+		// dispatch(updateCourse({ activeStep: serviceSteps.activeStep + 1 }));
+		setStepCount(stepCount + 1);
 	}
 
 	function handleBack() {
-		dispatch(updateCourse({ activeStep: course.activeStep - 1 }));
+		// dispatch(updateCourse({ activeStep: serviceSteps.activeStep - 1 }));
+		setStepCount(stepCount - 1);
 	}
 
-	const activeStep = course && course.activeStep !== 0 ? course.activeStep : 1;
+	// const activeStep = serviceSteps && serviceSteps.activeStep !== 0 ? serviceSteps.activeStep : 1;
+	const activeStep = stepCount;
+	// console.log('serviceSteps');
+	// if (serviceSteps) {
+	// 	console.log(serviceSteps);
+	// 	console.log(serviceSteps.lserviceDTO.name);
+	// 	console.log(serviceSteps.customerDTO);
+	// }
+
+	const updateStepCount = index => () => {
+		// the callback
+		console.log(index);
+		setStepCount(index);
+	};
+
+	function renderFormsUsingSwitchDecision(index, step) {
+		switch (index) {
+			case 0:
+				return (
+					<PricingInfo
+						costDetails={serviceSteps.lserviceCostDTO}
+						stepCount={1}
+						name={step.name}
+						updateStepCount={updateStepCount}
+					/>
+				);
+			case 1:
+				return <ConfidentialityAgreement stepCount={2} step={step} updateStepCount={updateStepCount} />;
+			default:
+				return '';
+		}
+	}
 
 	return (
 		<FusePageSimple
@@ -90,11 +130,13 @@ function Course(props) {
 					<IconButton to="/services" component={Link}>
 						<Icon>{theme.direction === 'ltr' ? 'arrow_back' : 'arrow_forward'}</Icon>
 					</IconButton>
-					{course && <Typography className="flex-1 text-20 mx-16">{course.title}</Typography>}
+					{serviceSteps && (
+						<Typography className="flex-1 text-20 mx-16">{serviceSteps.lserviceDTO.name}</Typography>
+					)}
 				</div>
 			}
 			content={
-				course && (
+				serviceSteps && (
 					<div className="flex flex-1 relative overflow-hidden">
 						<FuseScrollbars className="w-full overflow-auto">
 							<SwipeableViews
@@ -103,16 +145,24 @@ function Course(props) {
 								enableMouseEvents
 								onChangeIndex={handleChangeActiveStep}
 							>
-								{course.steps.map((step, index) => (
+								{serviceSteps.lserviceStageDTOs.map((step, index) => (
 									<div
 										className="flex justify-center p-16 pb-64 sm:p-24 sm:pb-64 md:p-48 md:pb-64"
 										key={step.id}
 									>
-										<Paper className="w-full max-w-lg rounded-20 p-16 md:p-24 shadow text-14 leading-normal">
-											<div
-												dangerouslySetInnerHTML={{ __html: step.content }}
-												dir={theme.direction}
-											/>
+										<Paper className="w-full max-w-lg rounded-20 p-16 md:p-24 shadow leading-normal">
+											<div dir={theme.direction}>
+												{/* {step.stageType === 'PRICINGINFO' && index === 0 ? (
+													<PricingInfo
+														costDetails={serviceSteps.lserviceCostDTO}
+														stepCount={1}
+														name={step.name}
+													/>
+												) : (
+													''
+												)} */}
+												{renderFormsUsingSwitchDecision(index, step)}
+											</div>
 										</Paper>
 									</div>
 								))}
@@ -129,12 +179,12 @@ function Course(props) {
 									)}
 								</div>
 								<div>
-									{activeStep < course.steps.length ? (
+									{activeStep < serviceSteps.lserviceStageDTOs.length ? (
 										<Fab className="" color="secondary" onClick={handleNext}>
 											<Icon>{theme.direction === 'ltr' ? 'chevron_right' : 'chevron_left'}</Icon>
 										</Fab>
 									) : (
-										<Fab className={classes.successFab} to="/apps/academy/courses" component={Link}>
+										<Fab className={classes.successFab} to="/services" component={Link}>
 											<Icon>check</Icon>
 										</Fab>
 									)}
@@ -145,12 +195,12 @@ function Course(props) {
 				)
 			}
 			leftSidebarContent={
-				course && (
+				serviceSteps && (
 					<Stepper classes={{ root: 'bg-transparent' }} activeStep={activeStep - 1} orientation="vertical">
-						{course.steps.map((step, index) => {
+						{serviceSteps.lserviceStageDTOs.map((step, index) => {
 							return (
 								<Step key={step.id} onClick={() => handleChangeActiveStep(index)}>
-									<StepLabel classes={{ root: classes.stepLabel }}>{step.title}</StepLabel>
+									<StepLabel classes={{ root: classes.stepLabel }}>{step.name}</StepLabel>
 								</Step>
 							);
 						})}
@@ -163,4 +213,4 @@ function Course(props) {
 	);
 }
 
-export default withReducer('servicesApp', reducer)(Course);
+export default withReducer('servicesApp', reducer)(ServiceStep);
