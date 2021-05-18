@@ -1,3 +1,5 @@
+import _ from '@lodash';
+import * as yup from 'yup';
 import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -11,10 +13,10 @@ import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import { useDispatch, useSelector } from 'react-redux';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import _ from '@lodash';
+import { updateData } from '../store/serviceStepsSlice';
 
 const useStyles = makeStyles({
 	root: {
@@ -42,6 +44,7 @@ const defaultValues = {
 
 const PricingInfo = props => {
 	const classes = useStyles();
+	const dispatch = useDispatch();
 
 	const { control, formState, handleSubmit } = useForm({
 		mode: 'onChange',
@@ -53,6 +56,19 @@ const PricingInfo = props => {
 
 	const platformCharges = (props.costDetails.platformCharges / 100) * props.costDetails.baseAmount;
 	const platformAndBaseTotal = props.costDetails.baseAmount + platformCharges;
+
+	// console.log('PricingInfo props');
+	// console.log(props);
+
+	const stageStaus =
+		props.lserviceStageTransaction != null
+			? props.lserviceStageTransaction.stageStaus === 'COMPLETED'
+				? 1
+				: 0
+			: 0;
+
+	// console.log('PricingInfo stageStaus');
+	// console.log(stageStaus);
 
 	let tax =
 		(props.costDetails.cgst / 100) * platformAndBaseTotal + (props.costDetails.sgst / 100) * platformAndBaseTotal;
@@ -70,8 +86,14 @@ const PricingInfo = props => {
 	});
 
 	function onSubmit(model) {
-		// console.log('onSubmit');
-		// props.updateStepCount(props.stepCount + 1);
+		dispatch(
+			updateData({
+				lserviceTransactionId: 0,
+				stageStatus: 'COMPLETED',
+				lserviceStageId: props.step.id,
+				lserviceId: props.step.lserviceId
+			})
+		);
 	}
 
 	return (
@@ -80,7 +102,7 @@ const PricingInfo = props => {
 				<div>
 					<div>
 						<Typography className="text-16 sm:text-20 truncate font-semibold">
-							{`Step ${props.stepCount} - ${props.name}`}
+							{`Step ${props.stepCount} - ${props.step.name}`}
 						</Typography>
 						<form onSubmit={handleSubmit(onSubmit)}>
 							<Table className="simple mt-12">
@@ -143,9 +165,16 @@ const PricingInfo = props => {
 								name="acceptTermsConditions"
 								control={control}
 								render={({ field }) => (
-									<FormControl className="items-center" error={!!errors.acceptTermsConditions}>
+									<FormControl
+										className="items-center"
+										// eslint-disable-next-line
+										disabled={stageStaus === 1 ? true : false}
+										error={!!errors.acceptTermsConditions}
+									>
 										<FormControlLabel label="I accept charges" control={<Checkbox {...field} />} />
 										<FormHelperText>{errors?.acceptTermsConditions?.message}</FormHelperText>
+										{/* {console.log('field')}
+										{console.log(field)} */}
 									</FormControl>
 								)}
 							/>
@@ -155,7 +184,7 @@ const PricingInfo = props => {
 								color="primary"
 								className="w-full mx-auto mt-16"
 								aria-label="REGISTER"
-								disabled={_.isEmpty(dirtyFields) || !isValid}
+								disabled={_.isEmpty(dirtyFields) || !isValid || stageStaus === 1}
 								value="legacy"
 							>
 								Submit
