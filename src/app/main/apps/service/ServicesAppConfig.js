@@ -27,10 +27,6 @@ const ServicesAppConfig = {
 			component: lazy(() => import('./Services'))
 		},
 		{
-			path: '/apps/services/course/:courseId/:courseHandle?',
-			component: lazy(() => import('./course/Course'))
-		},
-		{
 			path: '/apps/services/steps/:lserviceId?',
 			component: lazy(() => import('./service-steps/ServiceStep'))
 		}
