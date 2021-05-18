@@ -55,14 +55,21 @@ const ConfidentialityAgreement = props => {
 
 	const { isValid, dirtyFields, errors } = formState;
 
-	let showDesc = false;
-	if (props.step.stageType === 'AGGREMENTS') {
-		showDesc = true;
-	}
+	// console.log('ConfidentialityAgreement props');
+	// console.log(props);
+
+	const stageStaus =
+		props.lserviceStageTransaction != null
+			? props.lserviceStageTransaction.stageStaus === 'COMPLETED'
+				? 1
+				: 0
+			: 0;
+
+	const desc = props.stageContent && props.stageContent.desc != null ? props.stageContent.desc : '';
 
 	function onSubmit(model) {
 		// console.log('onSubmit');
-		// props.updateStepCount(props.stepCount + 1);
+		// save serviceStageTransaction data
 	}
 
 	return (
@@ -73,23 +80,19 @@ const ConfidentialityAgreement = props => {
 						<Typography className="text-16 sm:text-20 mb-16 truncate font-semibold">
 							{`Step ${props.stepCount} - ${props.step.name}`}
 						</Typography>
-						{showDesc ? (
+						{desc ? (
 							<form onSubmit={handleSubmit(onSubmit)}>
 								<Box p={1} borderColor="text.primary" border={1} boxShadow={3} borderRadius={12}>
-									<Typography>
-										Accept charges and time line accept terms & conditions complete formalities
-										(fill-in questionnaire) approve charges and make payment download agreement
-										upload suggestions/corrections download final draft.Accept charges and time line
-										accept terms & conditions complete formalities (fill-in questionnaire) approve
-										charges and make payment download agreement upload suggestions/corrections
-										download final draft
-									</Typography>
+									<Typography>{desc}</Typography>
 								</Box>
 								<Controller
 									name="acceptTermsConditions"
 									control={control}
 									render={({ field }) => (
-										<FormControl className="items-center" error={!!errors.acceptTermsConditions}>
+										<FormControl
+											className="items-center mt-10"
+											error={!!errors.acceptTermsConditions}
+										>
 											<FormControlLabel
 												label="I read and accept terms and conditions"
 												control={<Checkbox {...field} />}

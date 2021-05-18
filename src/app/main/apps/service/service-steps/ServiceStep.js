@@ -18,9 +18,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useDeepCompareEffect } from '@fuse/hooks';
 import SwipeableViews from 'react-swipeable-views';
 import reducer from '../store';
-import { getCourse, updateCourse } from '../store/courseSlice';
 import { getData } from '../store/serviceStepsSlice';
-import ModernInvoicePage from '../../invoice/Invoice';
 import PricingInfo from '../stagesForms/PricingInfo';
 import ConfidentialityAgreement from '../stagesForms/ConfidentialityAgreement';
 
@@ -35,10 +33,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function ServiceStep(props) {
-	// const orderJs = TempOrder;
-	const [stepCount, setStepCount] = useState(1);
 	const dispatch = useDispatch();
 	const serviceSteps = useSelector(({ servicesApp }) => servicesApp.serviceSteps);
+	const [stepCount, setStepCount] = useState(1);
 	const theme = useTheme();
 
 	const routeParams = useParams();
@@ -47,7 +44,7 @@ function ServiceStep(props) {
 
 	useDeepCompareEffect(() => {
 		/**
-		 * Get the Course Data
+		 * Get the ServiceStages Data
 		 */
 		dispatch(getData(routeParams));
 	}, [dispatch, routeParams]);
@@ -79,17 +76,18 @@ function ServiceStep(props) {
 
 	// const activeStep = serviceSteps && serviceSteps.activeStep !== 0 ? serviceSteps.activeStep : 1;
 	const activeStep = stepCount;
-	// console.log('serviceSteps');
-	// if (serviceSteps) {
-	// 	console.log(serviceSteps);
-	// 	console.log(serviceSteps.lserviceDTO.name);
-	// 	console.log(serviceSteps.customerDTO);
-	// }
 
-	const updateStepCount = index => () => {
-		// the callback
-		console.log(index);
-		setStepCount(index);
+	const findMatchingLserviceStageTransaction = (lserviceStageTransactionData, step) => {
+		const el = lserviceStageTransactionData.find(eltemp => eltemp.lserviceStageId === step.id); // Possibly returns `undefined`
+		return el || null; // so check result is truthy and extract `id`
+	};
+	const findStageContentUsingStageId = (stagesData, stagesContentData, step) => {
+		const el = stagesData.find(eltemp => eltemp.stageType === step.stageType);
+		if (el != null) {
+			const sc = stagesContentData.find(sctemp => sctemp.stageId === el.id);
+			return sc || null; // Possibly returns `undefined`
+		}
+		return null;
 	};
 
 	function renderFormsUsingSwitchDecision(index, step) {
@@ -99,12 +97,29 @@ function ServiceStep(props) {
 					<PricingInfo
 						costDetails={serviceSteps.lserviceCostDTO}
 						stepCount={1}
-						name={step.name}
-						updateStepCount={updateStepCount}
+						step={step}
+						lserviceStageTransaction={findMatchingLserviceStageTransaction(
+							serviceSteps.lserviceStageTransactionDTOs,
+							step
+						)}
 					/>
 				);
 			case 1:
-				return <ConfidentialityAgreement stepCount={2} step={step} updateStepCount={updateStepCount} />;
+				return (
+					<ConfidentialityAgreement
+						stepCount={2}
+						step={step}
+						stageContent={findStageContentUsingStageId(
+							serviceSteps.stageDTOs,
+							serviceSteps.stageLongContentDTOs,
+							step
+						)}
+						lserviceStageTransaction={findMatchingLserviceStageTransaction(
+							serviceSteps.lserviceStageTransactionDTOs,
+							step
+						)}
+					/>
+				);
 			default:
 				return '';
 		}
@@ -152,15 +167,6 @@ function ServiceStep(props) {
 									>
 										<Paper className="w-full max-w-lg rounded-20 p-16 md:p-24 shadow leading-normal">
 											<div dir={theme.direction}>
-												{/* {step.stageType === 'PRICINGINFO' && index === 0 ? (
-													<PricingInfo
-														costDetails={serviceSteps.lserviceCostDTO}
-														stepCount={1}
-														name={step.name}
-													/>
-												) : (
-													''
-												)} */}
 												{renderFormsUsingSwitchDecision(index, step)}
 											</div>
 										</Paper>
