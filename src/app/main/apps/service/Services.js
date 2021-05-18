@@ -14,7 +14,7 @@ import reducer from './store';
 import TradeMarksTab from './tabs/TradeMarksTab';
 import PatentsTab from './tabs/PatentsTab';
 import CopyrightsTab from './tabs/CopyrightsTab';
-import AnyLegalServicesTab from './tabs/AnyLegalServicesTab';
+import OtherLegalServicesTab from './tabs/OtherLegalServicesTab';
 import DesignsTab from './tabs/DesignsTab';
 import { getServices, selectServices } from './store/servicesSlice';
 
@@ -54,15 +54,13 @@ function Services(props) {
 	// } else {
 	// 	i = 0;
 	// }
-	// console.log('##########tabValue: ', i);
+	// console.log('tabValue: ', i);
 	const [tabValue, setTabValue] = useState(0);
-	// setTabValue();
-	// console.log('##########tabValue: ', tabValue);
+	// console.log('tabValue: ', tabValue);
 
 	useEffect(() => {
 		dispatch(getProductServices());
 		dispatch(getServices());
-		// dispatch(getCourses());
 	}, [dispatch]);
 
 	function handleChangeTab(event, value) {
@@ -111,11 +109,11 @@ function Services(props) {
 					// initialSelectedIndex={tabValue}
 					classes={{ root: 'w-full h-64' }}
 				>
-					<Tab className="h-64" label="Trademark" />
+					<Tab className="h-64" label="Trademarks" />
 					<Tab className="h-64" label="Patents" />
 					<Tab className="h-64" label="Copyrights" />
 					<Tab className="h-64" label="Design" />
-					<Tab className="h-64" label="Any Legal Service" />
+					<Tab className="h-64" label="Other Legal Services" />
 				</Tabs>
 			}
 			content={
@@ -124,7 +122,7 @@ function Services(props) {
 					{tabValue === 1 && <PatentsTab />}
 					{tabValue === 2 && <CopyrightsTab />}
 					{tabValue === 3 && <DesignsTab />}
-					{tabValue === 4 && <AnyLegalServicesTab />}
+					{tabValue === 4 && <OtherLegalServicesTab />}
 				</div>
 			}
 			innerScroll

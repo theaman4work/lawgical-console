@@ -16,11 +16,9 @@ import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
 import { selectProductServices } from '../store/productServicesSlice';
 import { selectServices } from '../store/servicesSlice';
-import { courses } from '../CoursesList';
 
-function AnyLegalServicesTab() {
+function OtherLegalServicesTab() {
 	const theme = useTheme();
-	const coursesTemp = courses;
 	const productServices = useSelector(selectProductServices);
 	const subservices = useSelector(selectServices);
 
@@ -155,4 +153,4 @@ function AnyLegalServicesTab() {
 	);
 }
 
-export default AnyLegalServicesTab;
+export default OtherLegalServicesTab;
