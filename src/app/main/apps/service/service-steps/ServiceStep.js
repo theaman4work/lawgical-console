@@ -19,8 +19,14 @@ import { useDeepCompareEffect } from '@fuse/hooks';
 import SwipeableViews from 'react-swipeable-views';
 import reducer from '../store';
 import { getData } from '../store/serviceStepsSlice';
+import { getApplicants } from '../store/applicantSlice';
 import PricingInfo from '../stagesForms/PricingInfo';
 import ConfidentialityAgreement from '../stagesForms/ConfidentialityAgreement';
+import ApplicantsTable from '../stagesForms/applicantDetails/ApplicantsTable';
+import ApplicantDialog from '../stagesForms/applicantDetails/ApplicantDialog';
+import TrademarkDetailsForTmSearch from '../stagesForms/trademarksRelated/TrademarkDetailsForTmSearch';
+// import ModernInvoicePage from '../stagesForms/payment/Invoice';
+import CartAndPayment from '../stagesForms/payment/CartAndPayment';
 
 const useStyles = makeStyles(theme => ({
 	stepLabel: {
@@ -47,17 +53,9 @@ function ServiceStep(props) {
 		 * Get the ServiceStages Data
 		 */
 		dispatch(getData(routeParams));
+		// dispatch(getContacts(routeParams));
+		dispatch(getApplicants(routeParams));
 	}, [dispatch, routeParams]);
-
-	// useEffect(() => {
-	// 	/**
-	// 	 * If the course is opened for the first time
-	// 	 * Change ActiveStep to 1
-	// 	 */
-	// 	if (serviceSteps && serviceSteps.activeStep === 0) {
-	// 		dispatch(updateData({ activeStep: 1 }));
-	// 	}
-	// }, [dispatch, serviceSteps]);
 
 	function handleChangeActiveStep(index) {
 		// dispatch(updateCourse({ activeStep: index + 1 }));
@@ -89,6 +87,14 @@ function ServiceStep(props) {
 		}
 		return null;
 	};
+	const convertClassficationsToDropdownList = classificationDTOs => {
+		const classificationsForDropDown = [];
+		for (let i = 0; i < classificationDTOs.length; i += 1) {
+			const classificationLabel = `${classificationDTOs[i].name} ${classificationDTOs[i].desc}`;
+			classificationsForDropDown.push(classificationLabel);
+		}
+		return classificationsForDropDown;
+	};
 
 	function renderFormsUsingSwitchDecision(index, step) {
 		switch (index) {
@@ -118,104 +124,168 @@ function ServiceStep(props) {
 							serviceSteps.lserviceStageTransactionDTOs,
 							step
 						)}
+						lserviceTransaction={serviceSteps.lserviceTransactionDTO}
 					/>
 				);
+			case 2:
+				return (
+					<ApplicantsTable
+						stepCount={3}
+						step={step}
+						stageContent={findStageContentUsingStageId(
+							serviceSteps.stageDTOs,
+							serviceSteps.stageLongContentDTOs,
+							step
+						)}
+						lserviceStageTransaction={findMatchingLserviceStageTransaction(
+							serviceSteps.lserviceStageTransactionDTOs,
+							step
+						)}
+						lserviceTransaction={serviceSteps.lserviceTransactionDTO}
+						lservice={serviceSteps.lserviceDTO}
+					/>
+				);
+			case 3:
+				if (step.stageType === 'TMSEARCHREQ') {
+					// return 4th step for TM Search
+					return (
+						<TrademarkDetailsForTmSearch
+							costDetails={serviceSteps.lserviceCostDTO}
+							stepCount={4}
+							step={step}
+							lserviceStageTransaction={findMatchingLserviceStageTransaction(
+								serviceSteps.lserviceStageTransactionDTOs,
+								step
+							)}
+							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
+							classifications={convertClassficationsToDropdownList(serviceSteps.classificationDTOs)}
+							classificationDTOs={serviceSteps.classificationDTOs}
+						/>
+					);
+				}
+				return '';
+			case 4:
+				if (step.stageType === 'PAYMENT') {
+					return (
+						<CartAndPayment
+							costDetails={serviceSteps.lserviceCostDTO}
+							stepCount={5}
+							step={step}
+							lserviceStageTransaction={findMatchingLserviceStageTransaction(
+								serviceSteps.lserviceStageTransactionDTOs,
+								step
+							)}
+						/>
+					);
+				}
+				return '';
 			default:
 				return '';
 		}
 	}
 
 	return (
-		<FusePageSimple
-			classes={{
-				content: 'flex flex-col flex-auto overflow-hidden',
-				header: 'h-72 min-h-72 lg:ltr:rounded-bl-20 lg:rtl:rounded-br-20',
-				sidebar: 'border-0'
-			}}
-			header={
-				<div className="flex flex-1 items-center px-16 lg:px-24">
-					<Hidden lgUp>
-						<IconButton
-							onClick={ev => pageLayout.current.toggleLeftSidebar()}
-							aria-label="open left sidebar"
-						>
-							<Icon>menu</Icon>
-						</IconButton>
-					</Hidden>
-					<IconButton to="/services" component={Link}>
-						<Icon>{theme.direction === 'ltr' ? 'arrow_back' : 'arrow_forward'}</Icon>
-					</IconButton>
-					{serviceSteps && (
-						<Typography className="flex-1 text-20 mx-16">{serviceSteps.lserviceDTO.name}</Typography>
-					)}
-				</div>
-			}
-			content={
-				serviceSteps && (
-					<div className="flex flex-1 relative overflow-hidden">
-						<FuseScrollbars className="w-full overflow-auto">
-							<SwipeableViews
-								className="overflow-hidden"
-								index={activeStep - 1}
-								enableMouseEvents
-								onChangeIndex={handleChangeActiveStep}
+		<>
+			<FusePageSimple
+				classes={{
+					content: 'flex flex-col flex-auto overflow-hidden',
+					header: 'h-72 min-h-72 lg:ltr:rounded-bl-20 lg:rtl:rounded-br-20',
+					sidebar: 'border-0'
+				}}
+				header={
+					<div className="flex flex-1 items-center px-16 lg:px-24">
+						<Hidden lgUp>
+							<IconButton
+								onClick={ev => pageLayout.current.toggleLeftSidebar()}
+								aria-label="open left sidebar"
 							>
-								{serviceSteps.lserviceStageDTOs.map((step, index) => (
-									<div
-										className="flex justify-center p-16 pb-64 sm:p-24 sm:pb-64 md:p-48 md:pb-64"
-										key={step.id}
-									>
-										<Paper className="w-full max-w-lg rounded-20 p-16 md:p-24 shadow leading-normal">
-											<div dir={theme.direction}>
-												{renderFormsUsingSwitchDecision(index, step)}
-											</div>
-										</Paper>
-									</div>
-								))}
-							</SwipeableViews>
-						</FuseScrollbars>
+								<Icon>menu</Icon>
+							</IconButton>
+						</Hidden>
+						<IconButton to="/services" component={Link}>
+							<Icon>{theme.direction === 'ltr' ? 'arrow_back' : 'arrow_forward'}</Icon>
+						</IconButton>
+						{serviceSteps && (
+							<Typography className="flex-1 text-20 mx-16">{serviceSteps.lserviceDTO.name}</Typography>
+						)}
+					</div>
+				}
+				content={
+					serviceSteps && (
+						<div className="flex flex-1 relative overflow-hidden">
+							<FuseScrollbars className="w-full overflow-auto">
+								<SwipeableViews
+									className="overflow-hidden"
+									index={activeStep - 1}
+									enableMouseEvents
+									onChangeIndex={handleChangeActiveStep}
+								>
+									{serviceSteps.lserviceStageDTOs.map((step, index) => (
+										<div
+											className="flex justify-center p-16 pb-64 sm:p-24 sm:pb-64 md:p-48 md:pb-64"
+											key={step.id}
+										>
+											<Paper className="w-full max-w-lg rounded-20 p-16 md:p-24 shadow leading-normal">
+												<div dir={theme.direction}>
+													{renderFormsUsingSwitchDecision(index, step)}
+												</div>
+											</Paper>
+										</div>
+									))}
+								</SwipeableViews>
+							</FuseScrollbars>
 
-						<div className="flex justify-center w-full absolute left-0 right-0 bottom-0 pb-16 md:pb-32">
-							<div className="flex justify-between w-full max-w-xl px-8">
-								<div>
-									{activeStep !== 1 && (
-										<Fab className="" color="secondary" onClick={handleBack}>
-											<Icon>{theme.direction === 'ltr' ? 'chevron_left' : 'chevron_right'}</Icon>
-										</Fab>
-									)}
-								</div>
-								<div>
-									{activeStep < serviceSteps.lserviceStageDTOs.length ? (
-										<Fab className="" color="secondary" onClick={handleNext}>
-											<Icon>{theme.direction === 'ltr' ? 'chevron_right' : 'chevron_left'}</Icon>
-										</Fab>
-									) : (
-										<Fab className={classes.successFab} to="/services" component={Link}>
-											<Icon>check</Icon>
-										</Fab>
-									)}
+							<div className="flex justify-center w-full absolute left-0 right-0 bottom-0 pb-16 md:pb-32">
+								<div className="flex justify-between w-full max-w-xl px-8">
+									<div>
+										{activeStep !== 1 && (
+											<Fab className="" color="secondary" onClick={handleBack}>
+												<Icon>
+													{theme.direction === 'ltr' ? 'chevron_left' : 'chevron_right'}
+												</Icon>
+											</Fab>
+										)}
+									</div>
+									<div>
+										{activeStep < serviceSteps.lserviceStageDTOs.length ? (
+											<Fab className="" color="secondary" onClick={handleNext}>
+												<Icon>
+													{theme.direction === 'ltr' ? 'chevron_right' : 'chevron_left'}
+												</Icon>
+											</Fab>
+										) : (
+											<Fab className={classes.successFab} to="/services" component={Link}>
+												<Icon>check</Icon>
+											</Fab>
+										)}
+									</div>
 								</div>
 							</div>
 						</div>
-					</div>
-				)
-			}
-			leftSidebarContent={
-				serviceSteps && (
-					<Stepper classes={{ root: 'bg-transparent' }} activeStep={activeStep - 1} orientation="vertical">
-						{serviceSteps.lserviceStageDTOs.map((step, index) => {
-							return (
-								<Step key={step.id} onClick={() => handleChangeActiveStep(index)}>
-									<StepLabel classes={{ root: classes.stepLabel }}>{step.name}</StepLabel>
-								</Step>
-							);
-						})}
-					</Stepper>
-				)
-			}
-			innerScroll
-			ref={pageLayout}
-		/>
+					)
+				}
+				leftSidebarContent={
+					serviceSteps && (
+						<Stepper
+							classes={{ root: 'bg-transparent' }}
+							activeStep={activeStep - 1}
+							orientation="vertical"
+						>
+							{serviceSteps.lserviceStageDTOs.map((step, index) => {
+								return (
+									<Step key={step.id} onClick={() => handleChangeActiveStep(index)}>
+										<StepLabel classes={{ root: classes.stepLabel }}>{step.name}</StepLabel>
+									</Step>
+								);
+							})}
+						</Stepper>
+					)
+				}
+				innerScroll
+				ref={pageLayout}
+			/>
+			<ApplicantDialog />
+		</>
 	);
 }
 
