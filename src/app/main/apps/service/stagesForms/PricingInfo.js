@@ -7,13 +7,18 @@ import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import { useDispatch, useSelector } from 'react-redux';
+import Alert from '@material-ui/lab/Alert';
+import IconButton from '@material-ui/core/IconButton';
+import Collapse from '@material-ui/core/Collapse';
+import CloseIcon from '@material-ui/icons/Close';
+
+import { useDispatch } from 'react-redux';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { updateData } from '../store/serviceStepsSlice';
@@ -38,17 +43,29 @@ const schema = yup.object().shape({
 	acceptTermsConditions: yup.boolean().oneOf([true], 'Charges must be accepted.')
 });
 
-const defaultValues = {
-	acceptTermsConditions: false
-};
-
 const PricingInfo = props => {
 	const classes = useStyles();
 	const dispatch = useDispatch();
 
-	const { control, formState, handleSubmit } = useForm({
+	const [messageAndLevel, setMessageAndLevel] = useState({
+		message: '',
+		level: 'error',
+		open: false
+	});
+
+	let stageStaus =
+		props.lserviceStageTransaction != null
+			? props.lserviceStageTransaction.stageStaus === 'COMPLETED'
+				? 1
+				: 0
+			: 0;
+
+	const { control, formState, handleSubmit, reset } = useForm({
 		mode: 'onChange',
-		defaultValues,
+		defaultValues: {
+			// eslint-disable-next-line
+			acceptTermsConditions: stageStaus === 1 ? true : false
+		},
 		resolver: yupResolver(schema)
 	});
 
@@ -56,19 +73,6 @@ const PricingInfo = props => {
 
 	const platformCharges = (props.costDetails.platformCharges / 100) * props.costDetails.baseAmount;
 	const platformAndBaseTotal = props.costDetails.baseAmount + platformCharges;
-
-	// console.log('PricingInfo props');
-	// console.log(props);
-
-	const stageStaus =
-		props.lserviceStageTransaction != null
-			? props.lserviceStageTransaction.stageStaus === 'COMPLETED'
-				? 1
-				: 0
-			: 0;
-
-	// console.log('PricingInfo stageStaus');
-	// console.log(stageStaus);
 
 	let tax =
 		(props.costDetails.cgst / 100) * platformAndBaseTotal + (props.costDetails.sgst / 100) * platformAndBaseTotal;
@@ -85,7 +89,25 @@ const PricingInfo = props => {
 		minimumFractionDigits: 2
 	});
 
+	function handleClose(event, reason) {
+		if (reason === 'clickaway') {
+			return;
+		}
+		const message = '';
+		const open = false;
+		const level = messageAndLevel.level === 'success' ? 'success' : 'error';
+		setMessageAndLevel({
+			message,
+			open,
+			level
+		});
+	}
+
 	function onSubmit(model) {
+		let message = '';
+		let open = false;
+		let level = 'error';
+
 		dispatch(
 			updateData({
 				lserviceTransactionId: 0,
@@ -94,6 +116,16 @@ const PricingInfo = props => {
 				lserviceId: props.step.lserviceId
 			})
 		);
+		stageStaus = 1;
+		message = 'Data saved successfully.';
+		open = true;
+		level = 'success';
+
+		setMessageAndLevel({
+			message,
+			open,
+			level
+		});
 	}
 
 	return (
@@ -150,7 +182,7 @@ const PricingInfo = props => {
 									<TableRow>
 										<TableCell>
 											<Typography className="font-light" variant="h5" color="textSecondary">
-												TOTAL
+												TOTAL (excluding Govt. charges)
 											</Typography>
 										</TableCell>
 										<TableCell align="right">
@@ -164,14 +196,17 @@ const PricingInfo = props => {
 							<Controller
 								name="acceptTermsConditions"
 								control={control}
-								render={({ field }) => (
+								render={({ field: { onChange, onBlur, value, name, ref } }) => (
 									<FormControl
 										className="items-center"
 										// eslint-disable-next-line
 										disabled={stageStaus === 1 ? true : false}
 										error={!!errors.acceptTermsConditions}
 									>
-										<FormControlLabel label="I accept charges" control={<Checkbox {...field} />} />
+										<FormControlLabel
+											label="I accept charges"
+											control={<Checkbox onChange={onChange} checked={value} name={name} />}
+										/>
 										<FormHelperText>{errors?.acceptTermsConditions?.message}</FormHelperText>
 										{/* {console.log('field')}
 										{console.log(field)} */}
@@ -191,6 +226,25 @@ const PricingInfo = props => {
 							</Button>
 						</form>
 					</div>
+					<Collapse in={messageAndLevel.open}>
+						<Alert
+							severity={messageAndLevel.level}
+							variant="outlined"
+							className="mt-10"
+							action={
+								<IconButton
+									aria-label="close"
+									color="inherit"
+									size="small"
+									onClick={event => handleClose(event)}
+								>
+									<CloseIcon fontSize="inherit" />
+								</IconButton>
+							}
+						>
+							{messageAndLevel.message}
+						</Alert>
+					</Collapse>
 				</div>
 			)}
 		</div>
