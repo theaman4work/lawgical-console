@@ -17,6 +17,7 @@ import CopyrightsTab from './tabs/CopyrightsTab';
 import OtherLegalServicesTab from './tabs/OtherLegalServicesTab';
 import DesignsTab from './tabs/DesignsTab';
 import { getServices, selectServices } from './store/servicesSlice';
+import ApplicantDialog from './stagesForms/applicantDetails/ApplicantDialog';
 
 const useStyles = makeStyles(theme => ({
 	header: {
