@@ -27,7 +27,7 @@ const navigationConfig = [
 		children: [
 			{
 				id: 'service-trademark',
-				title: 'Trademark',
+				title: 'Trademarks',
 				type: 'item',
 				// icon: 'person',
 				url: '/services/trademarks',
@@ -35,7 +35,7 @@ const navigationConfig = [
 			},
 			{
 				id: 'service-patent',
-				title: 'Patent',
+				title: 'Patents',
 				type: 'item',
 				// icon: 'person',
 				url: '/services/patents',
@@ -51,7 +51,7 @@ const navigationConfig = [
 			},
 			{
 				id: 'service-anylegalservice',
-				title: 'Any Legal Service',
+				title: 'Other Legal Services',
 				type: 'item',
 				// icon: 'person',
 				url: '/services/legalservices',

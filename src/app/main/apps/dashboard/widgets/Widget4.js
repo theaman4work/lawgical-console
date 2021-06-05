@@ -1,10 +1,7 @@
-import { Button, IconButton } from '@material-ui/core';
-import Icon from '@material-ui/core/Icon';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import { AddCircle } from '@material-ui/icons';
 import { memo, useState } from 'react';
-import { Link } from 'react-router-dom';
 
 const styles = {
 	largeIcon: {
@@ -17,7 +14,7 @@ const styles = {
 function Widget4(props) {
 	const [currentRange, setCurrentRange] = useState(props.count);
 
-	const productName = props.product !== null ? props.product : 'Any Legal Services';
+	const productName = props.product !== null ? props.product : 'Other Legal Services';
 
 	return (
 		<Paper className="w-full rounded-20 shadow flex flex-col justify-between">
