@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
 import { showMessage } from 'app/store/fuse/messageSlice';
 import { axiosInstance } from 'app/auth-service/axiosInstance';
 
@@ -26,14 +25,28 @@ export const updateData = createAsyncThunk('servicesApp/serviceSteps/updateData'
 
 const serviceStepsSlice = createSlice({
 	name: 'servicesApp/serviceSteps',
-	initialState: null,
+	initialState: {
+		currentStageCountForUser: 1,
+		customerDTO: {},
+		errorCode: 0,
+		errorMessage: '',
+		lserviceCostDTO: {},
+		lserviceDTO: {},
+		lserviceStageDTOs: [],
+		lserviceStageTransactionDTOs: [],
+		lserviceTransactionDTO: {},
+		stageDTOs: [],
+		stageLongContentDTOs: []
+	},
 	reducers: {},
 	extraReducers: {
 		[getData.fulfilled]: (state, action) => action.payload,
-		[updateData.fulfilled]: (state, action) => ({
-			...state,
-			...action.payload
-		})
+		[updateData.fulfilled]: (state, action) => {
+			if (action.payload.lserviceTransactionDTO !== null) {
+				state.lserviceTransactionDTO = action.payload.lserviceTransactionDTO;
+			}
+			state.lserviceStageTransactionDTOs.push(action.payload.lserviceStageTransactionDTO);
+		}
 	}
 });
 
