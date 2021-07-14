@@ -17,7 +17,8 @@ import CloseIcon from '@material-ui/icons/Close';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { selectCustomerTrademarkDetails } from '../../store/customerTrademarkDetailsSlice';
+import { updateData } from '../../store/serviceStepsSlice';
+import { selectResponseCustomerTrademarkDetailsAndAttachments } from '../../store/responseCustomerTrademarkDetailsAndAttachmentsSlice';
 
 const useStyles = makeStyles({
 	root: {
@@ -42,7 +43,11 @@ const schema = yup.object().shape({
 const CartAndPayment = props => {
 	const classes = useStyles();
 	const dispatch = useDispatch();
-	const customerTrademarkDetails = useSelector(selectCustomerTrademarkDetails);
+	const serviceSteps = useSelector(({ servicesApp }) => servicesApp.serviceSteps);
+
+	const responseCustomerTrademarkDetailsAndAttachments = useSelector(
+		selectResponseCustomerTrademarkDetailsAndAttachments
+	);
 
 	const [messageAndLevel, setMessageAndLevel] = useState({
 		message: '',
@@ -62,17 +67,17 @@ const CartAndPayment = props => {
 
 	const total = platformAndBaseTotal + tax;
 
-	let chargesToBePaid = total * customerTrademarkDetails.length;
+	let chargesToBePaid = total * responseCustomerTrademarkDetailsAndAttachments.length;
 	if (chargesToBePaid === 0) {
 		chargesToBePaid = total;
 	}
 
-	// let stageStaus =
-	// 	props.lserviceStageTransaction != null
-	// 		? props.lserviceStageTransaction.stageStaus === 'COMPLETED'
-	// 			? 1
-	// 			: 0
-	// 		: 0;
+	let stageStatus =
+		props.lserviceStageTransaction != null
+			? props.lserviceStageTransaction.stageStaus === 'COMPLETED'
+				? 1
+				: 0
+			: 0;
 
 	const { control, formState, handleSubmit, reset } = useForm({
 		mode: 'onChange',
@@ -82,6 +87,8 @@ const CartAndPayment = props => {
 		},
 		resolver: yupResolver(schema)
 	});
+
+	const { isValid, dirtyFields, errors } = formState;
 
 	const formatter = new Intl.NumberFormat('en-IN', {
 		style: 'currency',
@@ -108,19 +115,33 @@ const CartAndPayment = props => {
 		let open = false;
 		let level = 'error';
 
-		// dispatch(
-		// 	updateData({
-		// 		lserviceTransactionId: 0,
-		// 		stageStatus: 'COMPLETED',
-		// 		lserviceStageId: props.step.id,
-		// 		lserviceId: props.step.lserviceId
-		// 	})
-		// );
-		// stageStaus = 1;
-		message = 'Data saved successfully.';
-		open = true;
-		level = 'success';
+		if (props.lserviceTransaction == null) {
+			message = 'Please complete the previous steps before trying to complete this step!';
+			open = true;
+		} else if (serviceSteps != null) {
+			const lserviceTransactionId =
+				props.lserviceTransaction != null
+					? props.lserviceTransaction.id
+					: serviceSteps.lserviceTransactionDTO.id;
 
+			dispatch(
+				updateData({
+					lserviceTransactionId,
+					stageStatus: 'COMPLETED',
+					lserviceStageId: props.step.id,
+					lserviceId: props.step.lserviceId
+				})
+			);
+			stageStatus = 1;
+
+			message = 'Paid successfully.';
+			open = true;
+			level = 'success';
+		} else {
+			message = 'Failed to save the data, please try again later!';
+			open = true;
+			level = 'error';
+		}
 		setMessageAndLevel({
 			message,
 			open,
@@ -147,8 +168,8 @@ const CartAndPayment = props => {
 												color="textSecondary"
 											>
 												Total number of Trademarks -(
-												{customerTrademarkDetails.length !== 0
-													? customerTrademarkDetails.length
+												{responseCustomerTrademarkDetailsAndAttachments.length !== 0
+													? responseCustomerTrademarkDetailsAndAttachments.length
 													: 1}
 												)
 											</Typography>
@@ -203,10 +224,10 @@ const CartAndPayment = props => {
 								color="primary"
 								className="w-full mx-auto mt-16"
 								aria-label="REGISTER"
-								disabled="true"
 								value="legacy"
+								disabled={stageStatus === 1}
 							>
-								Payment
+								{stageStatus === 1 ? 'Payment Completed' : 'Payment'}
 							</Button>
 						</form>
 					</div>

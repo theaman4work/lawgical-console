@@ -23,11 +23,14 @@ import {
 	selectApplicants,
 	setApplicantsForLserviceTransaction
 } from '../../store/applicantSlice';
+import { updateData } from '../../store/serviceStepsSlice';
 import ApplicantsTableHead from './ApplicantsTableHead';
 
 function ApplicantsTable(props) {
 	const dispatch = useDispatch();
 	const applicants = useSelector(selectApplicants);
+	// console.log('ApplicantsTable');
+	// console.log(props);
 
 	const [messageAndLevel, setMessageAndLevel] = useState({
 		message: '',
@@ -35,7 +38,7 @@ function ApplicantsTable(props) {
 		open: false
 	});
 	const [selected, setSelected] = useState([]);
-	const [data, setData] = useState(applicants);
+	// const [data, setData] = useState(applicants);
 	const [error, setError] = useState(null);
 	const [applicant, setApplicant] = useState({
 		direction: 'asc',
@@ -47,7 +50,7 @@ function ApplicantsTable(props) {
 	}, [dispatch]);
 
 	useEffect(() => {
-		setData(applicants);
+		console.log();
 
 		const selectedIds = [];
 		if (applicants.length > 0) {
@@ -60,7 +63,10 @@ function ApplicantsTable(props) {
 					for (const [key1, value1] of Object.entries(value.applicantsOfLserTransDTOs)) {
 						// console.log('key1 - value1');
 						// console.log(`${key1} - ${JSON.stringify(value1)}`);
-						if (props.lserviceTransaction.id === value1.lserviceTransactionId) {
+						if (
+							props.lserviceTransaction.id === value1.lserviceTransactionId &&
+							value1.status === 'ACTIVE'
+						) {
 							selectedIds.push(value1.applicantId);
 						}
 					}
@@ -86,7 +92,7 @@ function ApplicantsTable(props) {
 
 	function handleSelectAllClick(event) {
 		if (event.target.checked) {
-			setSelected(data.map(n => n.id));
+			setSelected(applicants.map(n => n.id));
 			return;
 		}
 		setSelected([]);
@@ -157,8 +163,6 @@ function ApplicantsTable(props) {
 		if (selected.length <= 0) {
 			message = 'Please select atleast 1 applicant!';
 			open = true;
-			// setError('Please select atleast 1 applicant!');
-			// setOpen(true);
 		} else {
 			// eslint-disable-next-line
 			if (props.lserviceTransaction.id == null) {
@@ -175,13 +179,23 @@ function ApplicantsTable(props) {
 						lserviceTransactionId: props.lserviceTransaction.id,
 						mail: localStorage.getItem('lg_logged_in_email')
 					};
-					console.log('reqData');
-					console.log(reqData);
 
 					message = `${selected.length} applicants saved successfully.`;
 					open = true;
 					level = 'success';
 					dispatch(setApplicantsForLserviceTransaction(reqData));
+
+					if (props.lserviceStageTransaction === null) {
+						const lserviceTransactionId = props.lserviceTransaction.id;
+						dispatch(
+							updateData({
+								lserviceTransactionId,
+								stageStatus: 'INPROGRESS',
+								lserviceStageId: props.step.id,
+								lserviceId: props.step.lserviceId
+							})
+						);
+					}
 				}
 			} else {
 				message = 'Unknown error occurred, please try again!';
@@ -195,7 +209,7 @@ function ApplicantsTable(props) {
 		});
 	}
 
-	if (data.length === 0) {
+	if (applicants.length === 0) {
 		return (
 			<motion.div
 				initial={{ opacity: 0 }}
@@ -208,7 +222,7 @@ function ApplicantsTable(props) {
 
 				<Button
 					variant="contained"
-					color="secondary"
+					color="primary"
 					size="medium"
 					aria-label="addnew"
 					onClick={ev => dispatch(openNewApplicantDialog())}
@@ -247,7 +261,7 @@ function ApplicantsTable(props) {
 			<div className="w-full flex items-center justify-end pb-10">
 				<Button
 					variant="contained"
-					color="secondary"
+					color="primary"
 					size="medium"
 					aria-label="addnew"
 					onClick={ev => dispatch(openNewApplicantDialog())}
@@ -256,7 +270,7 @@ function ApplicantsTable(props) {
 				</Button>
 				<Button
 					variant="contained"
-					color="secondary"
+					color="primary"
 					size="medium"
 					aria-label="save"
 					className="ml-5"
@@ -272,13 +286,13 @@ function ApplicantsTable(props) {
 						applicant={applicant}
 						onSelectAllClick={handleSelectAllClick}
 						onRequestSort={handleRequestSort}
-						rowCount={data.length}
+						rowCount={applicants.length}
 						onMenuItemClick={handleDeselect}
 					/>
 
 					<TableBody>
 						{_.orderBy(
-							data,
+							applicants,
 							[
 								o => {
 									switch (applicant.id) {
