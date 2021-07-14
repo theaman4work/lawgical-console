@@ -57,7 +57,7 @@ const ConfidentialityAgreement = props => {
 		open: false
 	});
 
-	let stageStaus =
+	let stageStatus =
 		props.lserviceStageTransaction != null
 			? props.lserviceStageTransaction.stageStaus === 'COMPLETED'
 				? 1
@@ -68,7 +68,7 @@ const ConfidentialityAgreement = props => {
 		mode: 'onChange',
 		defaultValues: {
 			// eslint-disable-next-line
-			acceptTermsConditions: stageStaus === 1 ? true : false
+			acceptTermsConditions: stageStatus === 1 ? true : false
 		},
 		resolver: yupResolver(schema)
 	});
@@ -113,7 +113,7 @@ const ConfidentialityAgreement = props => {
 					lserviceId: props.step.lserviceId
 				})
 			);
-			stageStaus = 1;
+			stageStatus = 1;
 
 			message = 'Data saved successfully.';
 			open = true;
@@ -141,7 +141,7 @@ const ConfidentialityAgreement = props => {
 
 						{desc ? (
 							<form onSubmit={handleSubmit(onSubmit)}>
-								<Box p={1} borderColor="text.primary" border={1} boxShadow={3} borderRadius={12}>
+								<Box p={1} borderColor="primary.main" border={1} boxShadow={0} borderRadius={12}>
 									<Typography>{desc}</Typography>
 								</Box>
 								<Controller
@@ -151,7 +151,7 @@ const ConfidentialityAgreement = props => {
 										<FormControl
 											className="items-center mx-auto mt-10"
 											// eslint-disable-next-line
-											disabled={stageStaus === 1 ? true : false}
+											disabled={stageStatus === 1 ? true : false}
 											error={!!errors.acceptTermsConditions}
 										>
 											<FormControlLabel
@@ -168,7 +168,7 @@ const ConfidentialityAgreement = props => {
 									color="primary"
 									className="w-full mx-auto mt-16"
 									aria-label="REGISTER"
-									disabled={_.isEmpty(dirtyFields) || !isValid || stageStaus === 1}
+									disabled={_.isEmpty(dirtyFields) || !isValid || stageStatus === 1}
 									value="legacy"
 								>
 									Submit
