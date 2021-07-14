@@ -15,7 +15,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import clsx from 'clsx';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { removeApplicants } from '../../store/applicantSlice';
+import { removeApplicant } from '../../store/applicantSlice';
 
 const rows = [
 	{
@@ -115,7 +115,12 @@ function ApplicantsTableHead(props) {
 								<MenuList>
 									<MenuItem
 										onClick={() => {
-											dispatch(removeApplicants(selectedApplicantIds));
+											if (selectedApplicantIds.length === 1) {
+												// const removeIds = [selectedApplicantIds];
+												dispatch(removeApplicant(selectedApplicantIds));
+											} else {
+												dispatch(removeApplicant(selectedApplicantIds));
+											}
 											props.onMenuItemClick();
 											closeSelectedApplicantsMenu();
 										}}
