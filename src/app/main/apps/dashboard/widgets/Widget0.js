@@ -10,7 +10,7 @@ const styles = {
 	largeIcon: {
 		width: 32,
 		height: 32,
-		color: '#0494AC'
+		padding: 1
 	}
 };
 
@@ -21,9 +21,9 @@ function Widget0(props) {
 
 	return (
 		<Paper className="w-full rounded-20 shadow flex flex-col justify-between">
-			<div className="flex items-center justify-between px-4">
+			<div className="flex items-center justify-between p-4">
 				<div />
-				<AddCircle style={styles.largeIcon} onClick={() => window.open('/services', '_self')} />
+				<AddCircle color="primary" style={styles.largeIcon} onClick={() => window.open('/services', '_self')} />
 			</div>
 			<div className="text-center">
 				<Typography className="text-48 font-semibold leading-none text-blue tracking-tighter">
