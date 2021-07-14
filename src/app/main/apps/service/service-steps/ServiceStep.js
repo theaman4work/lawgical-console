@@ -171,6 +171,7 @@ function ServiceStep(props) {
 							costDetails={serviceSteps.lserviceCostDTO}
 							stepCount={5}
 							step={step}
+							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
 							lserviceStageTransaction={findMatchingLserviceStageTransaction(
 								serviceSteps.lserviceStageTransactionDTOs,
 								step
@@ -239,7 +240,7 @@ function ServiceStep(props) {
 								<div className="flex justify-between w-full max-w-xl px-8">
 									<div>
 										{activeStep !== 1 && (
-											<Fab className="" color="secondary" onClick={handleBack}>
+											<Fab className="" color="primary" onClick={handleBack}>
 												<Icon>
 													{theme.direction === 'ltr' ? 'chevron_left' : 'chevron_right'}
 												</Icon>
@@ -248,7 +249,7 @@ function ServiceStep(props) {
 									</div>
 									<div>
 										{activeStep < serviceSteps.lserviceStageDTOs.length ? (
-											<Fab className="" color="secondary" onClick={handleNext}>
+											<Fab className="" color="primary" onClick={handleNext}>
 												<Icon>
 													{theme.direction === 'ltr' ? 'chevron_right' : 'chevron_left'}
 												</Icon>

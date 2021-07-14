@@ -710,6 +710,31 @@ const themesConfig = {
 		status: {
 			danger: 'orange'
 		}
+	},
+	customLawg: {
+		palette: {
+			type: 'light',
+			text: lightText,
+			primary: {
+				light: '#DBFAFF',
+				main: '#00A2BF',
+				dark: '#008096'
+			},
+			secondary: {
+				light: '#FFF2C9',
+				main: '#FED441',
+				dark: '#FDB91C',
+				contrastText: '#1E1F23'
+			},
+			background: {
+				paper: '#FFFFFF',
+				default: '#F5F4F6'
+			},
+			error: red
+		},
+		status: {
+			danger: 'orange'
+		}
 	}
 };
 

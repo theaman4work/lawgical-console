@@ -1,12 +1,12 @@
 import FusePageCarded from '@fuse/core/FusePageCarded';
-import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
 import withReducer from 'app/store/withReducer';
 import { motion } from 'framer-motion';
+import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getProductServices, selectProductServices } from './store/productServicesSlice';
@@ -17,18 +17,17 @@ import CopyrightsTab from './tabs/CopyrightsTab';
 import OtherLegalServicesTab from './tabs/OtherLegalServicesTab';
 import DesignsTab from './tabs/DesignsTab';
 import { getServices, selectServices } from './store/servicesSlice';
-import ApplicantDialog from './stagesForms/applicantDetails/ApplicantDialog';
 
 const useStyles = makeStyles(theme => ({
-	header: {
-		background: `linear-gradient(to right, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+	topBg: {
+		background: `linear-gradient(to right, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
 		color: theme.palette.getContrastText(theme.palette.primary.main)
 	},
 	headerIcon: {
 		position: 'absolute',
 		top: -50,
 		left: 0,
-		opacity: 0.04,
+		opacity: 0.2,
 		fontSize: 350,
 		// width: 512,
 		// height: 512,
@@ -72,12 +71,13 @@ function Services(props) {
 		<FusePageCarded
 			classes={{
 				content: 'flex',
-				header: 'min-h-72 h-72 sm:h-136 sm:min-h-136 items-center'
+				header: 'min-h-72 h-72 sm:h-136 sm:min-h-136 items-center',
+				topBg: classes.topBg
 			}}
 			header={
 				<div className="flex flex-1 w-full items-start justify-between">
 					{/* <div className="flex flex-1 flex-col items-center sm:items-start"> */}
-					<div className="w-1/4" />
+					{/* <div className="w-1/4" /> */}
 					<div className="flex flex-col min-w-0 items-start sm:items-start">
 						<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { delay: 0 } }}>
 							<Typography color="inherit" className="text-16 sm:text-36 font-bold tracking-tight">

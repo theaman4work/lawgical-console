@@ -5,13 +5,12 @@ import _ from '@lodash';
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { useDeepCompareEffect } from '@fuse/hooks';
 import ProjectDashboardAppHeader from './ProjectDashboardAppHeader';
-import ProjectDashboardAppSidebar from './ProjectDashboardAppSidebar';
 import reducer from './store';
 import { getWidgets, selectWidgets } from './store/widgetsSlice';
 import HomeTab from './tabs/HomeTab';
 import { getProducts, selectProducts } from './store/productsSlice';
+import ProjectDashboardAppSidebar from './ProjectDashboardAppSidebar';
 
 const useStyles = makeStyles(theme => ({
 	content: {

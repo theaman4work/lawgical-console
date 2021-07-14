@@ -28,8 +28,16 @@ const useStyles = makeStyles(theme => ({
 	rightSection: {
 		// #0494AC- rgb(4, 148, 172)
 		// #274760 rgb(39, 71, 96)
-		background: `linear-gradient(to bottom left, rgb(39, 71, 96) 0%, rgb(4, 148, 172) 100%)`,
+		// background: `linear-gradient(to bottom left, rgb(39, 71, 96) 0%, rgb(4, 148, 172) 100%)`,
+		background: `linear-gradient(to bottom left, #008096 0%, #00A2BF 100%)`,
 		color: theme.palette.primary.contrastText
+	},
+	disabledButton: {
+		backgroundColor: theme.palette.primary || 'grey'
+	},
+	enabledButton: {
+		backgroundColor: '#00A2BF',
+		color: '#FFFFFF'
 	}
 }));
 
@@ -83,7 +91,6 @@ function Register() {
 	}, [authRegister.errors, setError]);
 
 	function onSubmit(model) {
-		// reset(defaultValues);
 		dispatch(submitRegister(model));
 	}
 
@@ -238,11 +245,14 @@ function Register() {
 							<Button
 								type="submit"
 								variant="contained"
-								color="primary"
 								className="w-full mx-auto mt-16"
 								aria-label="REGISTER"
 								disabled={!isValid}
 								value="legacy"
+								classes={{
+									root: classes.enabledButton,
+									disabled: classes.disabledButton
+								}}
 							>
 								Register
 							</Button>
@@ -256,9 +266,6 @@ function Register() {
 								Login
 							</Link>
 						</span>
-						{/* <Link className="font-normal" to="/dashboard">
-							Back to Dashboard
-						</Link> */}
 					</div>
 				</Card>
 

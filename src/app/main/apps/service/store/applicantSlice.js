@@ -43,7 +43,6 @@ export const removeApplicant = createAsyncThunk(
 	'servicesApp/applicants/removeApplicant',
 	async (applicantId, { dispatch, getState }) => {
 		await axiosInstance.put('/services/lgrest/api/applicants/inactivate-applicants-for-customer', applicantId);
-
 		return applicantId;
 	}
 );

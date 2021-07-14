@@ -521,7 +521,7 @@ function ApplicantDialog(props) {
 						<div className="px-16">
 							<Button
 								variant="contained"
-								color="secondary"
+								color="primary"
 								type="submit"
 								disabled={_.isEmpty(dirtyFields) || !isValid}
 							>
@@ -534,7 +534,7 @@ function ApplicantDialog(props) {
 						<div className="px-16">
 							<Button
 								variant="contained"
-								color="secondary"
+								color="primary"
 								type="submit"
 								disabled={_.isEmpty(dirtyFields) || !isValid}
 							>

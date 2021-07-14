@@ -89,10 +89,8 @@ function DesignsTab() {
 										<div
 											className="flex flex-shrink-0 items-center justify-between px-24 h-64"
 											style={{
-												background: productService.id % 2 === 0 ? blue[500] : amber[500],
-												color: theme.palette.getContrastText(
-													productService.id % 2 === 0 ? blue[500] : amber[500]
-												)
+												background: '#607D8B',
+												color: theme.palette.getContrastText('#607D8B')
 											}}
 										>
 											<Typography className="font-medium truncate" color="inherit">

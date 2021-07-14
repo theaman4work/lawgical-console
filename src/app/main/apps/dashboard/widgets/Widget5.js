@@ -89,12 +89,7 @@ function Widget5(props) {
 							<MenuItem value="orderBy">Order by</MenuItem>
 						</Select>
 					</FormControl>
-					<Button
-						className="mx-8"
-						variant="contained"
-						style={{ backgroundColor: '#0494AC', color: '#FFFFFF' }}
-						aria-label="AddNew"
-					>
+					<Button className="mx-8" variant="contained" color="primary" aria-label="AddNew">
 						Add New
 					</Button>
 				</div>
@@ -141,6 +136,7 @@ function Widget5(props) {
 						{/* <Paper className="rounded-16 shadow"> */}
 						<Pagination
 							// classes="min-w-48 h-48 p-0 px-16"
+							color="primary"
 							variant="outlined"
 							shape="rounded"
 							count={noOfPages}

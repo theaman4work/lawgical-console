@@ -10,12 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
-import Checkbox from '@material-ui/core/Checkbox';
-import Divider from '@material-ui/core/Divider';
-import FormControl from '@material-ui/core/FormControl';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { makeStyles } from '@material-ui/core/styles';
-import { darken } from '@material-ui/core/styles/colorManipulator';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
@@ -30,8 +25,16 @@ const useStyles = makeStyles(theme => ({
 	rightSection: {
 		// #0494AC- rgb(4, 148, 172)
 		// #274760 rgb(39, 71, 96)
-		background: `linear-gradient(to bottom left, rgb(39, 71, 96) 0%, rgb(4, 148, 172) 100%)`,
+		// background: `linear-gradient(to bottom left, rgb(39, 71, 96) 0%, rgb(4, 148, 172) 100%)`,
+		background: `linear-gradient(to bottom left, #008096 0%, #00A2BF 100%)`,
 		color: theme.palette.primary.contrastText
+	},
+	disabledButton: {
+		backgroundColor: theme.palette.primary || 'grey'
+	},
+	enabledButton: {
+		backgroundColor: '#00A2BF',
+		color: '#FFFFFF'
 	}
 }));
 
@@ -171,16 +174,6 @@ function Login() {
 							/>
 
 							<div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between">
-								{/* <Controller
-									name="remember"
-									control={control}
-									render={({ field }) => (
-										<FormControl>
-											<FormControlLabel label="Remember Me" control={<Checkbox {...field} />} />
-										</FormControl>
-									)}
-								/> */}
-
 								<Link className="font-normal" to="/pages/auth/forgot-password-2">
 									Forgot Password?
 								</Link>
@@ -192,6 +185,10 @@ function Login() {
 								className="w-full mx-auto mt-16"
 								aria-label="LOG IN"
 								disabled={_.isEmpty(dirtyFields) || !isValid}
+								classes={{
+									root: classes.enabledButton,
+									disabled: classes.disabledButton
+								}}
 								type="submit"
 							>
 								Login

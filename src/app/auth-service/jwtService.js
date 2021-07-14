@@ -81,7 +81,12 @@ class JwtService extends FuseUtils.EventEmitter {
 										config: {}
 									},
 									customScrollbars: true,
-									theme: {}
+									theme: {
+										main: 'customLawg',
+										navbar: 'customLawg',
+										toolbar: 'customLawg',
+										footer: 'customLawg'
+									}
 								},
 								shortcuts: []
 							}
@@ -134,7 +139,12 @@ class JwtService extends FuseUtils.EventEmitter {
 										config: {}
 									},
 									customScrollbars: true,
-									theme: {}
+									theme: {
+										main: 'customLawg',
+										navbar: 'customLawg',
+										toolbar: 'customLawg',
+										footer: 'customLawg'
+									}
 								},
 								shortcuts: []
 							}
@@ -192,7 +202,12 @@ class JwtService extends FuseUtils.EventEmitter {
 										config: {}
 									},
 									customScrollbars: true,
-									theme: {}
+									theme: {
+										main: 'customLawg',
+										navbar: 'customLawg',
+										toolbar: 'customLawg',
+										footer: 'customLawg'
+									}
 								},
 								shortcuts: []
 							}
