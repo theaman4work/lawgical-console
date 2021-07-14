@@ -50,6 +50,14 @@ const navigationConfig = [
 				exact: true
 			},
 			{
+				id: 'service-design',
+				title: 'Design',
+				type: 'item',
+				// icon: 'person',
+				url: '/services/design',
+				exact: true
+			},
+			{
 				id: 'service-anylegalservice',
 				title: 'Other Legal Services',
 				type: 'item',
