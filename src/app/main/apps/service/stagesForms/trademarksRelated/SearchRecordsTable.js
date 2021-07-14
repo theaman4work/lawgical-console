@@ -16,10 +16,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import FuseLoading from '@fuse/core/FuseLoading';
 import {
-	selectCustomerTrademarkDetails,
-	getCustomerTrademarkDetails,
-	removeCustomerTrademarkDetail
-} from '../../store/customerTrademarkDetailsSlice';
+	selectResponseCustomerTrademarkDetailsAndAttachments,
+	getResponseCustomerTrademarkDetailsAndAttachments,
+	removeResponseCustomerTrademarkDetailsAndAttachment
+} from '../../store/responseCustomerTrademarkDetailsAndAttachmentsSlice';
 
 const useStyles = makeStyles({
 	table: {
@@ -36,22 +36,24 @@ function SearchRecordsTable(props) {
 	const dispatch = useDispatch();
 	const classes = useStyles();
 
-	const customerTrademarkDetails = useSelector(selectCustomerTrademarkDetails);
+	const responseCustomerTrademarkDetailsAndAttachments = useSelector(
+		selectResponseCustomerTrademarkDetailsAndAttachments
+	);
 
 	const [loading, setLoading] = useState(true);
 	const [selected, setSelected] = useState([]);
-	const [data, setData] = useState(customerTrademarkDetails);
+	const [data, setData] = useState(responseCustomerTrademarkDetailsAndAttachments);
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(5);
 
 	useEffect(() => {
-		dispatch(getCustomerTrademarkDetails()).then(() => setLoading(false));
+		dispatch(getResponseCustomerTrademarkDetailsAndAttachments()).then(() => setLoading(false));
 	}, [dispatch]);
 
 	useEffect(() => {
-		setData(customerTrademarkDetails);
-		props.onRecordAdditionOrRemoval(customerTrademarkDetails.length);
-	}, [customerTrademarkDetails, props]);
+		setData(responseCustomerTrademarkDetailsAndAttachments);
+		props.onRecordAdditionOrRemoval(responseCustomerTrademarkDetailsAndAttachments.length);
+	}, [responseCustomerTrademarkDetailsAndAttachments, props]);
 
 	function handleChangePage(event, value) {
 		setPage(value);
@@ -103,15 +105,26 @@ function SearchRecordsTable(props) {
 									</TableCell> */}
 
 									<TableCell component="th" scope="row">
-										{findClassname(props.classificationDTOs, n.classficationId)}
+										{findClassname(
+											props.classificationDTOs,
+											n.customerTrademarkDetailsDTO.classficationId
+										)}
 									</TableCell>
 
 									{/* <TableCell component="th" scope="row">
 										{n.typeForTm}
 									</TableCell> */}
 
-									<TableCell component="th" scope="row">
-										{n.word || n.attachmentId}
+									<TableCell className="w-52 px-4 md:px-0" padding="none" component="th" scope="row">
+										{n.customerTrademarkDetailsDTO.typeForTm === 'IMAGE' ? (
+											<img
+												className="w-full block rounded"
+												src={n.attachmentDTO.url}
+												alt={n.attachmentDTO.attachmentName}
+											/>
+										) : (
+											n.customerTrademarkDetailsDTO.word
+										)}
 									</TableCell>
 
 									<TableCell component="th" scope="row">
@@ -119,7 +132,9 @@ function SearchRecordsTable(props) {
 											onClick={ev => {
 												ev.stopPropagation();
 												const removeIds = [n.id];
-												dispatch(removeCustomerTrademarkDetail(removeIds));
+												dispatch(
+													removeResponseCustomerTrademarkDetailsAndAttachment(removeIds)
+												);
 											}}
 										>
 											<Icon>delete</Icon>

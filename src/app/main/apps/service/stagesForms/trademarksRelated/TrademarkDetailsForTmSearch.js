@@ -1,12 +1,10 @@
 import _ from '@lodash';
 import * as yup from 'yup';
 import { makeStyles } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableRow from '@material-ui/core/TableRow';
+import { orange } from '@material-ui/core/colors';
 import clsx from 'clsx';
-import { memo, useState } from 'react';
+import FuseUtils from '@fuse/utils';
+import { memo, useState, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import Icon from '@material-ui/core/Icon';
@@ -22,11 +20,29 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Divider from '@material-ui/core/Divider';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import Box from '@material-ui/core/Box';
 import { useDispatch } from 'react-redux';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { addCustomerTrademarkDetails } from '../../store/customerTrademarkDetailsSlice';
+import FuseLoading from '@fuse/core/FuseLoading';
+import { axiosInstance } from 'app/auth-service/axiosInstance';
+import { addResponseCustomerTrademarkDetailsAndAttachments } from '../../store/responseCustomerTrademarkDetailsAndAttachmentsSlice';
 import SearchRecordsTable from './SearchRecordsTable';
+import storage from '../../../../firebase/index';
+
+const useStyles = makeStyles(theme => ({
+	productImageUpload: {
+		transitionProperty: 'box-shadow',
+		transitionDuration: theme.transitions.duration.short,
+		transitionTimingFunction: theme.transitions.easing.easeInOut
+	},
+	productImageItem: {
+		transitionProperty: 'box-shadow',
+		transitionDuration: theme.transitions.duration.short,
+		transitionTimingFunction: theme.transitions.easing.easeInOut
+	}
+}));
 
 const defaultValues = {
 	classification: 'Class 1 (Chemicals)',
@@ -38,12 +54,33 @@ const defaultValues = {
 /**
  * Form Validation Schema
  */
+const FILE_SIZE = 160 * 1024;
+const SUPPORTED_FORMATS = ['image/jpg', 'image/jpeg', 'image/gif', 'image/png'];
+
 const schema = yup.object().shape({
 	classification: yup.string().required('You must enter a Classification').nullable(),
-	word: yup.string().max(250, 'Word must be less than or equal to 250 characters').required('You must enter a word')
+	switchForImageAndWord: yup.string().required('Upload type is required')
+	// word: yup.string().when('switchForImageAndWord', {
+	// 	is: 'word',
+	// 	then: yup
+	// 		.string()
+	// 		.max(250, 'Word must be less than or equal to 250 characters')
+	// 		.required('You must enter a word'),
+	// 	otherwise: yup.mixed().notRequired()
+	// }),
+	// image: yup.string().when('switchForImageAndWord', {
+	// 	is: 'image',
+	// 	then: yup
+	// 		.object()
+	// 		.required('An Image is required')
+	// 		.test('fileSize', 'File too large', value => value && value.size <= FILE_SIZE)
+	// 		.test('fileFormat', 'Unsupported Format', value => value && SUPPORTED_FORMATS.includes(value.type)),
+	// 	otherwise: yup.mixed().notRequired()
+	// })
 });
 
 const TrademarkDetailsForTmSearch = props => {
+	const classes = useStyles(props);
 	const dispatch = useDispatch();
 
 	const [messageAndLevel, setMessageAndLevel] = useState({
@@ -52,6 +89,12 @@ const TrademarkDetailsForTmSearch = props => {
 		open: false
 	});
 	const [showUploadOrText, setShowUploadOrText] = useState(2);
+	const [showImageSelected, setShowImageSelected] = useState(false);
+	const [progress, setProgress] = useState(0);
+	const [image, setImage] = useState(null);
+	const [imageUrl, setImageUrl] = useState(null);
+	const [loading, setLoading] = useState(true);
+	const [stateLserviceStageTransactionId, setStateLserviceStageTransactionId] = useState(null);
 
 	// let stageStaus =
 	// 	props.lserviceStageTransaction != null
@@ -60,13 +103,14 @@ const TrademarkDetailsForTmSearch = props => {
 	// 			: 0
 	// 		: 0;
 
-	const { control, handleSubmit, formState } = useForm({
+	const { control, handleSubmit, formState, watch } = useForm({
 		mode: 'onChange',
 		defaultValues,
 		resolver: yupResolver(schema)
 	});
 
 	const { isValid, dirtyFields, errors } = formState;
+	// let image = watch('image', null);
 
 	const platformCharges = (props.costDetails.platformCharges / 100) * props.costDetails.baseAmount;
 	const platformAndBaseTotal = props.costDetails.baseAmount + platformCharges;
@@ -88,6 +132,50 @@ const TrademarkDetailsForTmSearch = props => {
 		currency: 'INR',
 		minimumFractionDigits: 2
 	});
+
+	useEffect(() => {
+		if (props.lserviceTransaction.id !== null) {
+			if (props.lserviceStageTransaction == null) {
+				const data = {
+					lserviceTransactionId: props.lserviceTransaction.id,
+					stageStatus: 'INPROGRESS',
+					lserviceStageId: props.step.id,
+					lserviceId: props.step.lserviceId
+				};
+
+				axiosInstance
+					.post('/services/lgrest/api/lservice-stage-transactions/create-transaction-for-customer', {
+						email: localStorage.getItem('lg_logged_in_email'),
+						...data
+					})
+					.then(res => {
+						setLoading(false);
+						setStateLserviceStageTransactionId(res.data.lserviceStageTransactionDTO.id);
+					});
+			} else {
+				setLoading(false);
+			}
+		} else {
+			setLoading(false);
+		}
+	}, [props.step.id, props.step.lserviceId, props.lserviceStageTransaction, props.lserviceTransaction]);
+
+	// eslint-disable-next-line
+	useEffect(() => {
+		if (progress !== 0) {
+			const timer = setInterval(() => {
+				setProgress(oldProgress => {
+					if (oldProgress === 100) {
+						return 0;
+					}
+					return Math.min(oldProgress + 15, 100);
+				});
+			}, 500);
+			return () => {
+				clearInterval(timer);
+			};
+		}
+	}, [progress]);
 
 	function setProvisionCostAfterItemAdd(count) {
 		if (count !== 0) {
@@ -112,8 +200,9 @@ const TrademarkDetailsForTmSearch = props => {
 	}
 
 	function onSubmit(model) {
-		console.log(model);
+		// console.log(model);
 		let message = '';
+		let urlOfImage = '';
 		let open = false;
 		let level = 'error';
 
@@ -122,29 +211,160 @@ const TrademarkDetailsForTmSearch = props => {
 			message = 'Please complete the previous step before trying to complete this step!';
 			open = true;
 		} else {
-			const customerTrademarkDetailsDTO = {
-				classficationId,
-				typeForTm: model.switchForImageAndWord === 'word' ? 'WORD' : 'IMAGE',
-				status: 'ACTIVE',
-				word: model.word
-			};
-			const reqData = {
-				customerTrademarkDetailsDTO,
-				email: localStorage.getItem('lg_logged_in_email')
-			};
+			// Upload image if type is image
+			// eslint-disable-next-line
+			if (model.switchForImageAndWord === 'image') {
+				if (image == null) {
+					message = 'Failed to upload image on server, it is empty!';
+					open = true;
+					setProgress(0);
+					setMessageAndLevel({
+						message,
+						open,
+						level
+					});
+				} else {
+					let classificationCount = 0;
+					if (props.classificationDTOs !== null) {
+						classificationCount = props.classificationDTOs.length;
+					}
+					const { imageForUpload } = image;
+					// eslint-disable-next-line
+					// const imageName = 'img_' + classficationId + '_' + classificationCount;
+					const promises = [];
+					if (image.name != null) {
+						const uploadTask = storage.ref(`images/${image.name}`).put(image);
+						promises.push(uploadTask);
+						uploadTask.on(
+							'state_changed',
+							snapshot => {
+								// progress function ...
+								const progressDone = Math.round(
+									(snapshot.bytesTransferred / snapshot.totalBytes) * 100
+								);
+								// if (snapshot.state === firebase.storage.TaskState.RUNNING) {
+								console.log(progressDone);
+								setProgress(progressDone);
+								// }
+							},
+							error => {
+								// Error function ...
+								message = 'Failed to upload image on server, please try again after some time!';
+								open = true;
+								setProgress(0);
+								setMessageAndLevel({
+									message,
+									open,
+									level
+								});
+							},
+							async () => {
+								// complete function ...
+								const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+								urlOfImage = downloadURL;
+								// console.log('Url of image uploaded');
+								// console.log(downloadURL);
 
-			dispatch(addCustomerTrademarkDetails(reqData));
-			// stageStaus = 1;
-			message = 'Data saved successfully.';
-			open = true;
-			level = 'success';
+								let lserviceStageTransactionIdForData = null;
+								if (props.lserviceStageTransaction == null) {
+									lserviceStageTransactionIdForData = stateLserviceStageTransactionId;
+								} else {
+									lserviceStageTransactionIdForData = props.lserviceStageTransaction.id;
+								}
 
-			setMessageAndLevel({
-				message,
-				open,
-				level
-			});
+								const customerTrademarkDetailsDTO = {
+									classficationId,
+									typeForTm: model.switchForImageAndWord === 'word' ? 'WORD' : 'IMAGE',
+									status: 'ACTIVE',
+									word: '',
+									lserviceStageTransactionId: lserviceStageTransactionIdForData
+								};
+								const attachmentDTO = {
+									attachmentName: image.name,
+									url: downloadURL,
+									attachmentType: 'IMAGE'
+								};
+								const reqData = {
+									customerTrademarkDetailsDTO,
+									attachmentDTO,
+									email: localStorage.getItem('lg_logged_in_email')
+								};
+
+								dispatch(addResponseCustomerTrademarkDetailsAndAttachments(reqData));
+								// stageStaus = 1;
+								message = 'Data saved successfully.';
+								open = true;
+								level = 'success';
+								setProgress(0);
+								setImage(null);
+							}
+						);
+					}
+					// image name check condition ends here
+
+					Promise.allSettled(promises)
+						// .then(() => console.log('All images successfully uploaded'))
+						.catch(err => {
+							console.log(err.code);
+							message = `Failed to upload image on server, please try again after some time- ${err.code}`;
+							open = true;
+							setProgress(0);
+							setMessageAndLevel({
+								message,
+								open,
+								level
+							});
+						});
+				}
+			} else {
+				let lserviceStageTransactionIdForData = null;
+				if (props.lserviceStageTransaction == null) {
+					lserviceStageTransactionIdForData = stateLserviceStageTransactionId;
+				} else {
+					lserviceStageTransactionIdForData = props.lserviceStageTransaction.id;
+				}
+
+				const customerTrademarkDetailsDTO = {
+					classficationId,
+					typeForTm: model.switchForImageAndWord === 'word' ? 'WORD' : 'IMAGE',
+					status: 'ACTIVE',
+					word: model.word,
+					lserviceStageTransactionId: lserviceStageTransactionIdForData
+				};
+				const reqData = {
+					customerTrademarkDetailsDTO,
+					email: localStorage.getItem('lg_logged_in_email')
+				};
+
+				dispatch(addResponseCustomerTrademarkDetailsAndAttachments(reqData));
+				// stageStaus = 1;
+				message = 'Data saved successfully.';
+				open = true;
+				level = 'success';
+			}
 		}
+		setMessageAndLevel({
+			message,
+			open,
+			level
+		});
+	}
+
+	function LinearProgressWithLabel(propsTemp) {
+		return (
+			<Box display="flex" alignItems="center">
+				<Box width="100%" mr={1}>
+					<LinearProgress variant="determinate" {...propsTemp} />
+				</Box>
+				<Box minWidth={35}>
+					<Typography variant="body2" color="textSecondary">{`${Math.round(propsTemp.value)}%`}</Typography>
+				</Box>
+			</Box>
+		);
+	}
+
+	if (loading) {
+		return <FuseLoading />;
 	}
 
 	return (
@@ -204,6 +424,7 @@ const TrademarkDetailsForTmSearch = props => {
 												className="justify-center"
 												row
 												onChange={(event, newValue) => {
+													// console.log('onChange- ' + newValue);
 													field.onChange(newValue);
 													if (event.target.value === 'image') {
 														// show image upload button
@@ -256,17 +477,75 @@ const TrademarkDetailsForTmSearch = props => {
 							)}
 
 							{showUploadOrText === 1 && (
-								<div className="flex">
-									<Button
-										className="mb-12 w-full"
-										variant="contained"
-										color="secondary"
-										disabled
-										// className={classes.button}
-										startIcon={<CloudUploadIcon />}
-									>
-										Upload
-									</Button>
+								<div className="flex justify-center">
+									<Controller
+										name="image"
+										control={control}
+										defaultValue={[]}
+										render={({ field: { onChange, value } }) => (
+											<label
+												htmlFor="button-file"
+												className={clsx(
+													classes.productImageUpload,
+													'flex items-center justify-center relative w-128 h-128 rounded-16 mx-12 mb-24 overflow-hidden cursor-pointer shadow hover:shadow-lg'
+												)}
+											>
+												<input
+													accept="image/*"
+													className="hidden"
+													id="button-file"
+													type="file"
+													onChange={async e => {
+														const reader = new FileReader();
+														const file = e.target.files[0];
+
+														reader.onloadend = () => {
+															// console.log('inside onloadend');
+															setImage(file);
+															setImageUrl(reader.result);
+														};
+														reader.readAsDataURL(file);
+
+														// console.log(image);
+														setShowImageSelected(true);
+													}}
+												/>
+												<Icon fontSize="large" color="action">
+													cloud_upload
+												</Icon>
+											</label>
+										)}
+									/>
+									{image && (
+										<Controller
+											name="selectedImage"
+											control={control}
+											defaultValue=""
+											render={
+												({ field: { onChange, value } }) => (
+													// images.map(media => (
+													<div
+														// onClick={() => onChange(image.id)}
+														// onKeyDown={() => onChange(image.id)}
+														role="button"
+														tabIndex={0}
+														className={clsx(
+															classes.productImageItem,
+															'flex items-center justify-center relative w-128 h-128 rounded-16 mx-12 mb-24 overflow-hidden cursor-pointer outline-none shadow hover:shadow-lg'
+														)}
+														key={image.name}
+													>
+														<img
+															className="max-w-none w-auto h-full"
+															src={imageUrl}
+															alt={image.name}
+														/>
+													</div>
+												)
+												// ))
+											}
+										/>
+									)}
 								</div>
 							)}
 
@@ -276,12 +555,13 @@ const TrademarkDetailsForTmSearch = props => {
 								color="primary"
 								className="w-full mx-auto mt-16"
 								aria-label="Add"
-								disabled={_.isEmpty(dirtyFields) || !isValid || showUploadOrText !== 2}
+								disabled={_.isEmpty(dirtyFields) || !isValid}
 								value="legacy"
 							>
 								Add
 							</Button>
 						</form>
+						{progress !== 0 && <LinearProgressWithLabel value={progress} />}
 						<Divider className="mt-20" />
 						<div className="mt-20 w-full flex items-center justify-center">
 							<SearchRecordsTable
