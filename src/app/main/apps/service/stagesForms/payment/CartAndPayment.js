@@ -18,6 +18,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { updateData } from '../../store/serviceStepsSlice';
+import { selectApplicants } from '../../store/applicantSlice';
 import { selectResponseCustomerTrademarkDetailsAndAttachments } from '../../store/responseCustomerTrademarkDetailsAndAttachmentsSlice';
 
 const useStyles = makeStyles({
@@ -43,6 +44,7 @@ const schema = yup.object().shape({
 const CartAndPayment = props => {
 	const classes = useStyles();
 	const dispatch = useDispatch();
+	const applicants = useSelector(selectApplicants);
 	const serviceSteps = useSelector(({ servicesApp }) => servicesApp.serviceSteps);
 
 	const responseCustomerTrademarkDetailsAndAttachments = useSelector(
@@ -67,9 +69,91 @@ const CartAndPayment = props => {
 
 	const total = platformAndBaseTotal + tax;
 
-	let chargesToBePaid = total * responseCustomerTrademarkDetailsAndAttachments.length;
-	if (chargesToBePaid === 0) {
-		chargesToBePaid = total;
+	const findlserviceStageTransactionUsingLserviceStage = (lserviceStageTransactionDTOs, lserviceStageId) => {
+		const el = lserviceStageTransactionDTOs.find(eltemp => eltemp.lserviceStageId === lserviceStageId);
+		return el || null; // so check result is truthy and extract `id`
+	};
+
+	let totaFilteredRecords = '';
+	if (props.lservice.name.toLowerCase() === 'TM search'.toLowerCase()) {
+		totaFilteredRecords = responseCustomerTrademarkDetailsAndAttachments.filter(
+			eachRec =>
+				eachRec.customerTrademarkDetailsDTO.typeForTm === 'WORD' ||
+				eachRec.customerTrademarkDetailsDTO.typeForTm === 'IMAGE'
+		);
+	} else if (
+		props.lservice.name.toLowerCase() === 'TM monitor'.toLowerCase() ||
+		props.lservice.name.toLowerCase() === 'Legal status'.toLowerCase() ||
+		props.lservice.name.toLowerCase() === 'TM Renewal'.toLowerCase() ||
+		props.lservice.name.toLowerCase() === 'Change in Applicant'.toLowerCase() ||
+		props.lservice.name.toLowerCase() === 'Trademark portfolio valuation (per Country)'.toLowerCase()
+	) {
+		if (serviceSteps.lserviceStageDTOs.length > 0) {
+			const lserviceStageDTO = serviceSteps.lserviceStageDTOs.filter(
+				eachRec =>
+					eachRec.stageType === 'TMMONITORANDPORTVALREQ' ||
+					eachRec.stageType === 'TMRENEWALREQ' ||
+					eachRec.stageType === 'TMCHANGAPPDETAILSREQ'
+			);
+
+			if (lserviceStageDTO !== null) {
+				const lserviceStageTransactionFound = findlserviceStageTransactionUsingLserviceStage(
+					serviceSteps.lserviceStageTransactionDTOs,
+					lserviceStageDTO[0].id
+				);
+				let interMediateFilterRecords = '';
+				if (lserviceStageTransactionFound !== null) {
+					interMediateFilterRecords = responseCustomerTrademarkDetailsAndAttachments.filter(
+						eachRec =>
+							eachRec.customerTrademarkDetailsDTO.typeForTm === 'TMAPPLNO' ||
+							eachRec.customerTrademarkDetailsDTO.typeForTm === 'TMREGNO'
+					);
+					if (interMediateFilterRecords.length > 0) {
+						totaFilteredRecords = interMediateFilterRecords.filter(
+							eachRec =>
+								eachRec.customerTrademarkDetailsDTO.lserviceStageTransactionId ===
+								lserviceStageTransactionFound.id
+						);
+					}
+				}
+			}
+		}
+	} else {
+		totaFilteredRecords = responseCustomerTrademarkDetailsAndAttachments;
+	}
+
+	let chargesToBePaid = total;
+
+	if (
+		chargesToBePaid === 0 ||
+		props.lservice.name.toLowerCase() === 'TM search'.toLocaleLowerCase() ||
+		props.lservice.name.toLowerCase() === 'TM monitor'.toLocaleLowerCase() ||
+		props.lservice.name.toLowerCase() === 'Legal status'.toLocaleLowerCase() ||
+		props.lservice.name.toLowerCase() === 'TM Renewal'.toLocaleLowerCase() ||
+		props.lservice.name.toLowerCase() === 'Change in Applicant'.toLocaleLowerCase() ||
+		props.lservice.name.toLowerCase() === 'Trademark portfolio valuation (per Country)'.toLocaleLowerCase()
+	) {
+		chargesToBePaid = total * totaFilteredRecords.length;
+	}
+
+	let totalTextLabel = 'SERVICE CHARGES';
+	if (props.lservice.name.toLowerCase() === 'TM search'.toLocaleLowerCase()) {
+		totalTextLabel = `TOTAL NUMBER OF TRADEMARKS -(${
+			totaFilteredRecords.length !== 0 ? totaFilteredRecords.length : 1
+		})`;
+	} else if (
+		props.lservice.name.toLowerCase() === 'TM monitor'.toLowerCase() ||
+		props.lservice.name.toLowerCase() === 'Legal status'.toLowerCase() ||
+		props.lservice.name.toLowerCase() === 'Change in Applicant'.toLowerCase() ||
+		props.lservice.name.toLowerCase() === 'Trademark portfolio valuation (per Country)'.toLowerCase()
+	) {
+		totalTextLabel = `TOTAL NUMBER OF TM APPLICATION NO -(${
+			totaFilteredRecords.length !== 0 ? totaFilteredRecords.length : 1
+		})`;
+	} else if (props.lservice.name.toLowerCase() === 'TM Renewal'.toLowerCase()) {
+		totalTextLabel = `TOTAL NUMBER OF REGISTERED TM NO -(${
+			totaFilteredRecords.length !== 0 ? totaFilteredRecords.length : 1
+		})`;
 	}
 
 	let stageStatus =
@@ -115,7 +199,12 @@ const CartAndPayment = props => {
 		let open = false;
 		let level = 'error';
 
-		if (props.lserviceTransaction == null) {
+		let error = false;
+		if (applicants.length <= 0) {
+			error = true;
+		}
+
+		if (props.lserviceTransaction == null || error) {
 			message = 'Please complete the previous steps before trying to complete this step!';
 			open = true;
 		} else if (serviceSteps != null) {
@@ -167,11 +256,7 @@ const CartAndPayment = props => {
 												variant="subtitle1"
 												color="textSecondary"
 											>
-												Total number of Trademarks -(
-												{responseCustomerTrademarkDetailsAndAttachments.length !== 0
-													? responseCustomerTrademarkDetailsAndAttachments.length
-													: 1}
-												)
+												{totalTextLabel}
 											</Typography>
 										</TableCell>
 										<TableCell align="right">
@@ -191,7 +276,7 @@ const CartAndPayment = props => {
 												variant="subtitle1"
 												color="textSecondary"
 											>
-												Govt. charges
+												GOVT. CHARGES
 											</Typography>
 										</TableCell>
 										<TableCell align="right">
