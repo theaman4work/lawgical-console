@@ -29,6 +29,21 @@ export const addResponseCustomerTrademarkDetailsAndAttachments = createAsyncThun
 	}
 );
 
+export const updateResponseCustomerTrademarkDetailsAndAttachments = createAsyncThunk(
+	'servicesApp/responseCustomerTrademarkDetailsAndAttachments/updateResponseCustomerTrademarkDetailsAndAttachments',
+	async (requestCustomerTrademarkDetailsAddDTO, { dispatch }) => {
+		const response = await axiosInstance.put(
+			'/services/lgrest/api/customer-trademark-details/update-single-record',
+			requestCustomerTrademarkDetailsAddDTO
+		);
+		const data = await response.data;
+
+		dispatch(getResponseCustomerTrademarkDetailsAndAttachments());
+
+		return data;
+	}
+);
+
 export const removeResponseCustomerTrademarkDetailsAndAttachment = createAsyncThunk(
 	'servicesApp/responseCustomerTrademarkDetailsAndAttachments/removeResponseCustomerTrademarkDetailsAndAttachment',
 	async (customerTrademarkDetailId, { dispatch, getState }) => {
@@ -73,6 +88,8 @@ const responseCustomerTrademarkDetailsAndAttachmentsSlice = createSlice({
 			responseCustomerTrademarkDetailsAndAttachmentsAdapter.removeMany(state, action.payload),
 		[removeResponseCustomerTrademarkDetailsAndAttachment.fulfilled]: (state, action) =>
 			responseCustomerTrademarkDetailsAndAttachmentsAdapter.removeOne(state, action.payload),
+		[updateResponseCustomerTrademarkDetailsAndAttachments.fulfilled]:
+			responseCustomerTrademarkDetailsAndAttachmentsAdapter.upsertOne,
 		[getResponseCustomerTrademarkDetailsAndAttachments.fulfilled]:
 			responseCustomerTrademarkDetailsAndAttachmentsAdapter.setAll
 	}
