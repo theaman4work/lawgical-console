@@ -6,7 +6,6 @@ import Tabs from '@material-ui/core/Tabs';
 import Typography from '@material-ui/core/Typography';
 import withReducer from 'app/store/withReducer';
 import { motion } from 'framer-motion';
-import clsx from 'clsx';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getProductServices, selectProductServices } from './store/productServicesSlice';
@@ -29,8 +28,6 @@ const useStyles = makeStyles(theme => ({
 		left: 0,
 		opacity: 0.2,
 		fontSize: 350,
-		// width: 512,
-		// height: 512,
 		pointerEvents: 'none'
 	}
 }));
@@ -39,7 +36,6 @@ function Services(props) {
 	const dispatch = useDispatch();
 	const classes = useStyles(props);
 
-	// const products = useSelector(({ projectDashboardApp }) => projectDashboardApp.products);
 	const productServices = useSelector(selectProductServices);
 	const services = useSelector(selectServices);
 
@@ -56,7 +52,6 @@ function Services(props) {
 	// }
 	// console.log('tabValue: ', i);
 	const [tabValue, setTabValue] = useState(0);
-	// console.log('tabValue: ', tabValue);
 
 	useEffect(() => {
 		dispatch(getProductServices());
