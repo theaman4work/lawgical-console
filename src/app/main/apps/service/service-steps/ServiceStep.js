@@ -12,7 +12,7 @@ import Stepper from '@material-ui/core/Stepper';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import withReducer from 'app/store/withReducer';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import { useDeepCompareEffect } from '@fuse/hooks';
@@ -25,8 +25,10 @@ import ConfidentialityAgreement from '../stagesForms/ConfidentialityAgreement';
 import ApplicantsTable from '../stagesForms/applicantDetails/ApplicantsTable';
 import ApplicantDialog from '../stagesForms/applicantDetails/ApplicantDialog';
 import TrademarkDetailsForTmSearch from '../stagesForms/trademarksRelated/TrademarkDetailsForTmSearch';
-// import ModernInvoicePage from '../stagesForms/payment/Invoice';
+import TrademarkDetailsForTmFiling from '../stagesForms/trademarksRelated/TrademarkDetailsForTmFiling';
 import CartAndPayment from '../stagesForms/payment/CartAndPayment';
+import DownloadSearchReports from '../stagesForms/trademarksRelated/DownloadSearchReports';
+import TmApplicationNoAndOtherDetails from '../stagesForms/trademarksRelated/TmApplicationNoAndOtherDetails';
 
 const useStyles = makeStyles(theme => ({
 	stepLabel: {
@@ -79,6 +81,7 @@ function ServiceStep(props) {
 		const el = lserviceStageTransactionData.find(eltemp => eltemp.lserviceStageId === step.id); // Possibly returns `undefined`
 		return el || null; // so check result is truthy and extract `id`
 	};
+
 	const findStageContentUsingStageId = (stagesData, stagesContentData, step) => {
 		const el = stagesData.find(eltemp => eltemp.stageType === step.stageType);
 		if (el != null) {
@@ -87,6 +90,12 @@ function ServiceStep(props) {
 		}
 		return null;
 	};
+
+	const findMatchingStageUsingType = (stagesData, step) => {
+		const el = stagesData.find(eltemp => eltemp.stageType === step.stageType);
+		return el || null; // so check result is truthy and extract `id`
+	};
+
 	const convertClassficationsToDropdownList = classificationDTOs => {
 		const classificationsForDropDown = [];
 		for (let i = 0; i < classificationDTOs.length; i += 1) {
@@ -162,6 +171,49 @@ function ServiceStep(props) {
 							classificationDTOs={serviceSteps.classificationDTOs}
 						/>
 					);
+					// eslint-disable-next-line
+				} else if (step.stageType === 'TMFILINGREQ') {
+					// return 4th step for TM filing
+					return (
+						<TrademarkDetailsForTmFiling
+							costDetails={serviceSteps.lserviceCostDTO}
+							stepCount={4}
+							step={step}
+							stage={findMatchingStageUsingType(serviceSteps.stageDTOs, step)}
+							lserviceStageTransaction={findMatchingLserviceStageTransaction(
+								serviceSteps.lserviceStageTransactionDTOs,
+								step
+							)}
+							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
+							classifications={convertClassficationsToDropdownList(serviceSteps.classificationDTOs)}
+							classificationDTOs={serviceSteps.classificationDTOs}
+						/>
+					);
+				} else if (
+					step.stageType === 'TMMONITORANDPORTVALREQ' ||
+					step.stageType === 'TMRENEWALREQ' ||
+					step.stageType === 'TMREPTOEXAMREPORTREQ' ||
+					step.stageType === 'TMATTSHOWCAUHEARINGREQ' ||
+					step.stageType === 'TMCHANGAPPDETAILSREQ' ||
+					step.stageType === 'TMNOCCPRIGHTREQ'
+				) {
+					// return 4th step for TM Monitor, Legal Status and Trademark portfolio valuation (per Country)
+					return (
+						<TmApplicationNoAndOtherDetails
+							costDetails={serviceSteps.lserviceCostDTO}
+							stepCount={4}
+							step={step}
+							stage={findMatchingStageUsingType(serviceSteps.stageDTOs, step)}
+							lserviceStageTransaction={findMatchingLserviceStageTransaction(
+								serviceSteps.lserviceStageTransactionDTOs,
+								step
+							)}
+							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
+							classifications={convertClassficationsToDropdownList(serviceSteps.classificationDTOs)}
+							classificationDTOs={serviceSteps.classificationDTOs}
+							trademarkNoType={step.stageType === 'TMRENEWALREQ' ? 2 : 1}
+						/>
+					);
 				}
 				return '';
 			case 4:
@@ -176,6 +228,22 @@ function ServiceStep(props) {
 								serviceSteps.lserviceStageTransactionDTOs,
 								step
 							)}
+							lservice={serviceSteps.lserviceDTO}
+						/>
+					);
+				}
+				return '';
+			case 5:
+				if (step.stageType === 'TMSEARCHSREPORT') {
+					return (
+						<DownloadSearchReports
+							stepCount={5}
+							step={step}
+							lserviceStageTransaction={findMatchingLserviceStageTransaction(
+								serviceSteps.lserviceStageTransactionDTOs,
+								step
+							)}
+							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
 						/>
 					);
 				}
