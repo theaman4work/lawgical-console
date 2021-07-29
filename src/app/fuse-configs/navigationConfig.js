@@ -69,7 +69,7 @@ const navigationConfig = [
 	},
 	{
 		id: 'profile',
-		title: 'Profile',
+		title: 'PROFILE',
 		type: 'item',
 		icon: 'account_circle',
 		url: '/profile'
@@ -89,7 +89,7 @@ const navigationConfig = [
 	},
 	{
 		id: 'faq',
-		title: 'Faq',
+		title: 'FAQ',
 		type: 'item',
 		icon: 'help_outline',
 		url: '/faq'
