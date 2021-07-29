@@ -1,16 +1,12 @@
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
-import { amber, blue, blueGrey, green } from '@material-ui/core/colors';
 import { useTheme } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import LinearProgress from '@material-ui/core/LinearProgress';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useSelector } from 'react-redux';
@@ -108,7 +104,10 @@ function TradeMarkTab() {
 													// eslint-disable-next-line
 												subServicesForTradeMark.map((subService, i) => {
 														const url = `/apps/services/steps/${subService.id}`;
-														if (subService.productLserviceId === productService.id) {
+														if (
+															subService.productLserviceId === productService.id &&
+															subService.status === 'ACTIVE'
+														) {
 															return (
 																<ListItem
 																	key={i}
