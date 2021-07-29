@@ -41,7 +41,6 @@ function SearchRecordsTable(props) {
 	);
 
 	const [loading, setLoading] = useState(true);
-	const [selected, setSelected] = useState([]);
 	const [data, setData] = useState(responseCustomerTrademarkDetailsAndAttachments);
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -51,11 +50,16 @@ function SearchRecordsTable(props) {
 	}, [dispatch]);
 
 	useEffect(() => {
-		setData(responseCustomerTrademarkDetailsAndAttachments);
-		props.onRecordAdditionOrRemoval(responseCustomerTrademarkDetailsAndAttachments.length);
-	}, [responseCustomerTrademarkDetailsAndAttachments, props]);
+		setData(
+			responseCustomerTrademarkDetailsAndAttachments.filter(
+				eachRec =>
+					eachRec.customerTrademarkDetailsDTO.lserviceStageTransactionId === props.lserviceStageTransactionId
+			)
+		);
+		props.onRecordAdditionOrRemoval(data.length);
+	}, [responseCustomerTrademarkDetailsAndAttachments, props, data.length]);
 
-	function handleChangePage(event, value) {
+	function handleChangePage(value) {
 		setPage(value);
 	}
 
@@ -67,7 +71,7 @@ function SearchRecordsTable(props) {
 		return <FuseLoading />;
 	}
 
-	if (data.length === 0) {
+	if (data.length === 0 || props.lserviceStageTransactionId === null) {
 		return (
 			<motion.div
 				initial={{ opacity: 0 }}
@@ -97,7 +101,6 @@ function SearchRecordsTable(props) {
 
 					<TableBody>
 						{data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(n => {
-							const isSelected = selected.indexOf(n.id) !== -1;
 							return (
 								<TableRow className="h-36 cursor-pointer" hover tabIndex={-1} key={n.id}>
 									{/* <TableCell component="th" scope="row">
@@ -110,10 +113,6 @@ function SearchRecordsTable(props) {
 											n.customerTrademarkDetailsDTO.classficationId
 										)}
 									</TableCell>
-
-									{/* <TableCell component="th" scope="row">
-										{n.typeForTm}
-									</TableCell> */}
 
 									<TableCell className="w-52 px-4 md:px-0" padding="none" component="th" scope="row">
 										{n.customerTrademarkDetailsDTO.typeForTm === 'IMAGE' ? (

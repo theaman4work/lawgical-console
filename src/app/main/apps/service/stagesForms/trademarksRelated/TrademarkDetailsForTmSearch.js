@@ -1,12 +1,9 @@
 import _ from '@lodash';
 import * as yup from 'yup';
 import { makeStyles } from '@material-ui/core/styles';
-import { orange } from '@material-ui/core/colors';
 import clsx from 'clsx';
-import FuseUtils from '@fuse/utils';
 import { memo, useState, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
@@ -110,7 +107,6 @@ const TrademarkDetailsForTmSearch = props => {
 	});
 
 	const { isValid, dirtyFields, errors } = formState;
-	// let image = watch('image', null);
 
 	const platformCharges = (props.costDetails.platformCharges / 100) * props.costDetails.baseAmount;
 	const platformAndBaseTotal = props.costDetails.baseAmount + platformCharges;
@@ -200,7 +196,6 @@ const TrademarkDetailsForTmSearch = props => {
 	}
 
 	function onSubmit(model) {
-		// console.log(model);
 		let message = '';
 		let urlOfImage = '';
 		let open = false;
@@ -229,8 +224,6 @@ const TrademarkDetailsForTmSearch = props => {
 						classificationCount = props.classificationDTOs.length;
 					}
 					const { imageForUpload } = image;
-					// eslint-disable-next-line
-					// const imageName = 'img_' + classficationId + '_' + classificationCount;
 					const promises = [];
 					if (image.name != null) {
 						const uploadTask = storage.ref(`images/${image.name}`).put(image);
@@ -242,10 +235,8 @@ const TrademarkDetailsForTmSearch = props => {
 								const progressDone = Math.round(
 									(snapshot.bytesTransferred / snapshot.totalBytes) * 100
 								);
-								// if (snapshot.state === firebase.storage.TaskState.RUNNING) {
 								console.log(progressDone);
 								setProgress(progressDone);
-								// }
 							},
 							error => {
 								// Error function ...
@@ -262,8 +253,6 @@ const TrademarkDetailsForTmSearch = props => {
 								// complete function ...
 								const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
 								urlOfImage = downloadURL;
-								// console.log('Url of image uploaded');
-								// console.log(downloadURL);
 
 								let lserviceStageTransactionIdForData = null;
 								if (props.lserviceStageTransaction == null) {
@@ -302,19 +291,17 @@ const TrademarkDetailsForTmSearch = props => {
 					}
 					// image name check condition ends here
 
-					Promise.allSettled(promises)
-						// .then(() => console.log('All images successfully uploaded'))
-						.catch(err => {
-							console.log(err.code);
-							message = `Failed to upload image on server, please try again after some time- ${err.code}`;
-							open = true;
-							setProgress(0);
-							setMessageAndLevel({
-								message,
-								open,
-								level
-							});
+					Promise.allSettled(promises).catch(err => {
+						console.log(err.code);
+						message = `Failed to upload image on server, please try again after some time- ${err.code}`;
+						open = true;
+						setProgress(0);
+						setMessageAndLevel({
+							message,
+							open,
+							level
 						});
+					});
 				}
 			} else {
 				let lserviceStageTransactionIdForData = null;
@@ -424,7 +411,6 @@ const TrademarkDetailsForTmSearch = props => {
 												className="justify-center"
 												row
 												onChange={(event, newValue) => {
-													// console.log('onChange- ' + newValue);
 													field.onChange(newValue);
 													if (event.target.value === 'image') {
 														// show image upload button
@@ -500,13 +486,10 @@ const TrademarkDetailsForTmSearch = props => {
 														const file = e.target.files[0];
 
 														reader.onloadend = () => {
-															// console.log('inside onloadend');
 															setImage(file);
 															setImageUrl(reader.result);
 														};
 														reader.readAsDataURL(file);
-
-														// console.log(image);
 														setShowImageSelected(true);
 													}}
 												/>
@@ -519,31 +502,26 @@ const TrademarkDetailsForTmSearch = props => {
 									{image && (
 										<Controller
 											name="selectedImage"
+											required
 											control={control}
 											defaultValue=""
-											render={
-												({ field: { onChange, value } }) => (
-													// images.map(media => (
-													<div
-														// onClick={() => onChange(image.id)}
-														// onKeyDown={() => onChange(image.id)}
-														role="button"
-														tabIndex={0}
-														className={clsx(
-															classes.productImageItem,
-															'flex items-center justify-center relative w-128 h-128 rounded-16 mx-12 mb-24 overflow-hidden cursor-pointer outline-none shadow hover:shadow-lg'
-														)}
-														key={image.name}
-													>
-														<img
-															className="max-w-none w-auto h-full"
-															src={imageUrl}
-															alt={image.name}
-														/>
-													</div>
-												)
-												// ))
-											}
+											render={({ field: { onChange } }) => (
+												<div
+													role="button"
+													tabIndex={0}
+													className={clsx(
+														classes.productImageItem,
+														'flex items-center justify-center relative w-128 h-128 rounded-16 mx-12 mb-24 overflow-hidden cursor-pointer outline-none shadow hover:shadow-lg'
+													)}
+													key={image.name}
+												>
+													<img
+														className="max-w-none w-auto h-full"
+														src={imageUrl}
+														alt={image.name}
+													/>
+												</div>
+											)}
 										/>
 									)}
 								</div>
@@ -567,6 +545,11 @@ const TrademarkDetailsForTmSearch = props => {
 							<SearchRecordsTable
 								classificationDTOs={props.classificationDTOs}
 								onRecordAdditionOrRemoval={setProvisionCostAfterItemAdd}
+								lserviceStageTransactionId={
+									props.lserviceStageTransaction !== null
+										? props.lserviceStageTransaction.id
+										: stateLserviceStageTransactionId
+								}
 							/>
 						</div>
 					</div>
