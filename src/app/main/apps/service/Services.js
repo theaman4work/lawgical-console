@@ -7,15 +7,18 @@ import Typography from '@material-ui/core/Typography';
 import withReducer from 'app/store/withReducer';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getProductServices, selectProductServices } from './store/productServicesSlice';
+import { useDispatch } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import FuseLoading from '@fuse/core/FuseLoading';
 import reducer from './store';
 import TradeMarksTab from './tabs/TradeMarksTab';
 import PatentsTab from './tabs/PatentsTab';
 import CopyrightsTab from './tabs/CopyrightsTab';
 import OtherLegalServicesTab from './tabs/OtherLegalServicesTab';
 import DesignsTab from './tabs/DesignsTab';
-import { getServices, selectServices } from './store/servicesSlice';
+import { getServices } from './store/servicesSlice';
+import { getProductServices } from './store/productServicesSlice';
+import { getServiceTransactions } from './store/lserviceTransactionsSlice';
 
 const useStyles = makeStyles(theme => ({
 	topBg: {
@@ -36,30 +39,45 @@ function Services(props) {
 	const dispatch = useDispatch();
 	const classes = useStyles(props);
 
-	const productServices = useSelector(selectProductServices);
-	const services = useSelector(selectServices);
+	let tabIndex = 0;
+	const routeParams = useParams();
 
-	// const i = 0;
-	// let i = 0;
-	// if (window.location.href.indexOf('/patents') > -1) {
-	// 	i = 1;
-	// } else if (window.location.href.indexOf('/copyrights') > -1) {
-	// 	i = 2;
-	// } else if (window.location.href.indexOf('/legalservices') > -1) {
-	// 	i = 3;
-	// } else {
-	// 	i = 0;
-	// }
-	// console.log('tabValue: ', i);
-	const [tabValue, setTabValue] = useState(0);
+	if (routeParams === null) {
+		tabIndex = 0;
+	} else if (routeParams.tab === null) {
+		tabIndex = 0;
+	} else if (routeParams.tab === 'trademarks') {
+		tabIndex = 0;
+	} else if (routeParams.tab === 'patents') {
+		tabIndex = 1;
+	} else if (routeParams.tab === 'copyrights') {
+		tabIndex = 2;
+	} else if (routeParams.tab === 'designs') {
+		tabIndex = 3;
+	} else if (routeParams.tab === 'otherlegalservices') {
+		tabIndex = 4;
+	} else {
+		tabIndex = 0;
+	}
+
+	// console.log(tabIndex);
+
+	const [tabValue, setTabValue] = useState(tabIndex);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
+		setTabValue(tabIndex);
 		dispatch(getProductServices());
 		dispatch(getServices());
-	}, [dispatch]);
+		dispatch(getServiceTransactions()).then(() => setLoading(false));
+	}, [dispatch, tabIndex]);
 
 	function handleChangeTab(event, value) {
 		setTabValue(value);
+	}
+
+	if (loading) {
+		return <FuseLoading />;
 	}
 
 	return (

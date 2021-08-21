@@ -103,7 +103,7 @@ function CopyrightsTab() {
 												{
 													// eslint-disable-next-line
 												subServicesForCopyright.map((subService, i) => {
-														const url = `/apps/services/steps/${subService.id}`;
+														const url = `/apps/services/steps/copyrights/${subService.id}`;
 														if (
 															subService.productLserviceId === productService.id &&
 															subService.status === 'ACTIVE'

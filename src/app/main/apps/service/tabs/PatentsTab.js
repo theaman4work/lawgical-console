@@ -103,7 +103,7 @@ function PatentsTab() {
 												{
 													// eslint-disable-next-line
 												subServicesForPatent.map((subService, i) => {
-														const url = `/apps/services/steps/${subService.id}`;
+														const url = `/apps/services/steps/patents/${subService.id}`;
 														if (
 															subService.productLserviceId === productService.id &&
 															subService.status === 'ACTIVE'

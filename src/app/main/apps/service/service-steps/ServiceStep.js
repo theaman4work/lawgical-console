@@ -12,23 +12,27 @@ import Stepper from '@material-ui/core/Stepper';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import withReducer from 'app/store/withReducer';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
 import { useDeepCompareEffect } from '@fuse/hooks';
 import SwipeableViews from 'react-swipeable-views';
+import Error404 from 'app/main/errors/404/Error404';
 import reducer from '../store';
 import { getData } from '../store/serviceStepsSlice';
-import { getApplicants } from '../store/applicantSlice';
+import { getApplicants, selectApplicants } from '../store/applicantSlice';
 import PricingInfo from '../stagesForms/PricingInfo';
 import ConfidentialityAgreement from '../stagesForms/ConfidentialityAgreement';
 import ApplicantsTable from '../stagesForms/applicantDetails/ApplicantsTable';
 import ApplicantDialog from '../stagesForms/applicantDetails/ApplicantDialog';
+import LabelForServiceTransactionDialog from '../stagesForms/LabelForServiceTransactionDialog';
 import TrademarkDetailsForTmSearch from '../stagesForms/trademarksRelated/TrademarkDetailsForTmSearch';
 import TrademarkDetailsForTmFiling from '../stagesForms/trademarksRelated/TrademarkDetailsForTmFiling';
 import CartAndPayment from '../stagesForms/payment/CartAndPayment';
 import DownloadSearchReports from '../stagesForms/trademarksRelated/DownloadSearchReports';
 import TmApplicationNoAndOtherDetails from '../stagesForms/trademarksRelated/TmApplicationNoAndOtherDetails';
+import UploadsForTrademarkServices from '../stagesForms/trademarksRelated/UploadsForTrademarkServices';
+import { getServiceTransactions, selectServiceTransactions } from '../store/lserviceTransactionsSlice';
 
 const useStyles = makeStyles(theme => ({
 	stepLabel: {
@@ -43,21 +47,43 @@ const useStyles = makeStyles(theme => ({
 function ServiceStep(props) {
 	const dispatch = useDispatch();
 	const serviceSteps = useSelector(({ servicesApp }) => servicesApp.serviceSteps);
+	const applicantsData = useSelector(selectApplicants);
+	const lserviceTransactions = useSelector(selectServiceTransactions);
 	const [stepCount, setStepCount] = useState(1);
+	const [loading, setLoading] = useState(true);
+	const [data, setData] = useState(lserviceTransactions);
 	const theme = useTheme();
 
 	const routeParams = useParams();
+
 	const classes = useStyles(props);
 	const pageLayout = useRef(null);
+
+	let tabName = 'trademarks';
+	if (routeParams.tab !== null) {
+		tabName = routeParams.tab;
+	}
+	// eslint-disable-next-line
+	const backUrl = '/services/' + tabName;
+	// console.log(backUrl);
+
+	useEffect(() => {
+		// console.log(serviceSteps.currentStageCountForUser);
+		setStepCount(serviceSteps.currentStageCountForUser ? serviceSteps.currentStageCountForUser : 1);
+	}, [serviceSteps]);
 
 	useDeepCompareEffect(() => {
 		/**
 		 * Get the ServiceStages Data
 		 */
 		dispatch(getData(routeParams));
-		// dispatch(getContacts(routeParams));
 		dispatch(getApplicants(routeParams));
+		dispatch(getServiceTransactions()).then(() => setLoading(false));
 	}, [dispatch, routeParams]);
+
+	if (routeParams.lserviceTransactionId !== undefined && serviceSteps.lserviceTransactionDTO.id === null) {
+		return <Error404 />;
+	}
 
 	function handleChangeActiveStep(index) {
 		// dispatch(updateCourse({ activeStep: index + 1 }));
@@ -105,6 +131,95 @@ function ServiceStep(props) {
 		return classificationsForDropDown;
 	};
 
+	const findPaymentStatus = (lserviceStageTransactionDTOs, stageDTOs) => {
+		const stageDTO = stageDTOs.find(eltemp => eltemp.stageType === 'PAYMENT');
+		if (stageDTO) {
+			const lserviceStageTransactionDTO = lserviceStageTransactionDTOs.find(
+				eltemp => eltemp.stageId === stageDTO.id
+			);
+			if (lserviceStageTransactionDTO) {
+				if (lserviceStageTransactionDTO.stageStaus === 'COMPLETED') {
+					return 0;
+					// eslint-disable-next-line
+				} else {
+					return 1;
+				}
+				// eslint-disable-next-line
+			} else {
+				return 3;
+			}
+		} else {
+			return 2;
+		}
+	};
+
+	const findAggreementStageStatus = (lserviceStageTransactionDTOs, stageDTOs) => {
+		const stageDTO = stageDTOs.find(eltemp => eltemp.stageType === 'AGREEMENTS');
+		if (stageDTO) {
+			const lserviceStageTransactionDTO = lserviceStageTransactionDTOs.find(
+				eltemp => eltemp.stageId === stageDTO.id
+			);
+			if (lserviceStageTransactionDTO) {
+				if (lserviceStageTransactionDTO.stageStaus === 'COMPLETED') {
+					return 0;
+					// eslint-disable-next-line
+				} else {
+					return 1;
+				}
+				// eslint-disable-next-line
+			} else {
+				return 3;
+			}
+		} else {
+			return 2;
+		}
+	};
+
+	const applicantsStatusForLserviceTransactions = (applicants, lserviceTransaction) => {
+		if (applicants !== null) {
+			const selectedRecords = [];
+			// eslint-disable-next-line
+			for ( const[key, value] of Object.entries(applicants) ) {
+				// console.log('key - value');
+				// console.log(`${key} - ${JSON.stringify(value.applicantsOfLserTransDTOs)}`);
+				if (value.applicantsOfLserTransDTOs != null && value.applicantsOfLserTransDTOs.length > 0) {
+					// eslint-disable-next-line
+					for (const [key1, value1] of Object.entries(value.applicantsOfLserTransDTOs)) {
+						// console.log('key1 - value1');
+						// console.log(`${key1} - ${JSON.stringify(value1)}`);
+						if (lserviceTransaction.id === value1.lserviceTransactionId && value1.status === 'ACTIVE') {
+							selectedRecords.push(value1.applicantId);
+						}
+					}
+				}
+			}
+			if (selectedRecords.length > 0) {
+				return 0;
+			}
+			// no applicants selected for transaction
+			return 2;
+		}
+		// no applicants
+		return 1;
+	};
+
+	function createServiceNameUsingData(serviceStepsData) {
+		let nameOfService = 'Service Name';
+		if (
+			serviceStepsData.lserviceTransactionDTO.lablelByUser !== null ||
+			serviceStepsData.lserviceTransactionDTO.sysGenName
+		) {
+			const applicationLabel =
+				serviceStepsData.lserviceTransactionDTO.lablelByUser !== null
+					? serviceStepsData.lserviceTransactionDTO.lablelByUser
+					: serviceStepsData.lserviceTransactionDTO.sysGenName;
+			nameOfService = `${serviceStepsData.lserviceDTO.name} - (${applicationLabel})`;
+		} else {
+			nameOfService = `${serviceStepsData.lserviceDTO.name} - (New Application)`;
+		}
+		return nameOfService;
+	}
+
 	function renderFormsUsingSwitchDecision(index, step) {
 		switch (index) {
 			case 0:
@@ -117,6 +232,9 @@ function ServiceStep(props) {
 							serviceSteps.lserviceStageTransactionDTOs,
 							step
 						)}
+						lserviceTransaction={serviceSteps.lserviceTransactionDTO}
+						// eslint-disable-next-line
+						// isNewService={lserviceTransactionData === null ? true : false}
 					/>
 				);
 			case 1:
@@ -152,6 +270,10 @@ function ServiceStep(props) {
 						)}
 						lserviceTransaction={serviceSteps.lserviceTransactionDTO}
 						lservice={serviceSteps.lserviceDTO}
+						aggrementStatus={findAggreementStageStatus(
+							serviceSteps.lserviceStageTransactionDTOs,
+							serviceSteps.stageDTOs
+						)}
 					/>
 				);
 			case 3:
@@ -169,6 +291,10 @@ function ServiceStep(props) {
 							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
 							classifications={convertClassficationsToDropdownList(serviceSteps.classificationDTOs)}
 							classificationDTOs={serviceSteps.classificationDTOs}
+							applicantsStatus={applicantsStatusForLserviceTransactions(
+								applicantsData,
+								serviceSteps.lserviceTransactionDTO
+							)}
 						/>
 					);
 					// eslint-disable-next-line
@@ -187,6 +313,10 @@ function ServiceStep(props) {
 							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
 							classifications={convertClassficationsToDropdownList(serviceSteps.classificationDTOs)}
 							classificationDTOs={serviceSteps.classificationDTOs}
+							applicantsStatus={applicantsStatusForLserviceTransactions(
+								applicantsData,
+								serviceSteps.lserviceTransactionDTO
+							)}
 						/>
 					);
 				} else if (
@@ -212,6 +342,10 @@ function ServiceStep(props) {
 							classifications={convertClassficationsToDropdownList(serviceSteps.classificationDTOs)}
 							classificationDTOs={serviceSteps.classificationDTOs}
 							trademarkNoType={step.stageType === 'TMRENEWALREQ' ? 2 : 1}
+							applicantsStatus={applicantsStatusForLserviceTransactions(
+								applicantsData,
+								serviceSteps.lserviceTransactionDTO
+							)}
 						/>
 					);
 				}
@@ -234,16 +368,90 @@ function ServiceStep(props) {
 				}
 				return '';
 			case 5:
-				if (step.stageType === 'TMSEARCHSREPORT') {
+				if (step.stageType === 'TMSEARCHSREPORT' || step.stageType === 'TMSEARCHSREPORTANDTXTUPDATES') {
 					return (
 						<DownloadSearchReports
-							stepCount={5}
+							stepCount={6}
 							step={step}
 							lserviceStageTransaction={findMatchingLserviceStageTransaction(
 								serviceSteps.lserviceStageTransactionDTOs,
 								step
 							)}
 							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
+							tmServiceType={step.stageType === 'TMSEARCHSREPORT' ? 1 : 2}
+							paymentStatus={findPaymentStatus(
+								serviceSteps.lserviceStageTransactionDTOs,
+								serviceSteps.stageDTOs
+							)}
+						/>
+					);
+					// eslint-disable-next-line
+				} else if (step.stageType === 'TMFILINGUPLOADSREQ' ||
+					step.stageType === 'TMUPLOADPOA' ||
+					step.stageType === 'TMUPLOADPOAUSERAFFANDEVDOFUSAGE' ||
+					step.stageType === 'TMUPLOADPOAANDEVDOFCHANGE' ||
+					step.stageType === 'TMPORTVALUATIONUPLOADS' ||
+					step.stageType === 'TMARTISTICUPLOADS'
+				) {
+					return (
+						<UploadsForTrademarkServices
+							stepCount={6}
+							step={step}
+							stage={findMatchingStageUsingType(serviceSteps.stageDTOs, step)}
+							lserviceStageTransaction={findMatchingLserviceStageTransaction(
+								serviceSteps.lserviceStageTransactionDTOs,
+								step
+							)}
+							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
+							trademarkServiceUploadType={
+								step.stageType === 'TMUPLOADPOA'
+									? 1
+									: step.stageType === 'TMFILINGUPLOADSREQ'
+									? 2
+									: step.stageType === 'TMUPLOADPOAUSERAFFANDEVDOFUSAGE'
+									? 3
+									: step.stageType === 'TMUPLOADPOAANDEVDOFCHANGE'
+									? 5
+									: step.stageType === 'TMPORTVALUATIONUPLOADS'
+									? 6
+									: 7
+							}
+							paymentStatus={findPaymentStatus(
+								serviceSteps.lserviceStageTransactionDTOs,
+								serviceSteps.stageDTOs
+							)}
+						/>
+					);
+				} else {
+					return '';
+				}
+			case 6:
+				if (
+					step.stageType === 'TMDOWNLOADFILINGRECEIPT' ||
+					step.stageType === 'TMTEXTUPDATES' ||
+					step.stageType === 'TMDOWNLOADFILINGRECEIPTANDTEXTUPDATES'
+				) {
+					return (
+						<DownloadSearchReports
+							stepCount={7}
+							step={step}
+							lserviceStageTransaction={findMatchingLserviceStageTransaction(
+								serviceSteps.lserviceStageTransactionDTOs,
+								step
+							)}
+							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
+							tmServiceType={
+								step.stageType === 'TMDOWNLOADFILINGRECEIPT'
+									? 3
+									: step.stageType === 'TMDOWNLOADFILINGRECEIPTANDTEXTUPDATES'
+									? 4
+									: 5
+							}
+							lservice={serviceSteps.lserviceDTO}
+							paymentStatus={findPaymentStatus(
+								serviceSteps.lserviceStageTransactionDTOs,
+								serviceSteps.stageDTOs
+							)}
 						/>
 					);
 				}
@@ -271,11 +479,13 @@ function ServiceStep(props) {
 								<Icon>menu</Icon>
 							</IconButton>
 						</Hidden>
-						<IconButton to="/services" component={Link}>
+						<IconButton to={backUrl} component={Link}>
 							<Icon>{theme.direction === 'ltr' ? 'arrow_back' : 'arrow_forward'}</Icon>
 						</IconButton>
 						{serviceSteps && (
-							<Typography className="flex-1 text-20 mx-16">{serviceSteps.lserviceDTO.name}</Typography>
+							<Typography className="flex-1 text-20 mx-16">
+								{createServiceNameUsingData(serviceSteps)}
+							</Typography>
 						)}
 					</div>
 				}
@@ -304,7 +514,7 @@ function ServiceStep(props) {
 								</SwipeableViews>
 							</FuseScrollbars>
 
-							<div className="flex justify-center w-full absolute left-0 right-0 bottom-0 pb-16 md:pb-32">
+							<div className="flex justify-center w-full absolute left-0 right-0 top-4 pb-16 md:pb-32">
 								<div className="flex justify-between w-full max-w-xl px-8">
 									<div>
 										{activeStep !== 1 && (
@@ -323,7 +533,7 @@ function ServiceStep(props) {
 												</Icon>
 											</Fab>
 										) : (
-											<Fab className={classes.successFab} to="/services" component={Link}>
+											<Fab className={classes.successFab} to={backUrl} component={Link}>
 												<Icon>check</Icon>
 											</Fab>
 										)}
@@ -354,6 +564,7 @@ function ServiceStep(props) {
 				ref={pageLayout}
 			/>
 			<ApplicantDialog />
+			<LabelForServiceTransactionDialog />
 		</>
 	);
 }

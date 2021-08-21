@@ -103,7 +103,7 @@ function OtherLegalServicesTab() {
 												{
 													// eslint-disable-next-line
 													subServicesForAnyLegalServ.map((subService, i) => {												
-														const url = `/apps/services/steps/${subService.id}`;
+														const url = `/apps/services/steps/otherlegalservices/${subService.id}`;
 														if (
 															subService.productLserviceId === productService.id &&
 															subService.status === 'ACTIVE'

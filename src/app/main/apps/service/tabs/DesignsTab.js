@@ -103,7 +103,7 @@ function DesignsTab() {
 												{
 													// eslint-disable-next-line
 												subServicesForDesign.map((subService, i) => {
-														const url = `/apps/services/steps/${subService.id}`;
+														const url = `/apps/services/steps/designs/${subService.id}`;
 														if (
 															subService.productLserviceId === productService.id &&
 															subService.status === 'ACTIVE'

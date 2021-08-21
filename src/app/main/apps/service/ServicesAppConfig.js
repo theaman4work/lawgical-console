@@ -7,27 +7,11 @@ const ServicesAppConfig = {
 	},
 	routes: [
 		{
-			path: '/services',
+			path: '/services/:tab?',
 			component: lazy(() => import('./Services'))
 		},
 		{
-			path: '/services/trademarks',
-			component: lazy(() => import('./Services'))
-		},
-		{
-			path: '/services/patents',
-			component: lazy(() => import('./Services'))
-		},
-		{
-			path: '/services/copyrights',
-			component: lazy(() => import('./Services'))
-		},
-		{
-			path: '/services/legalservices',
-			component: lazy(() => import('./Services'))
-		},
-		{
-			path: '/apps/services/steps/:lserviceId?',
+			path: '/apps/services/steps/:tab?/:lserviceId?/:lserviceTransactionId?',
 			component: lazy(() => import('./service-steps/ServiceStep'))
 		}
 	]

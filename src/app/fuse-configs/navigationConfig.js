@@ -54,7 +54,7 @@ const navigationConfig = [
 				title: 'Design',
 				type: 'item',
 				// icon: 'person',
-				url: '/services/design',
+				url: '/services/designs',
 				exact: true
 			},
 			{
@@ -62,7 +62,7 @@ const navigationConfig = [
 				title: 'Other Legal Services',
 				type: 'item',
 				// icon: 'person',
-				url: '/services/legalservices',
+				url: '/services/otherlegalservices',
 				exact: true
 			}
 		]
