@@ -2,7 +2,7 @@ import _ from '@lodash';
 import * as yup from 'yup';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import { memo, useState, useEffect } from 'react';
+import { memo, useState, useEffect, useMemo, forwardRef } from 'react';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
@@ -19,6 +19,11 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Divider from '@material-ui/core/Divider';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Box from '@material-ui/core/Box';
+import Slide from '@material-ui/core/Slide';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import AppBar from '@material-ui/core/AppBar';
 import { useDispatch } from 'react-redux';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -40,6 +45,10 @@ const useStyles = makeStyles(theme => ({
 		transitionTimingFunction: theme.transitions.easing.easeInOut
 	}
 }));
+
+const Transition = forwardRef(function Transition(props, ref) {
+	return <Slide direction="up" ref={ref} {...props} />;
+});
 
 const defaultValues = {
 	classification: 'Class 1 (Chemicals)',
@@ -92,6 +101,11 @@ const TrademarkDetailsForTmSearch = props => {
 	const [imageUrl, setImageUrl] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [stateLserviceStageTransactionId, setStateLserviceStageTransactionId] = useState(null);
+	const [dialog, setDialog] = useState({
+		open: false,
+		imageUrl: null,
+		imageName: null
+	});
 
 	// let stageStaus =
 	// 	props.lserviceStageTransaction != null
@@ -130,7 +144,7 @@ const TrademarkDetailsForTmSearch = props => {
 	});
 
 	useEffect(() => {
-		if (props.lserviceTransaction.id !== null) {
+		if (props.lserviceTransaction && props.lserviceTransaction.id !== null) {
 			if (props.lserviceStageTransaction == null) {
 				const data = {
 					lserviceTransactionId: props.lserviceTransaction.id,
@@ -201,8 +215,9 @@ const TrademarkDetailsForTmSearch = props => {
 		let open = false;
 		let level = 'error';
 
+		console.log(props.applicantsStatus);
 		const classficationId = model.classification.replace(/^\D+|\D+$/g, '');
-		if (props.lserviceTransaction.id == null) {
+		if (props.lserviceTransaction.id == null || props.applicantsStatus !== 0) {
 			message = 'Please complete the previous step before trying to complete this step!';
 			open = true;
 		} else {
@@ -219,10 +234,6 @@ const TrademarkDetailsForTmSearch = props => {
 						level
 					});
 				} else {
-					let classificationCount = 0;
-					if (props.classificationDTOs !== null) {
-						classificationCount = props.classificationDTOs.length;
-					}
 					const { imageForUpload } = image;
 					const promises = [];
 					if (image.name != null) {
@@ -236,7 +247,9 @@ const TrademarkDetailsForTmSearch = props => {
 									(snapshot.bytesTransferred / snapshot.totalBytes) * 100
 								);
 								console.log(progressDone);
-								setProgress(progressDone);
+								if (!Number.isNaN(progressDone)) {
+									setProgress(progressDone);
+								}
 							},
 							error => {
 								// Error function ...
@@ -273,9 +286,10 @@ const TrademarkDetailsForTmSearch = props => {
 									url: downloadURL,
 									attachmentType: 'IMAGE'
 								};
+								const attachmentDTOs = [attachmentDTO];
 								const reqData = {
 									customerTrademarkDetailsDTO,
-									attachmentDTO,
+									attachmentDTOs,
 									email: localStorage.getItem('lg_logged_in_email')
 								};
 
@@ -337,6 +351,14 @@ const TrademarkDetailsForTmSearch = props => {
 		});
 	}
 
+	function handleOpenDialog(url, name) {
+		setDialog({
+			open: true,
+			imageUrl: url,
+			imageName: name
+		});
+	}
+
 	function LinearProgressWithLabel(propsTemp) {
 		return (
 			<Box display="flex" alignItems="center">
@@ -350,231 +372,286 @@ const TrademarkDetailsForTmSearch = props => {
 		);
 	}
 
-	if (loading) {
-		return <FuseLoading />;
-	}
+	// if (loading) {
+	// 	return <FuseLoading />;
+	// }
 
 	return (
-		<div className="flex-grow flex-shrink-0 p-0">
-			{props.costDetails && (
-				<div>
-					<div>
-						<Typography className="text-16 sm:text-20 truncate font-semibold">
-							{`Step ${props.stepCount} - ${props.step.name}`}
-						</Typography>
-						<div className="w-full flex items-center justify-end py-20">
-							<Typography className="text-12 sm:text-15">
-								{`Provisional cost: ${formatter.format(provisionalCost)}`}
-							</Typography>
-						</div>
-						<form className="justify-items-center mb-20" onSubmit={handleSubmit(onSubmit)}>
-							<div className="flex">
-								<Controller
-									name="classification"
-									control={control}
-									render={({ field: { onChange, value } }) => (
-										<Autocomplete
-											className="mt-8 mb-12 w-full"
-											options={props.classifications}
-											value={value}
-											onChange={(event, newValue) => {
-												onChange(newValue);
-											}}
-											renderInput={params => (
-												<TextField
-													{...params}
-													label="Choose a classification"
-													variant="outlined"
-													InputLabelProps={{
-														shrink: true
+		<>
+			<div>
+				{useMemo(() => {
+					function handleCloseDialog() {
+						setDialog({
+							...dialog,
+							open: false
+						});
+					}
+
+					return (
+						<Dialog
+							classes={{
+								paper: 'm-24'
+							}}
+							open={dialog.open}
+							onClose={handleCloseDialog}
+							aria-labelledby="service-applications-list"
+							TransitionComponent={Transition}
+							style={{ maxWidth: '100%', maxHeight: '100%' }}
+						>
+							<AppBar position="static" elevation={0} className="items-center">
+								<Typography variant="h6" color="inherit" className="p-16 items-center">
+									{dialog.title}
+								</Typography>
+							</AppBar>
+							<DialogContent className="w-auto justify-center">
+								<img
+									style={{ width: 'auto', height: '100%' }}
+									src={dialog.imageUrl}
+									alt={dialog.imageName}
+								/>
+							</DialogContent>
+							<DialogActions className="justify-center">
+								<Button
+									onClick={handleCloseDialog}
+									color="primary"
+									variant="contained"
+									size="medium"
+									aria-label="closePopup"
+								>
+									Close
+								</Button>
+							</DialogActions>
+						</Dialog>
+					);
+				}, [dialog])}
+			</div>
+			{loading ? (
+				<FuseLoading />
+			) : (
+				<div className="flex-grow flex-shrink-0 p-0">
+					{props.costDetails && (
+						<div>
+							<div>
+								<Typography className="text-16 sm:text-20 truncate font-semibold">
+									{`Step ${props.stepCount} - ${props.step.name}`}
+								</Typography>
+								<div className="w-full flex items-center justify-end py-20">
+									<Typography className="text-12 sm:text-15">
+										{`Provisional cost: ${formatter.format(provisionalCost)}`}
+									</Typography>
+								</div>
+								<form className="justify-items-center mb-20" onSubmit={handleSubmit(onSubmit)}>
+									<div className="flex">
+										<Controller
+											name="classification"
+											control={control}
+											render={({ field: { onChange, value } }) => (
+												<Autocomplete
+													className="mt-8 mb-12 w-full"
+													options={props.classifications}
+													value={value}
+													onChange={(event, newValue) => {
+														onChange(newValue);
 													}}
-													error={!!errors.classification}
-													helperText={errors?.classification?.message}
+													renderInput={params => (
+														<TextField
+															{...params}
+															label="Choose a classification"
+															variant="outlined"
+															InputLabelProps={{
+																shrink: true
+															}}
+															error={!!errors.classification}
+															helperText={errors?.classification?.message}
+															required
+														/>
+													)}
 													required
 												/>
 											)}
-											required
 										/>
-									)}
-								/>
-							</div>
+									</div>
 
-							<div className="flex">
-								<Controller
-									name="switchForImageAndWord"
-									control={control}
-									render={({ field }) => (
-										<FormControl component="fieldset" className="mt-8 mb-12 w-full">
-											<RadioGroup
-												{...field}
-												aria-label="TM Search Type"
-												className="justify-center"
-												row
-												onChange={(event, newValue) => {
-													field.onChange(newValue);
-													if (event.target.value === 'image') {
-														// show image upload button
-														setShowUploadOrText(1);
-													} else {
-														// show text field for word
-														setShowUploadOrText(2);
-													}
-												}}
-											>
-												<FormControlLabel
-													className="text-8"
-													key="image"
-													value="image"
-													control={<Radio />}
-													label="Image"
-												/>
-												<FormControlLabel
-													className="text-8"
-													key="word"
-													value="word"
-													control={<Radio />}
-													label="Word"
-												/>
-											</RadioGroup>
-										</FormControl>
-									)}
-								/>
-							</div>
-
-							{showUploadOrText === 2 && (
-								<div className="flex">
-									<Controller
-										control={control}
-										name="word"
-										render={({ field }) => (
-											<TextField
-												{...field}
-												className="mb-12 w-full"
-												label="Word"
-												id="word"
-												error={!!errors.word}
-												helperText={errors?.word?.message}
-												variant="outlined"
-												required
-											/>
-										)}
-									/>
-								</div>
-							)}
-
-							{showUploadOrText === 1 && (
-								<div className="flex justify-center">
-									<Controller
-										name="image"
-										control={control}
-										defaultValue={[]}
-										render={({ field: { onChange, value } }) => (
-											<label
-												htmlFor="button-file"
-												className={clsx(
-													classes.productImageUpload,
-													'flex items-center justify-center relative w-128 h-128 rounded-16 mx-12 mb-24 overflow-hidden cursor-pointer shadow hover:shadow-lg'
-												)}
-											>
-												<input
-													accept="image/*"
-													className="hidden"
-													id="button-file"
-													type="file"
-													onChange={async e => {
-														const reader = new FileReader();
-														const file = e.target.files[0];
-
-														reader.onloadend = () => {
-															setImage(file);
-															setImageUrl(reader.result);
-														};
-														reader.readAsDataURL(file);
-														setShowImageSelected(true);
-													}}
-												/>
-												<Icon fontSize="large" color="action">
-													cloud_upload
-												</Icon>
-											</label>
-										)}
-									/>
-									{image && (
+									<div className="flex">
 										<Controller
-											name="selectedImage"
-											required
+											name="switchForImageAndWord"
 											control={control}
-											defaultValue=""
-											render={({ field: { onChange } }) => (
-												<div
-													role="button"
-													tabIndex={0}
-													className={clsx(
-														classes.productImageItem,
-														'flex items-center justify-center relative w-128 h-128 rounded-16 mx-12 mb-24 overflow-hidden cursor-pointer outline-none shadow hover:shadow-lg'
-													)}
-													key={image.name}
-												>
-													<img
-														className="max-w-none w-auto h-full"
-														src={imageUrl}
-														alt={image.name}
-													/>
-												</div>
+											render={({ field }) => (
+												<FormControl component="fieldset" className="mt-8 mb-12 w-full">
+													<RadioGroup
+														{...field}
+														aria-label="TM Search Type"
+														className="justify-center"
+														row
+														onChange={(event, newValue) => {
+															field.onChange(newValue);
+															if (event.target.value === 'image') {
+																// show image upload button
+																setShowUploadOrText(1);
+															} else {
+																// show text field for word
+																setShowUploadOrText(2);
+															}
+														}}
+													>
+														<FormControlLabel
+															className="text-8"
+															key="image"
+															value="image"
+															control={<Radio />}
+															label="Image"
+														/>
+														<FormControlLabel
+															className="text-8"
+															key="word"
+															value="word"
+															control={<Radio />}
+															label="Word"
+														/>
+													</RadioGroup>
+												</FormControl>
 											)}
 										/>
-									)}
-								</div>
-							)}
+									</div>
 
-							<Button
-								type="submit"
-								variant="contained"
-								color="primary"
-								className="w-full mx-auto mt-16"
-								aria-label="Add"
-								disabled={_.isEmpty(dirtyFields) || !isValid}
-								value="legacy"
-							>
-								Add
-							</Button>
-						</form>
-						{progress !== 0 && <LinearProgressWithLabel value={progress} />}
-						<Divider className="mt-20" />
-						<div className="mt-20 w-full flex items-center justify-center">
-							<SearchRecordsTable
-								classificationDTOs={props.classificationDTOs}
-								onRecordAdditionOrRemoval={setProvisionCostAfterItemAdd}
-								lserviceStageTransactionId={
-									props.lserviceStageTransaction !== null
-										? props.lserviceStageTransaction.id
-										: stateLserviceStageTransactionId
-								}
-							/>
-						</div>
-					</div>
-					<Collapse in={messageAndLevel.open}>
-						<Alert
-							severity={messageAndLevel.level}
-							variant="outlined"
-							className="mt-10"
-							action={
-								<IconButton
-									aria-label="close"
-									color="inherit"
-									size="small"
-									onClick={event => handleClose(event)}
+									{showUploadOrText === 2 && (
+										<div className="flex">
+											<Controller
+												control={control}
+												name="word"
+												render={({ field }) => (
+													<TextField
+														{...field}
+														className="mb-12 w-full"
+														label="Word"
+														id="word"
+														error={!!errors.word}
+														helperText={errors?.word?.message}
+														variant="outlined"
+														required
+													/>
+												)}
+											/>
+										</div>
+									)}
+
+									{showUploadOrText === 1 && (
+										<div className="flex justify-center">
+											<Controller
+												name="image"
+												control={control}
+												defaultValue={[]}
+												render={({ field: { onChange, value } }) => (
+													<label
+														htmlFor="button-file"
+														className={clsx(
+															classes.productImageUpload,
+															'flex items-center justify-center relative w-128 h-128 rounded-16 mx-12 mb-24 overflow-hidden cursor-pointer shadow hover:shadow-lg'
+														)}
+													>
+														<input
+															accept="image/*"
+															className="hidden"
+															id="button-file"
+															type="file"
+															onChange={async e => {
+																const reader = new FileReader();
+																const file = e.target.files[0];
+
+																reader.onloadend = () => {
+																	setImage(file);
+																	setImageUrl(reader.result);
+																};
+																reader.readAsDataURL(file);
+																setShowImageSelected(true);
+															}}
+														/>
+														<Icon fontSize="large" color="action">
+															cloud_upload
+														</Icon>
+													</label>
+												)}
+											/>
+											{image && (
+												<Controller
+													name="selectedImage"
+													required
+													control={control}
+													defaultValue=""
+													render={({ field: { onChange } }) => (
+														// eslint-disable-next-line
+														<div
+															role="button"
+															tabIndex={0}
+															className={clsx(
+																classes.productImageItem,
+																'flex items-center justify-center relative w-128 h-128 rounded-16 mx-12 mb-24 overflow-hidden cursor-pointer outline-none shadow hover:shadow-lg'
+															)}
+															onClick={() => handleOpenDialog(imageUrl, image.name)}
+															key={image.name}
+														>
+															<img
+																className="max-w-none w-auto h-full"
+																src={imageUrl}
+																alt={image.name}
+															/>
+														</div>
+													)}
+												/>
+											)}
+										</div>
+									)}
+
+									<Button
+										type="submit"
+										variant="contained"
+										color="primary"
+										className="w-full mx-auto mt-16"
+										aria-label="Add"
+										disabled={_.isEmpty(dirtyFields) || !isValid}
+										value="legacy"
+									>
+										Add
+									</Button>
+								</form>
+								{progress !== 0 && <LinearProgressWithLabel value={progress} />}
+								<Divider className="mt-20" />
+								<div className="mt-20 w-full flex items-center justify-center">
+									<SearchRecordsTable
+										classificationDTOs={props.classificationDTOs}
+										onRecordAdditionOrRemoval={setProvisionCostAfterItemAdd}
+										lserviceStageTransactionId={
+											props.lserviceStageTransaction !== null
+												? props.lserviceStageTransaction.id
+												: stateLserviceStageTransactionId
+										}
+									/>
+								</div>
+							</div>
+							<Collapse in={messageAndLevel.open}>
+								<Alert
+									severity={messageAndLevel.level}
+									variant="outlined"
+									className="mt-10"
+									action={
+										<IconButton
+											aria-label="close"
+											color="inherit"
+											size="small"
+											onClick={event => handleClose(event)}
+										>
+											<CloseIcon fontSize="inherit" />
+										</IconButton>
+									}
 								>
-									<CloseIcon fontSize="inherit" />
-								</IconButton>
-							}
-						>
-							{messageAndLevel.message}
-						</Alert>
-					</Collapse>
+									{messageAndLevel.message}
+								</Alert>
+							</Collapse>
+						</div>
+					)}
 				</div>
 			)}
-		</div>
+		</>
 	);
 };
 

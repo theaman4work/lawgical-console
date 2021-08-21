@@ -228,7 +228,7 @@ const TmApplicationNoAndOtherDetails = props => {
 		let open = false;
 		let level = 'error';
 
-		if (props.lserviceTransaction.id == null) {
+		if (props.lserviceTransaction.id == null || props.applicantsStatus !== 0) {
 			message = 'Please complete the previous step before trying to complete this step!';
 			open = true;
 		} else {
@@ -441,7 +441,7 @@ const TmApplicationNoAndOtherDetails = props => {
 													</TableCell>
 												</TableRow>
 											)}
-											{props.stage.nocDraftUrl && (
+											{props.stage.nocDraftUrl ? (
 												<TableRow
 													className="h-36 cursor-pointer"
 													hover
@@ -469,7 +469,7 @@ const TmApplicationNoAndOtherDetails = props => {
 														/>
 													</TableCell>
 												</TableRow>
-											)}
+											) : null}
 										</TableBody>
 									</Table>
 								</FuseScrollbars>

@@ -4,8 +4,9 @@ import * as yup from 'yup';
 import { makeStyles } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import { useDeepCompareEffect } from '@fuse/hooks';
-import { memo, useState, useEffect } from 'react';
+import { memo, useState, useEffect, useMemo, forwardRef } from 'react';
 import format from 'date-fns/format';
+import Checkbox from '@material-ui/core/Checkbox';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 import TextField from '@material-ui/core/TextField';
@@ -15,6 +16,7 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControl from '@material-ui/core/FormControl';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormHelperText from '@material-ui/core/FormHelperText';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Box from '@material-ui/core/Box';
 import Divider from '@material-ui/core/Divider';
@@ -27,6 +29,11 @@ import Alert from '@material-ui/lab/Alert';
 import Collapse from '@material-ui/core/Collapse';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
+import Slide from '@material-ui/core/Slide';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import AppBar from '@material-ui/core/AppBar';
 import { GetApp } from '@material-ui/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { Controller, useForm } from 'react-hook-form';
@@ -60,6 +67,8 @@ const defaultValues = {
 	image: '',
 	switchForImageAndWord: 'word',
 	startDateOfUsage: '',
+	switchForDateAndCheckbox: 'dateOfUsage',
+	isProposeToBeUsed: false,
 	description: ''
 };
 
@@ -93,7 +102,19 @@ const schema = yup.object().shape({
 		.string()
 		.max(200, 'Description must be less than or equal to 200 characters')
 		.required('You must enter a Description'),
-	startDateOfUsage: yup.string().required('You must provide a Date')
+	switchForDateAndCheckbox: yup.string().required('Date type is required'),
+	startDateOfUsage: yup.string().when('switchForDateAndCheckbox', {
+		is: 'dateOfUsage',
+		then: yup.string().required('You must provide a Date')
+	}),
+	isProposeToBeUsed: yup.boolean().when('switchForDateAndCheckbox', {
+		is: 'proposeToBeUsed',
+		then: yup.boolean().oneOf([true], 'Propose To be used must be selected.')
+	})
+});
+
+const Transition = forwardRef(function Transition(props, ref) {
+	return <Slide direction="up" ref={ref} {...props} />;
 });
 
 const TrademarkDetailsForTmFiling = props => {
@@ -118,6 +139,12 @@ const TrademarkDetailsForTmFiling = props => {
 	const [stateLserviceStageTransactionId, setStateLserviceStageTransactionId] = useState(null);
 	const [stateCustomerTrademarkDetailsId, setStateCustomerTrademarkDetailsId] = useState(null);
 	const [stateAttachmentId, setStateAttachmentId] = useState(null);
+	const [dialog, setDialog] = useState({
+		open: false,
+		imageUrl: null,
+		imageName: null
+	});
+	const [showDateOrCheckBox, setShowDateOrCheckBox] = useState(1);
 
 	// let stageStaus =
 	// 	props.lserviceStageTransaction != null
@@ -197,17 +224,17 @@ const TrademarkDetailsForTmFiling = props => {
 		}
 
 		if (data) {
-			console.log(data);
 			const word = data.customerTrademarkDetailsDTO.word !== '' ? data.customerTrademarkDetailsDTO.word : '';
 			const typeOfUpload = data.customerTrademarkDetailsDTO.typeForTm === 'WORD' ? 'word' : 'image';
 			const desc = data.customerTrademarkDetailsDTO.desc ? data.customerTrademarkDetailsDTO.desc : '';
-			const startDateOfUsage = data.customerTrademarkDetailsDTO.startDateOfUsage
-				? data.customerTrademarkDetailsDTO.startDateOfUsage.replace(/T.*$/g, '')
-				: '';
+
 			const classfication = findClassificationTxtUsingId(
 				props.classificationDTOs,
 				data.customerTrademarkDetailsDTO.classficationId
 			);
+			const typeOfUsage = data.customerTrademarkDetailsDTO.isProposeToBeUsed ? 'proposeToBeUsed' : 'dateOfUsage';
+			// eslint-disable-next-line
+			const isProposeToBeUsed = data.customerTrademarkDetailsDTO.isProposeToBeUsed;
 
 			setStateCustomerTrademarkDetailsId(data.customerTrademarkDetailsDTO.id);
 			if (data.attachmentDTO) {
@@ -216,16 +243,26 @@ const TrademarkDetailsForTmFiling = props => {
 				}
 			}
 			if (typeOfUpload === 'image') {
-				if (data.attachmentDTO) {
-					if (data.attachmentDTO.id) {
+				if (data.attachmentDTOs) {
+					if (data.attachmentDTOs[0].id) {
 						const imageData = {
-							name: data.attachmentDTO.attachmentName
+							name: data.attachmentDTOs[0].attachmentName
 						};
 						setImage(imageData);
-						setImageUrl(data.attachmentDTO.url);
+						setImageUrl(data.attachmentDTOs[0].url);
 						setShowUploadOrText(1);
 					}
 				}
+			}
+
+			let startDateOfUsage = '';
+			if (typeOfUsage === 'dateOfUsage') {
+				startDateOfUsage = data.customerTrademarkDetailsDTO.startDateOfUsage
+					? data.customerTrademarkDetailsDTO.startDateOfUsage.replace(/T.*$/g, '')
+					: '';
+				setShowDateOrCheckBox(1);
+			} else {
+				setShowDateOrCheckBox(2);
 			}
 
 			reset({
@@ -233,8 +270,10 @@ const TrademarkDetailsForTmFiling = props => {
 				word,
 				// image: '',
 				switchForImageAndWord: typeOfUpload,
+				description: desc,
 				startDateOfUsage,
-				description: desc
+				switchForDateAndCheckbox: typeOfUsage,
+				isProposeToBeUsed
 			});
 		}
 
@@ -312,16 +351,20 @@ const TrademarkDetailsForTmFiling = props => {
 		let open = false;
 		let level = 'error';
 
-		if (props.lserviceTransaction.id == null) {
+		if (props.lserviceTransaction.id == null || props.applicantsStatus !== 0) {
 			message = 'Please complete the previous step before trying to complete this step!';
 			open = true;
 		} else {
 			// Upload image if type is image
 			// eslint-disable-next-line
 			let dateArray = [];
-			dateArray = model.startDateOfUsage.split('-');
-			const startDateOfUsage = format(new Date(dateArray[0], dateArray[1] - 1, dateArray[2]), 'yyyy-MM-dd');
-			const startDateOfUsageToBeSent = `${startDateOfUsage}T00:00:00Z`;
+			let startDateOfUsage = '';
+			let startDateOfUsageToBeSent = '';
+			if (model.switchForDateAndCheckbox === 'dateOfUsage') {
+				dateArray = model.startDateOfUsage.split('-');
+				startDateOfUsage = format(new Date(dateArray[0], dateArray[1] - 1, dateArray[2]), 'yyyy-MM-dd');
+				startDateOfUsageToBeSent = `${startDateOfUsage}T00:00:00Z`;
+			}
 
 			const classficationId = model.classification.replace(/^\D+|\D+$/g, '');
 
@@ -351,7 +394,9 @@ const TrademarkDetailsForTmFiling = props => {
 									(snapshot.bytesTransferred / snapshot.totalBytes) * 100
 								);
 								console.log(progressDone);
-								setProgress(progressDone);
+								if (!Number.isNaN(progressDone)) {
+									setProgress(progressDone);
+								}
 							},
 							error => {
 								// Error function ...
@@ -381,8 +426,12 @@ const TrademarkDetailsForTmFiling = props => {
 									typeForTm: model.switchForImageAndWord === 'word' ? 'WORD' : 'IMAGE',
 									status: 'ACTIVE',
 									word: '',
-									startDateOfUsage: startDateOfUsageToBeSent,
+									startDateOfUsage:
+										model.switchForDateAndCheckbox === 'dateOfUsage'
+											? startDateOfUsageToBeSent
+											: '',
 									desc: model.description,
+									isProposeToBeUsed: model.switchForDateAndCheckbox === 'dateOfUsage' || false,
 									lserviceStageTransactionId: lserviceStageTransactionIdForData
 								};
 								if (stateCustomerTrademarkDetailsId) {
@@ -396,9 +445,10 @@ const TrademarkDetailsForTmFiling = props => {
 								if (stateAttachmentId) {
 									attachmentDTO.id = stateAttachmentId;
 								}
+								const attachmentDTOs = [attachmentDTO];
 								const reqData = {
 									customerTrademarkDetailsDTO,
-									attachmentDTO,
+									attachmentDTOs,
 									email: localStorage.getItem('lg_logged_in_email')
 								};
 
@@ -453,8 +503,9 @@ const TrademarkDetailsForTmFiling = props => {
 					typeForTm: model.switchForImageAndWord === 'word' ? 'WORD' : 'IMAGE',
 					status: 'ACTIVE',
 					word: model.word,
-					startDateOfUsage: startDateOfUsageToBeSent,
+					startDateOfUsage: model.switchForDateAndCheckbox === 'dateOfUsage' ? startDateOfUsageToBeSent : '',
 					desc: model.description,
+					isProposeToBeUsed: model.switchForDateAndCheckbox === 'dateOfUsage' || true,
 					lserviceStageTransactionId: lserviceStageTransactionIdForData
 				};
 				if (stateCustomerTrademarkDetailsId) {
@@ -498,327 +549,469 @@ const TrademarkDetailsForTmFiling = props => {
 		);
 	}
 
-	if (loading) {
-		return <FuseLoading />;
+	function handleOpenDialog(url, name) {
+		setDialog({
+			open: true,
+			imageUrl: url,
+			imageName: name
+		});
 	}
 
 	return (
-		<div className="flex-grow flex-shrink-0 p-0">
+		<>
 			<div>
-				<div>
-					<Typography className="text-16 sm:text-20 truncate font-semibold">
-						{`Step ${props.stepCount} - ${props.step.name}`}
-					</Typography>
-					<form className="justify-items-center mb-20 mt-20" onSubmit={handleSubmit(onSubmit)}>
-						<div className="flex">
-							<Controller
-								name="classification"
-								control={control}
-								render={({ field: { onChange, value } }) => (
-									<Autocomplete
-										className="mt-8 mb-12 w-full"
-										options={props.classifications}
-										value={value}
-										onChange={(event, newValue) => {
-											onChange(newValue);
-										}}
-										renderInput={params => (
-											<TextField
-												{...params}
-												label="Choose a classification"
-												variant="outlined"
-												InputLabelProps={{
-													shrink: true
+				{useMemo(() => {
+					function handleCloseDialog() {
+						setDialog({
+							...dialog,
+							open: false
+						});
+					}
+
+					return (
+						<Dialog
+							classes={{
+								paper: 'm-24'
+							}}
+							open={dialog.open}
+							onClose={handleCloseDialog}
+							aria-labelledby="service-applications-list"
+							TransitionComponent={Transition}
+							style={{ maxWidth: '100%', maxHeight: '100%' }}
+						>
+							<AppBar position="static" elevation={0} className="items-center">
+								<Typography variant="h6" color="inherit" className="p-16 items-center">
+									{dialog.title}
+								</Typography>
+							</AppBar>
+							<DialogContent className="w-auto justify-center">
+								<img
+									style={{ width: 'auto', height: '100%' }}
+									src={dialog.imageUrl}
+									alt={dialog.imageName}
+								/>
+							</DialogContent>
+							<DialogActions className="justify-center">
+								<Button
+									onClick={handleCloseDialog}
+									color="primary"
+									variant="contained"
+									size="medium"
+									aria-label="closePopup"
+								>
+									Close
+								</Button>
+							</DialogActions>
+						</Dialog>
+					);
+				}, [dialog])}
+			</div>
+			{loading ? (
+				<FuseLoading />
+			) : (
+				<div className="flex-grow flex-shrink-0 p-0">
+					<div>
+						<div>
+							<Typography className="text-16 sm:text-20 truncate font-semibold">
+								{`Step ${props.stepCount} - ${props.step.name}`}
+							</Typography>
+							<form className="justify-items-center mb-20 mt-20" onSubmit={handleSubmit(onSubmit)}>
+								<div className="flex">
+									<Controller
+										name="classification"
+										control={control}
+										render={({ field: { onChange, value } }) => (
+											<Autocomplete
+												className="mt-8 mb-12 w-full"
+												options={props.classifications}
+												value={value}
+												onChange={(event, newValue) => {
+													onChange(newValue);
 												}}
-												error={!!errors.classification}
-												helperText={errors?.classification?.message}
+												renderInput={params => (
+													<TextField
+														{...params}
+														label="Choose a classification"
+														variant="outlined"
+														InputLabelProps={{
+															shrink: true
+														}}
+														error={!!errors.classification}
+														helperText={errors?.classification?.message}
+														required
+													/>
+												)}
 												required
 											/>
 										)}
-										required
 									/>
-								)}
-							/>
-						</div>
+								</div>
 
-						<div className="flex">
-							<Controller
-								name="switchForImageAndWord"
-								control={control}
-								render={({ field }) => (
-									<FormControl component="fieldset" className="mt-8 mb-12 w-full">
-										<RadioGroup
-											{...field}
-											aria-label="TM Search Type"
-											className="justify-center"
-											row
-											onChange={(event, newValue) => {
-												field.onChange(newValue);
-												if (event.target.value === 'image') {
-													// show image upload button
-													setShowUploadOrText(1);
-												} else {
-													// show text field for word
-													setShowUploadOrText(2);
-												}
-											}}
-										>
-											<FormControlLabel
-												className="text-8"
-												key="image"
-												value="image"
-												control={<Radio />}
-												label="Image"
-											/>
-											<FormControlLabel
-												className="text-8"
-												key="word"
-												value="word"
-												control={<Radio />}
-												label="Word"
-											/>
-										</RadioGroup>
-									</FormControl>
-								)}
-							/>
-						</div>
-
-						{showUploadOrText === 2 && (
-							<div className="flex">
-								<Controller
-									control={control}
-									name="word"
-									render={({ field }) => (
-										<TextField
-											{...field}
-											className="mb-12 w-full"
-											label="Word"
-											id="word"
-											error={!!errors.word}
-											helperText={errors?.word?.message}
-											variant="outlined"
-											required
-										/>
-									)}
-								/>
-							</div>
-						)}
-
-						{showUploadOrText === 1 && (
-							<div className="flex justify-center">
-								<Controller
-									name="image"
-									control={control}
-									defaultValue={[]}
-									render={({ field: { onChange } }) => (
-										<label
-											htmlFor="button-file"
-											className={clsx(
-												classes.productImageUpload,
-												'flex items-center justify-center relative w-128 h-128 rounded-16 mx-12 mb-24 overflow-hidden cursor-pointer shadow hover:shadow-lg'
-											)}
-										>
-											<input
-												accept="image/*"
-												className="hidden"
-												id="button-file"
-												type="file"
-												onChange={async e => {
-													const reader = new FileReader();
-													const file = e.target.files[0];
-
-													reader.onloadend = () => {
-														setImage(file);
-														setImageUrl(reader.result);
-													};
-													reader.readAsDataURL(file);
-													setShowImageSelected(true);
-												}}
-											/>
-											<Icon fontSize="large" color="action">
-												cloud_upload
-											</Icon>
-										</label>
-									)}
-								/>
-								{image && (
+								<div className="flex">
 									<Controller
-										name="selectedImage"
+										name="switchForImageAndWord"
 										control={control}
-										defaultValue=""
-										required
-										render={({ field: { onChange } }) => (
-											<div
-												role="button"
-												name="selectedImage"
-												id="selectedImage"
-												tabIndex={0}
-												className={clsx(
-													classes.productImageItem,
-													'flex items-center justify-center relative w-128 h-128 rounded-16 mx-12 mb-24 overflow-hidden cursor-pointer outline-none shadow hover:shadow-lg'
-												)}
-												key={image.name}
-											>
-												<img
-													className="max-w-none w-auto h-full"
-													src={imageUrl}
-													alt={image.name}
-												/>
-											</div>
+										render={({ field }) => (
+											<FormControl component="fieldset" className="mt-8 mb-12 w-full">
+												<RadioGroup
+													{...field}
+													aria-label="TM Search Type"
+													className="justify-center"
+													row
+													onChange={(event, newValue) => {
+														field.onChange(newValue);
+														if (event.target.value === 'image') {
+															// show image upload button
+															setShowUploadOrText(1);
+														} else {
+															// show text field for word
+															setShowUploadOrText(2);
+														}
+													}}
+												>
+													<FormControlLabel
+														className="text-8"
+														key="image"
+														value="image"
+														control={<Radio />}
+														label="Image"
+													/>
+													<FormControlLabel
+														className="text-8"
+														key="word"
+														value="word"
+														control={<Radio />}
+														label="Word"
+													/>
+												</RadioGroup>
+											</FormControl>
 										)}
 									/>
-								)}
-							</div>
-						)}
+								</div>
 
-						<div className="flex">
-							<Controller
-								name="description"
-								control={control}
-								render={({ field }) => (
-									<TextField
-										{...field}
-										className="mt-8 mb-16"
-										id="description"
-										label="Description"
-										type="text"
-										multiline
-										rows={2}
-										variant="outlined"
-										error={!!errors.description}
-										helperText={errors?.description?.message}
-										fullWidth
-										required
-									/>
-								)}
-							/>
-						</div>
-
-						<div className="flex">
-							<Controller
-								control={control}
-								name="startDateOfUsage"
-								render={({ field }) => (
-									<TextField
-										{...field}
-										className="mb-24"
-										id="startDateOfUsage"
-										label="Start Date Of Trademark Usage"
-										type="date"
-										InputProps={{ inputProps: { max: getCurrentDate() } }}
-										InputLabelProps={{
-											shrink: true
-										}}
-										variant="outlined"
-										fullWidth
-										required
-									/>
-								)}
-							/>
-						</div>
-
-						<Button
-							type="submit"
-							variant="contained"
-							color="primary"
-							className="w-full mx-auto mt-16"
-							aria-label="Submit"
-							disabled={_.isEmpty(dirtyFields) || !isValid}
-							value="legacy"
-						>
-							Submit
-						</Button>
-					</form>
-					{progress !== 0 && <LinearProgressWithLabel value={progress} />}
-					<Collapse in={messageAndLevel.open}>
-						<Alert
-							severity={messageAndLevel.level}
-							variant="outlined"
-							className="mt-10"
-							action={
-								<IconButton
-									aria-label="close"
-									color="inherit"
-									size="small"
-									onClick={event => handleClose(event)}
-								>
-									<CloseIcon fontSize="inherit" />
-								</IconButton>
-							}
-						>
-							{messageAndLevel.message}
-						</Alert>
-					</Collapse>
-					<Divider className="mt-20" />
-					<div className="mt-20 w-full flex items-center justify-center">
-						<FuseScrollbars className="flex-grow overflow-x-auto">
-							<Table stickyHeader className={classes.table} size="small" aria-labelledby="tableTitle">
-								<TableHead>
-									<TableRow>
-										<TableCell>Document</TableCell>
-										<TableCell>Link</TableCell>
-									</TableRow>
-								</TableHead>
-								<TableBody>
-									{props.stage.poaDraftUrl && (
-										<TableRow
-											className="h-36 cursor-pointer"
-											hover
-											tabIndex={-1}
-											key={props.stage.poaDraftUrl.substr(props.stage.poaDraftUrl.length - 4)}
-										>
-											<TableCell component="th" scope="row">
-												POA Draft
-											</TableCell>
-											<TableCell
-												align="center"
-												className="w-52 px-4 md:px-0"
-												padding="none"
-												component="th"
-												scope="row"
-											>
-												<GetApp
-													color="primary"
-													className={classes.largeIcon}
-													onClick={() => window.open(props.stage.poaDraftUrl, '_self')}
+								{showUploadOrText === 2 && (
+									<div className="flex">
+										<Controller
+											control={control}
+											name="word"
+											render={({ field }) => (
+												<TextField
+													{...field}
+													className="mb-12 w-full"
+													label="Word"
+													id="word"
+													error={!!errors.word}
+													helperText={errors?.word?.message}
+													variant="outlined"
+													required
 												/>
-											</TableCell>
-										</TableRow>
-									)}
-									{props.stage.affidavitDraftUrl && (
-										<TableRow
-											className="h-36 cursor-pointer"
-											hover
-											tabIndex={-1}
-											key={props.stage.affidavitDraftUrl.substr(
-												props.stage.affidavitDraftUrl.length - 4
 											)}
-										>
-											<TableCell component="th" scope="row">
-												User Affidavit Draft
-											</TableCell>
-											<TableCell
-												align="center"
-												className="w-52 px-4 md:px-0"
-												padding="none"
-												component="th"
-												scope="row"
-											>
-												<GetApp
-													color="primary"
-													className={classes.largeIcon}
-													onClick={() => window.open(props.stage.affidavitDraftUrl, '_self')}
+										/>
+									</div>
+								)}
+
+								{showUploadOrText === 1 && (
+									<div className="flex justify-center">
+										<Controller
+											name="image"
+											control={control}
+											defaultValue={[]}
+											render={({ field: { onChange } }) => (
+												<label
+													htmlFor="button-file"
+													className={clsx(
+														classes.productImageUpload,
+														'flex items-center justify-center relative w-128 h-128 rounded-16 mx-12 mb-24 overflow-hidden cursor-pointer shadow hover:shadow-lg'
+													)}
+												>
+													<input
+														accept="image/*"
+														className="hidden"
+														id="button-file"
+														type="file"
+														onChange={async e => {
+															const reader = new FileReader();
+															const file = e.target.files[0];
+
+															reader.onloadend = () => {
+																setImage(file);
+																setImageUrl(reader.result);
+															};
+															reader.readAsDataURL(file);
+															setShowImageSelected(true);
+														}}
+													/>
+													<Icon fontSize="large" color="action">
+														cloud_upload
+													</Icon>
+												</label>
+											)}
+										/>
+										{image && (
+											<Controller
+												name="selectedImage"
+												control={control}
+												defaultValue=""
+												required
+												render={({ field: { onChange } }) => (
+													// eslint-disable-next-line
+													<div
+														role="button"
+														onClick={() => handleOpenDialog(imageUrl, image.name)}
+														name="selectedImage"
+														id="selectedImage"
+														tabIndex={0}
+														className={clsx(
+															classes.productImageItem,
+															'flex items-center justify-center relative w-128 h-128 rounded-16 mx-12 mb-24 overflow-hidden cursor-pointer outline-none shadow hover:shadow-lg'
+														)}
+														key={image.name}
+													>
+														<img
+															className="max-w-none w-auto h-full"
+															src={imageUrl}
+															alt={image.name}
+														/>
+													</div>
+												)}
+											/>
+										)}
+									</div>
+								)}
+
+								<div className="flex">
+									<Controller
+										name="description"
+										control={control}
+										render={({ field }) => (
+											<TextField
+												{...field}
+												className="mt-8 mb-16"
+												id="description"
+												label="Description of goods/services"
+												type="text"
+												multiline
+												rows={2}
+												variant="outlined"
+												error={!!errors.description}
+												helperText={errors?.description?.message}
+												fullWidth
+												required
+											/>
+										)}
+									/>
+								</div>
+
+								<div className="flex">
+									<Controller
+										name="switchForDateAndCheckbox"
+										control={control}
+										render={({ field }) => (
+											<FormControl component="fieldset" className="mt-8 mb-12 w-full">
+												<RadioGroup
+													{...field}
+													aria-label="TM Filing Date Type"
+													className="justify-center"
+													row
+													onChange={(event, newValue) => {
+														field.onChange(newValue);
+														if (event.target.value === 'dateOfUsage') {
+															// show date of usage
+															setShowDateOrCheckBox(1);
+														} else {
+															// show checkbox
+															setShowDateOrCheckBox(2);
+														}
+													}}
+												>
+													<FormControlLabel
+														className="text-8"
+														key="dateOfUsage"
+														value="dateOfUsage"
+														control={<Radio />}
+														label="Date Of Usage"
+													/>
+													<FormControlLabel
+														className="text-8"
+														key="proposeToBeUsed"
+														value="proposeToBeUsed"
+														control={<Radio />}
+														label="Propose To Be Used"
+													/>
+												</RadioGroup>
+											</FormControl>
+										)}
+									/>
+								</div>
+
+								{showDateOrCheckBox === 1 && (
+									<div className="flex">
+										<Controller
+											control={control}
+											name="startDateOfUsage"
+											render={({ field }) => (
+												<TextField
+													{...field}
+													className="mb-24"
+													id="startDateOfUsage"
+													label="Start Date Of Trademark Usage"
+													type="date"
+													InputProps={{ inputProps: { max: getCurrentDate() } }}
+													InputLabelProps={{
+														shrink: true
+													}}
+													variant="outlined"
+													fullWidth
+													required
 												/>
-											</TableCell>
-										</TableRow>
-									)}
-								</TableBody>
-							</Table>
-						</FuseScrollbars>
+											)}
+										/>
+									</div>
+								)}
+
+								{showDateOrCheckBox === 2 && (
+									<div className="flex justify-center">
+										<Controller
+											name="isProposeToBeUsed"
+											control={control}
+											required
+											render={({ field: { onChange, onBlur, value, name, ref } }) => (
+												<FormControl
+													className="items-center"
+													// eslint-disable-next-line
+													// disabled={stageStaus === 1 ? true : false}
+													error={!!errors.isProposeToBeUsed}
+												>
+													<FormControlLabel
+														label="Propose To Be Used"
+														control={
+															<Checkbox onChange={onChange} checked={value} name={name} />
+														}
+													/>
+													<FormHelperText>
+														{errors?.isProposeToBeUsed?.message}
+													</FormHelperText>
+												</FormControl>
+											)}
+										/>
+									</div>
+								)}
+
+								<Button
+									type="submit"
+									variant="contained"
+									color="primary"
+									className="w-full mx-auto mt-16"
+									aria-label="Submit"
+									disabled={_.isEmpty(dirtyFields) || !isValid}
+									value="legacy"
+								>
+									Submit
+								</Button>
+							</form>
+							{progress !== 0 && <LinearProgressWithLabel value={progress} />}
+							<Collapse in={messageAndLevel.open}>
+								<Alert
+									severity={messageAndLevel.level}
+									variant="outlined"
+									className="mt-10"
+									action={
+										<IconButton
+											aria-label="close"
+											color="inherit"
+											size="small"
+											onClick={event => handleClose(event)}
+										>
+											<CloseIcon fontSize="inherit" />
+										</IconButton>
+									}
+								>
+									{messageAndLevel.message}
+								</Alert>
+							</Collapse>
+							<Divider className="mt-20" />
+							<div className="mt-20 w-full flex items-center justify-center">
+								<FuseScrollbars className="flex-grow overflow-x-auto">
+									<Table
+										stickyHeader
+										className={classes.table}
+										size="small"
+										aria-labelledby="tableTitle"
+									>
+										<TableHead>
+											<TableRow>
+												<TableCell>Document</TableCell>
+												<TableCell>Link</TableCell>
+											</TableRow>
+										</TableHead>
+										<TableBody>
+											{props.stage.poaDraftUrl && (
+												<TableRow
+													className="h-36 cursor-pointer"
+													hover
+													tabIndex={-1}
+													key={props.stage.poaDraftUrl.substr(
+														props.stage.poaDraftUrl.length - 4
+													)}
+												>
+													<TableCell component="th" scope="row">
+														POA Draft
+													</TableCell>
+													<TableCell
+														align="center"
+														className="w-52 px-4 md:px-0"
+														padding="none"
+														component="th"
+														scope="row"
+													>
+														<GetApp
+															color="primary"
+															className={classes.largeIcon}
+															onClick={() =>
+																window.open(props.stage.poaDraftUrl, '_self')
+															}
+														/>
+													</TableCell>
+												</TableRow>
+											)}
+											{props.stage.affidavitDraftUrl && (
+												<TableRow
+													className="h-36 cursor-pointer"
+													hover
+													tabIndex={-1}
+													key={props.stage.affidavitDraftUrl.substr(
+														props.stage.affidavitDraftUrl.length - 4
+													)}
+												>
+													<TableCell component="th" scope="row">
+														User Affidavit Draft
+													</TableCell>
+													<TableCell
+														align="center"
+														className="w-52 px-4 md:px-0"
+														padding="none"
+														component="th"
+														scope="row"
+													>
+														<GetApp
+															color="primary"
+															className={classes.largeIcon}
+															onClick={() =>
+																window.open(props.stage.affidavitDraftUrl, '_self')
+															}
+														/>
+													</TableCell>
+												</TableRow>
+											)}
+										</TableBody>
+									</Table>
+								</FuseScrollbars>
+							</div>
+						</div>
 					</div>
 				</div>
-			</div>
-		</div>
+			)}
+		</>
 	);
 };
 
