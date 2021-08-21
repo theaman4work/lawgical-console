@@ -64,6 +64,7 @@ function ApplicantsTable(props) {
 						// console.log('key1 - value1');
 						// console.log(`${key1} - ${JSON.stringify(value1)}`);
 						if (
+							props.lserviceTransaction &&
 							props.lserviceTransaction.id === value1.lserviceTransactionId &&
 							value1.status === 'ACTIVE'
 						) {
@@ -74,7 +75,7 @@ function ApplicantsTable(props) {
 			}
 			setSelected(selectedIds);
 		}
-	}, [applicants, props.lserviceTransaction.id]);
+	}, [applicants, props.lserviceTransaction]);
 
 	function handleRequestSort(event, property) {
 		const id = property;
@@ -165,7 +166,7 @@ function ApplicantsTable(props) {
 			open = true;
 		} else {
 			// eslint-disable-next-line
-			if (props.lserviceTransaction.id == null) {
+			if (props.lserviceTransaction.id == null || props.aggrementStatus !== 0) {
 				message = 'Please complete the previous steps before trying to complete this step!';
 				open = true;
 				setSelected([]);

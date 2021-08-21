@@ -1,7 +1,7 @@
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -64,7 +64,7 @@ const ConfidentialityAgreement = props => {
 				: 0
 			: 0;
 
-	const { control, formState, handleSubmit } = useForm({
+	const { control, formState, handleSubmit, reset } = useForm({
 		mode: 'onChange',
 		defaultValues: {
 			// eslint-disable-next-line
@@ -74,6 +74,18 @@ const ConfidentialityAgreement = props => {
 	});
 
 	const { isValid, dirtyFields, errors } = formState;
+
+	useEffect(() => {
+		if (props.lserviceStageTransaction != null) {
+			if (props.lserviceStageTransaction.stageStaus === 'COMPLETED') {
+				reset({ acceptTermsConditions: true });
+			} else {
+				reset({ acceptTermsConditions: false });
+			}
+		} else {
+			reset({ acceptTermsConditions: false });
+		}
+	}, [reset, props.lserviceStageTransaction]);
 
 	const desc = props.stageContent && props.stageContent.desc != null ? props.stageContent.desc : '';
 

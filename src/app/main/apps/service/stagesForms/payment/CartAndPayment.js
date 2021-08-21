@@ -70,17 +70,46 @@ const CartAndPayment = props => {
 	const total = platformAndBaseTotal + tax;
 
 	const findlserviceStageTransactionUsingLserviceStage = (lserviceStageTransactionDTOs, lserviceStageId) => {
-		const el = lserviceStageTransactionDTOs.find(eltemp => eltemp.lserviceStageId === lserviceStageId);
-		return el || null; // so check result is truthy and extract `id`
+		// const el = lserviceStageTransactionDTOs.find(eltemp => eltemp.lserviceStageId === lserviceStageId);
+		if (props.lserviceTransaction !== null) {
+			const el = lserviceStageTransactionDTOs.find(
+				eltemp =>
+					eltemp.lserviceTransactionId === props.lserviceTransaction.id &&
+					eltemp.lserviceStageId === lserviceStageId
+			);
+			return el || null;
+			// eslint-disable-next-line
+		} else {
+			return null;
+		}
+		// return el || null; // so check result is truthy and extract `id`
 	};
 
 	let totaFilteredRecords = '';
 	if (props.lservice.name.toLowerCase() === 'TM search'.toLowerCase()) {
-		totaFilteredRecords = responseCustomerTrademarkDetailsAndAttachments.filter(
-			eachRec =>
-				eachRec.customerTrademarkDetailsDTO.typeForTm === 'WORD' ||
-				eachRec.customerTrademarkDetailsDTO.typeForTm === 'IMAGE'
-		);
+		const lserviceStageDTO = serviceSteps.lserviceStageDTOs.filter(eachRec => eachRec.stageType === 'TMSEARCHREQ');
+
+		if (lserviceStageDTO !== null) {
+			const lserviceStageTransactionFound = findlserviceStageTransactionUsingLserviceStage(
+				serviceSteps.lserviceStageTransactionDTOs,
+				lserviceStageDTO[0].id
+			);
+			let interMediateFilterRecords = '';
+			if (lserviceStageTransactionFound !== null) {
+				interMediateFilterRecords = responseCustomerTrademarkDetailsAndAttachments.filter(
+					eachRec =>
+						eachRec.customerTrademarkDetailsDTO.typeForTm === 'WORD' ||
+						eachRec.customerTrademarkDetailsDTO.typeForTm === 'IMAGE'
+				);
+				if (interMediateFilterRecords.length > 0) {
+					totaFilteredRecords = interMediateFilterRecords.filter(
+						eachRec =>
+							eachRec.customerTrademarkDetailsDTO.lserviceStageTransactionId ===
+							lserviceStageTransactionFound.id
+					);
+				}
+			}
+		}
 	} else if (
 		props.lservice.name.toLowerCase() === 'TM monitor'.toLowerCase() ||
 		props.lservice.name.toLowerCase() === 'Legal status'.toLowerCase() ||
@@ -133,7 +162,7 @@ const CartAndPayment = props => {
 		props.lservice.name.toLowerCase() === 'Change in Applicant'.toLocaleLowerCase() ||
 		props.lservice.name.toLowerCase() === 'Trademark portfolio valuation (per Country)'.toLocaleLowerCase()
 	) {
-		chargesToBePaid = total * totaFilteredRecords.length;
+		chargesToBePaid = total * (totaFilteredRecords.length > 0 ? totaFilteredRecords.length : 1);
 	}
 
 	let totalTextLabel = 'SERVICE CHARGES';
@@ -204,7 +233,7 @@ const CartAndPayment = props => {
 			error = true;
 		}
 
-		if (props.lserviceTransaction == null || error) {
+		if (props.lserviceTransaction.id == null || error) {
 			message = 'Please complete the previous steps before trying to complete this step!';
 			open = true;
 		} else if (serviceSteps != null) {
