@@ -7,7 +7,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -28,6 +28,7 @@ import { useDispatch } from 'react-redux';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { updateData } from '../store/serviceStepsSlice';
+import { openLabelForServiceTransactionDialog } from '../store/lserviceTransactionsSlice';
 
 const useStyles = makeStyles({
 	root: {
@@ -76,6 +77,18 @@ const PricingInfo = props => {
 	});
 
 	const { isValid, dirtyFields, errors } = formState;
+
+	useEffect(() => {
+		if (props.lserviceStageTransaction != null) {
+			if (props.lserviceStageTransaction.stageStaus === 'COMPLETED') {
+				reset({ acceptTermsConditions: true });
+			} else {
+				reset({ acceptTermsConditions: false });
+			}
+		} else {
+			reset({ acceptTermsConditions: false });
+		}
+	}, [reset, props.lserviceStageTransaction]);
 
 	const platformCharges = (props.costDetails.platformCharges / 100) * props.costDetails.baseAmount;
 	const platformAndBaseTotal = props.costDetails.baseAmount + platformCharges;
@@ -178,9 +191,70 @@ const PricingInfo = props => {
 								</List>
 							</Typography>
 						</Box>
+						{props.lserviceTransaction && props.lserviceTransaction.sysGenName !== null && (
+							<div className="w-full flex items-center justify-end pb-10">
+								<Button
+									variant="contained"
+									color="primary"
+									size="medium"
+									aria-label="addnew"
+									onClick={ev =>
+										dispatch(openLabelForServiceTransactionDialog(props.lserviceTransaction))
+									}
+								>
+									{props.lserviceTransaction.lablelByUser !== null
+										? 'Change Application Name'
+										: 'Set Application Name'}
+								</Button>
+							</div>
+						)}
 						<form onSubmit={handleSubmit(onSubmit)}>
 							<Table className="simple mt-12">
 								<TableBody>
+									{props.lserviceTransaction && props.lserviceTransaction.lablelByUser !== null && (
+										<TableRow>
+											<TableCell>
+												<Typography
+													className="font-normal"
+													variant="subtitle1"
+													color="textSecondary"
+												>
+													Application Name
+												</Typography>
+											</TableCell>
+											<TableCell align="right">
+												<Typography
+													className="font-normal"
+													variant="subtitle1"
+													color="textSecondary"
+												>
+													{props.lserviceTransaction.lablelByUser}
+												</Typography>
+											</TableCell>
+										</TableRow>
+									)}
+									{props.lserviceTransaction && props.lserviceTransaction.sysGenName !== null && (
+										<TableRow>
+											<TableCell>
+												<Typography
+													className="font-normal"
+													variant="subtitle1"
+													color="textSecondary"
+												>
+													SYSTEM GEN. NAME
+												</Typography>
+											</TableCell>
+											<TableCell align="right">
+												<Typography
+													className="font-normal"
+													variant="subtitle1"
+													color="textSecondary"
+												>
+													{props.lserviceTransaction.sysGenName}
+												</Typography>
+											</TableCell>
+										</TableRow>
+									)}
 									<TableRow>
 										<TableCell>
 											<Typography
@@ -250,8 +324,6 @@ const PricingInfo = props => {
 											control={<Checkbox onChange={onChange} checked={value} name={name} />}
 										/>
 										<FormHelperText>{errors?.acceptTermsConditions?.message}</FormHelperText>
-										{/* {console.log('field')}
-										{console.log(field)} */}
 									</FormControl>
 								)}
 							/>

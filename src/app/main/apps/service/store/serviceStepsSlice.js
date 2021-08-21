@@ -5,10 +5,14 @@ import { axiosInstance } from 'app/auth-service/axiosInstance';
 export const getData = createAsyncThunk('servicesApp/serviceSteps/getData', async params => {
 	const response = await axiosInstance.post(
 		'/services/lgrest/api/lservice-stage-transactions/get-service-steps-for-user',
-		{ email: localStorage.getItem('lg_logged_in_email'), lserviceId: params.lserviceId }
+		{
+			email: localStorage.getItem('lg_logged_in_email'),
+			lserviceId: params.lserviceId,
+			lserviceTransactionId: params.lserviceTransactionId ? params.lserviceTransactionId : 0
+		}
 	);
 	const data = await response.data;
-	return data;
+	return data || null;
 });
 
 export const updateData = createAsyncThunk('servicesApp/serviceSteps/updateData', async (_data, { dispatch }) => {
@@ -22,6 +26,18 @@ export const updateData = createAsyncThunk('servicesApp/serviceSteps/updateData'
 
 	return data;
 });
+
+export const updateLserviceTransactionData = createAsyncThunk(
+	'servicesApp/serviceSteps/updateLserviceTransactionData',
+	async _data => {
+		const response = await axiosInstance.put(
+			'/services/lgrest/api/lservice-transactions/set-change-label-for-user',
+			{ ..._data }
+		);
+		const data = await response.data;
+		return data;
+	}
+);
 
 const serviceStepsSlice = createSlice({
 	name: 'servicesApp/serviceSteps',
@@ -46,8 +62,32 @@ const serviceStepsSlice = createSlice({
 				state.lserviceTransactionDTO = action.payload.lserviceTransactionDTO;
 			}
 			state.lserviceStageTransactionDTOs.push(action.payload.lserviceStageTransactionDTO);
+			state.labelForServiceTransactionDialog = {
+				type: 'edit',
+				props: {
+					open: false
+				},
+				data: null
+			};
+		},
+		[updateLserviceTransactionData.fulfilled]: (state, action) => {
+			if (action.payload.lserviceTransactionDTO !== null) {
+				state.lserviceTransactionDTO = action.payload;
+			}
+			state.labelForServiceTransactionDialog = {
+				type: 'edit',
+				props: {
+					open: false
+				},
+				data: null
+			};
 		}
 	}
 });
+
+export const {
+	openLabelForServiceTransactionDialog,
+	closeLabelForServiceTransactionDialog
+} = serviceStepsSlice.actions;
 
 export default serviceStepsSlice.reducer;
