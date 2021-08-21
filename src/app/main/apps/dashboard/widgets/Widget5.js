@@ -77,19 +77,25 @@ function Widget5(props) {
 	return (
 		<Paper className="w-full rounded-20 shadow">
 			<div className="flex items-center justify-between p-20">
-				<Typography className="text-16 font-medium">{widget.title}</Typography>
-				<div className="w-1/2 flex justify-between">
-					<FormControl className="ml-4">
-						<Select value="title" displayEmpty name="filter" className="">
-							<MenuItem value="title">
-								<em>Title</em>
-							</MenuItem>
-							<MenuItem value="startDate">Start Date</MenuItem>
-							<MenuItem value="dueDate">Due Date</MenuItem>
-							<MenuItem value="orderBy">Order by</MenuItem>
-						</Select>
-					</FormControl>
-					<Button className="mx-8" variant="contained" color="primary" aria-label="AddNew">
+				<FormControl className="ml-4">
+					<Select value="title" displayEmpty name="filter" className="">
+						<MenuItem value="title">
+							<em>Trademarks</em>
+						</MenuItem>
+						<MenuItem value="patents">Patents</MenuItem>
+						<MenuItem value="copyrights">Copyrights</MenuItem>
+						<MenuItem value="design">Design</MenuItem>
+						<MenuItem value="otherLegalServices">Other Legal Services</MenuItem>
+					</Select>
+				</FormControl>
+				<div className="w-1/2 flex justify-end">
+					<Button
+						className="mx-8"
+						variant="contained"
+						color="primary"
+						aria-label="AddNew"
+						onClick={() => window.open('/services', '_self')}
+					>
 						Add New
 					</Button>
 				</div>
