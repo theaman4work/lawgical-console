@@ -20,6 +20,8 @@ import {
 	getApplicants,
 	openEditApplicantDialog,
 	openNewApplicantDialog,
+	removeApplicant,
+	removeApplicants,
 	selectApplicants,
 	setApplicantsForLserviceTransaction
 } from '../../store/applicantSlice';
@@ -50,19 +52,13 @@ function ApplicantsTable(props) {
 	}, [dispatch]);
 
 	useEffect(() => {
-		console.log();
-
 		const selectedIds = [];
 		if (applicants.length > 0) {
 			// eslint-disable-next-line
 			for ( const[key, value] of Object.entries(applicants) ) {
-				// console.log('key - value');
-				// console.log(`${key} - ${JSON.stringify(value.applicantsOfLserTransDTOs)}`);
 				if (value.applicantsOfLserTransDTOs != null && value.applicantsOfLserTransDTOs.length > 0) {
 					// eslint-disable-next-line
 					for (const [key1, value1] of Object.entries(value.applicantsOfLserTransDTOs)) {
-						// console.log('key1 - value1');
-						// console.log(`${key1} - ${JSON.stringify(value1)}`);
 						if (
 							props.lserviceTransaction &&
 							props.lserviceTransaction.id === value1.lserviceTransactionId &&
@@ -162,7 +158,7 @@ function ApplicantsTable(props) {
 		let level = 'error';
 
 		if (selected.length <= 0) {
-			message = 'Please select atleast 1 applicant!';
+			message = 'Please select atleast 1 applicant to save!';
 			open = true;
 		} else {
 			// eslint-disable-next-line
@@ -191,7 +187,7 @@ function ApplicantsTable(props) {
 						dispatch(
 							updateData({
 								lserviceTransactionId,
-								stageStatus: 'INPROGRESS',
+								stageStatus: 'COMPLETED',
 								lserviceStageId: props.step.id,
 								lserviceId: props.step.lserviceId
 							})
@@ -203,6 +199,32 @@ function ApplicantsTable(props) {
 				open = true;
 			}
 		}
+		setMessageAndLevel({
+			message,
+			open,
+			level
+		});
+	}
+
+	function removeApplicantsForLservice() {
+		let message = '';
+		let open = false;
+		let level = 'error';
+
+		if (selected.length <= 0) {
+			message = 'Please select atleast 1 applicant to remove!';
+			open = true;
+		} else {
+			message = `${selected.length} applicants removed successfully.`;
+			open = true;
+			level = 'success';
+			if (selected.length === 1) {
+				dispatch(removeApplicant(selected));
+			} else {
+				dispatch(removeApplicants(selected));
+			}
+		}
+
 		setMessageAndLevel({
 			message,
 			open,
@@ -278,6 +300,17 @@ function ApplicantsTable(props) {
 					onClick={() => saveApplicantsForLservice()}
 				>
 					Save
+				</Button>
+
+				<Button
+					variant="contained"
+					color="primary"
+					size="medium"
+					aria-label="remove"
+					className="ml-5"
+					onClick={() => removeApplicantsForLservice()}
+				>
+					Remove
 				</Button>
 			</div>
 			<FuseScrollbars className="flex-grow overflow-x-auto">

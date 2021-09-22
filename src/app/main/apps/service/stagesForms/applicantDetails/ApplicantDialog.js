@@ -27,6 +27,7 @@ import {
 	closeEditApplicantDialog
 } from '../../store/applicantSlice';
 import { countriesList, statesList } from '../countriesAndStatesList';
+import { applicantTypesList } from '../applicantTypeList';
 
 const defaultValues = {
 	id: '',
@@ -42,7 +43,7 @@ const defaultValues = {
 	pincode: '',
 	city: '',
 	state: '',
-	country: '',
+	country: 'India',
 	createdOn: '',
 	addressCreatedOn: ''
 };
@@ -57,6 +58,7 @@ const schema = yup.object().shape({
 	contactPhoneNo: yup
 		.string()
 		.matches(phoneRegExp, 'You must enter a valid Phone number')
+		.min(10, 'Phone number should not be less than 10 digits')
 		.max(15, 'Phone number must be less than or equal to 15 digits')
 		.required('You must enter a Phone number'),
 	contactEmail: yup
@@ -72,6 +74,7 @@ const schema = yup.object().shape({
 		.required('You must enter a Pincode'),
 	city: yup.string().max(200, 'City must be less than or equal to 200 characters').required('You must enter a City'),
 	nationality: yup.string().required('You must enter a Nationality'),
+	type: yup.string().required('You must enter a Type'),
 	country: yup.string().required('You must enter a Country').nullable(),
 	state: yup
 		.string()
@@ -98,6 +101,25 @@ function ApplicantDialog(props) {
 	const name = watch('name');
 	const avatar = watch('avatar');
 
+	const findMatchingType = (labelOrVal, labelOrEnumVal) => {
+		if (labelOrEnumVal === 1) {
+			const el = applicantTypesList.find(eltemp => eltemp.label === labelOrVal);
+			if (el) {
+				return el.code;
+			}
+			return 'OTHER';
+		}
+		const el = applicantTypesList.find(eltemp => eltemp.code === labelOrVal);
+		if (el) {
+			return el.label;
+		}
+		const elFallBk = applicantTypesList.find(eltemp => eltemp.label === labelOrVal);
+		if (elFallBk) {
+			return elFallBk.label;
+		}
+		return 'Other';
+	};
+
 	/**
 	 * Initialize Dialog with Data
 	 */
@@ -113,6 +135,8 @@ function ApplicantDialog(props) {
 					setShowState(false);
 				}
 			}
+
+			const label = findMatchingType(applicantDialog.data.type, 2);
 			reset({ ...applicantDialog.data });
 		}
 
@@ -125,6 +149,8 @@ function ApplicantDialog(props) {
 				...applicantDialog.data,
 				id: FuseUtils.generateGUID()
 			});
+			// show State option since default country is set as 'India'
+			setShowState(true);
 		}
 	}, [applicantDialog.data, applicantDialog.type, reset, setShowState]);
 
@@ -150,6 +176,9 @@ function ApplicantDialog(props) {
 	 * Form Submit
 	 */
 	function onSubmit(data) {
+		// console.log(data.type);
+		const typeForEnumVal = findMatchingType(data.type, 1);
+		// console.log(typeForEnumVal);
 		const applicantDTO = {
 			contactEmail: data.contactEmail,
 			contactPhoneNo: data.contactPhoneNo,
@@ -157,12 +186,13 @@ function ApplicantDialog(props) {
 			name: data.name,
 			nationality: data.nationality,
 			// pANNo: data.pANNo,
-			status: 'ACTIVE'
+			status: 'ACTIVE',
 			// website: data.website
+			type: typeForEnumVal
 		};
-		if (data.type !== null || data.type !== '') {
-			applicantDTO[`'type'`] = data.type;
-		}
+		// if (data.type !== null || data.type !== '') {
+		// 	applicantDTO[`'type'`] = data.type;
+		// }
 		const addressDTO = {
 			addressLine1: data.addressLine1,
 			addressLine2: data.addressLine2,
@@ -345,17 +375,32 @@ function ApplicantDialog(props) {
 						<Controller
 							control={control}
 							name="type"
-							render={({ field }) => (
-								<TextField
-									{...field}
-									className="mb-24"
-									label="Type"
-									id="type"
-									name="type"
-									error={!!errors.type}
-									helperText={errors?.type?.message}
-									variant="outlined"
+							render={({ field: { onChange, value } }) => (
+								<Autocomplete
+									className="mt-8 mb-24"
+									// options={applicantTypesList}
+									options={applicantTypesList.map(option => option.label)}
+									value={findMatchingType(value, 2)}
+									// getOptionLabel={option => option.label}
+									onChange={(event, newValue) => {
+										console.log(newValue);
+										onChange(newValue);
+									}}
+									renderInput={params => (
+										<TextField
+											{...params}
+											label="Choose a Type"
+											variant="outlined"
+											InputLabelProps={{
+												shrink: true
+											}}
+											error={!!errors.type}
+											helperText={errors?.type?.message}
+											required
+										/>
+									)}
 									fullWidth
+									required
 								/>
 							)}
 						/>
