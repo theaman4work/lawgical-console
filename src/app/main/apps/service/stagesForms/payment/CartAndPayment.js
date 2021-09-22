@@ -18,7 +18,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { updateData } from '../../store/serviceStepsSlice';
-import { selectApplicants } from '../../store/applicantSlice';
 import { selectResponseCustomerTrademarkDetailsAndAttachments } from '../../store/responseCustomerTrademarkDetailsAndAttachmentsSlice';
 
 const useStyles = makeStyles({
@@ -44,7 +43,6 @@ const schema = yup.object().shape({
 const CartAndPayment = props => {
 	const classes = useStyles();
 	const dispatch = useDispatch();
-	const applicants = useSelector(selectApplicants);
 	const serviceSteps = useSelector(({ servicesApp }) => servicesApp.serviceSteps);
 
 	const responseCustomerTrademarkDetailsAndAttachments = useSelector(
@@ -228,12 +226,7 @@ const CartAndPayment = props => {
 		let open = false;
 		let level = 'error';
 
-		let error = false;
-		if (applicants.length <= 0) {
-			error = true;
-		}
-
-		if (props.lserviceTransaction.id == null || error) {
+		if (props.lserviceTransaction.id == null || props.aggrementStatus !== 0 || props.applicantsStatus !== 0) {
 			message = 'Please complete the previous steps before trying to complete this step!';
 			open = true;
 		} else if (serviceSteps != null) {
@@ -282,7 +275,11 @@ const CartAndPayment = props => {
 										<TableCell>
 											<Typography
 												className="font-normal"
-												variant="subtitle1"
+												variant={
+													props.costDetails.isGovtChargesApplicable === true
+														? 'subtitle1'
+														: 'h6'
+												}
 												color="textSecondary"
 											>
 												{totalTextLabel}
@@ -291,45 +288,62 @@ const CartAndPayment = props => {
 										<TableCell align="right">
 											<Typography
 												className="font-normal"
-												variant="subtitle1"
+												variant={
+													props.costDetails.isGovtChargesApplicable === true
+														? 'subtitle1'
+														: 'h6'
+												}
 												color="textSecondary"
 											>
 												{formatter.format(chargesToBePaid)}
 											</Typography>
 										</TableCell>
 									</TableRow>
-									<TableRow>
-										<TableCell>
-											<Typography
-												className="font-normal"
-												variant="subtitle1"
-												color="textSecondary"
-											>
-												GOVT. CHARGES
-											</Typography>
-										</TableCell>
-										<TableCell align="right">
-											<Typography
-												className="font-normal"
-												variant="subtitle1"
-												color="textSecondary"
-											>
-												{formatter.format(0)}
-											</Typography>
-										</TableCell>
-									</TableRow>
-									<TableRow>
-										<TableCell>
-											<Typography className="font-light" variant="h5" color="textSecondary">
-												TOTAL
-											</Typography>
-										</TableCell>
-										<TableCell align="right">
-											<Typography className="font-light" variant="h5" color="textSecondary">
-												{formatter.format(chargesToBePaid)}
-											</Typography>
-										</TableCell>
-									</TableRow>
+									{props.costDetails.isGovtChargesApplicable === true && (
+										<>
+											<TableRow>
+												<TableCell>
+													<Typography
+														className="font-normal"
+														variant="subtitle1"
+														color="textSecondary"
+													>
+														GOVT. CHARGES
+													</Typography>
+												</TableCell>
+												<TableCell align="right">
+													<Typography
+														className="font-normal"
+														variant="subtitle1"
+														color="textSecondary"
+													>
+														{formatter.format(props.govtCharges)}
+													</Typography>
+												</TableCell>
+											</TableRow>
+
+											<TableRow>
+												<TableCell>
+													<Typography
+														className="font-light"
+														variant="h5"
+														color="textSecondary"
+													>
+														TOTAL
+													</Typography>
+												</TableCell>
+												<TableCell align="right">
+													<Typography
+														className="font-light"
+														variant="h5"
+														color="textSecondary"
+													>
+														{formatter.format(chargesToBePaid + props.govtCharges)}
+													</Typography>
+												</TableCell>
+											</TableRow>
+										</>
+									)}
 								</TableBody>
 							</Table>
 							<Button

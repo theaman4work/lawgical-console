@@ -52,7 +52,9 @@ const serviceStepsSlice = createSlice({
 		lserviceStageTransactionDTOs: [],
 		lserviceTransactionDTO: {},
 		stageDTOs: [],
-		stageLongContentDTOs: []
+		stageLongContentDTOs: [],
+		govtChargesForLserviceDTO: {},
+		govtChargesWithTypesDTOs: []
 	},
 	reducers: {},
 	extraReducers: {
@@ -74,6 +76,9 @@ const serviceStepsSlice = createSlice({
 			if (action.payload.lserviceTransactionDTO !== null) {
 				state.lserviceTransactionDTO = action.payload;
 			}
+			// if (action.payload.currentStageCountForUser !== null) {
+			// 	state.currentStageCountForUser = action.payload.currentStageCountForUser;
+			// }
 			state.labelForServiceTransactionDialog = {
 				type: 'edit',
 				props: {
