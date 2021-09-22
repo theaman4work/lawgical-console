@@ -10,6 +10,7 @@ import reducer from './store';
 import { getWidgets, selectWidgets } from './store/widgetsSlice';
 import HomeTab from './tabs/HomeTab';
 import { getProducts, selectProducts } from './store/productsSlice';
+import { getCustomerDashboardStats, selectCustomerDashboardStats } from './store/customerDashboardStatsSlice';
 import ProjectDashboardAppSidebar from './ProjectDashboardAppSidebar';
 
 const useStyles = makeStyles(theme => ({
@@ -24,7 +25,8 @@ function ProjectDashboardApp(props) {
 	const dispatch = useDispatch();
 	const widgets = useSelector(selectWidgets);
 	const products = useSelector(selectProducts);
-	const routeParams = useParams();
+	const dashboardStats = useSelector(selectCustomerDashboardStats);
+	// const routeParams = useParams();
 
 	const classes = useStyles(props);
 	const pageLayout = useRef(null);
@@ -32,12 +34,16 @@ function ProjectDashboardApp(props) {
 	useEffect(() => {
 		dispatch(getWidgets());
 		dispatch(getProducts());
+		dispatch(getCustomerDashboardStats());
 	}, [dispatch]);
 
 	if (_.isEmpty(widgets)) {
 		return null;
 	}
 	if (_.isEmpty(products)) {
+		return null;
+	}
+	if (_.isEmpty(dashboardStats)) {
 		return null;
 	}
 
