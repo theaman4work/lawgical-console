@@ -183,7 +183,7 @@ const TrademarkDetailsForTmFiling = props => {
 	});
 
 	useEffect(() => {
-		if (props.lserviceTransaction.id !== null) {
+		if (props.pricingInfoStatus === 0 && props.lserviceTransaction.id !== null) {
 			if (props.lserviceStageTransaction == null) {
 				const data = {
 					lserviceTransactionId: props.lserviceTransaction.id,
@@ -202,7 +202,13 @@ const TrademarkDetailsForTmFiling = props => {
 					});
 			}
 		}
-	}, [props.step.id, props.step.lserviceId, props.lserviceStageTransaction, props.lserviceTransaction]);
+	}, [
+		props.step.id,
+		props.step.lserviceId,
+		props.lserviceStageTransaction,
+		props.lserviceTransaction,
+		props.pricingInfoStatus
+	]);
 
 	useDeepCompareEffect(() => {
 		dispatch(getResponseCustomerTrademarkDetailsAndAttachments()).then(() => setLoading(false));

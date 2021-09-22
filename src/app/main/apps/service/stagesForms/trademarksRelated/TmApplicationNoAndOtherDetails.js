@@ -23,6 +23,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import FuseLoading from '@fuse/core/FuseLoading';
 import { axiosInstance } from 'app/auth-service/axiosInstance';
+import { updateData } from '../../store/serviceStepsSlice';
 import {
 	addResponseCustomerTrademarkDetailsAndAttachments,
 	selectResponseCustomerTrademarkDetailsAndAttachments,
@@ -59,6 +60,20 @@ const schemaRegTmNo = yup.object().shape({
 		.required('You must enter a Registered TM no')
 });
 
+const schemaForAmmendments = yup.object().shape({
+	tmApplicationNo: yup
+		.string()
+		.matches(/^[0-9]+$/, 'TM Application no must contain digits only')
+		.min(5, 'TM Application no must be greater than or equal to 5 digits')
+		.max(8, 'TM Application no must be less than or equal to 8 digits')
+		.required('You must enter a TM Application no'),
+	proposedAmendments: yup
+		.string()
+		.min(5, 'Proposed Amendments must be greater than or equal to 5 charcters')
+		.max(150, 'Proposed Amendments must be less than or equal to 150 charactes')
+		.required('You must enter a Proposed Amendments')
+});
+
 const TmApplicationNoAndOtherDetails = props => {
 	const dispatch = useDispatch();
 	const classes = useStyles();
@@ -86,7 +101,13 @@ const TmApplicationNoAndOtherDetails = props => {
 	const { control, reset, handleSubmit, formState, watch } = useForm({
 		mode: 'onChange',
 		defaultValues,
-		resolver: yupResolver(props.trademarkNoType === 2 ? schemaRegTmNo : schema)
+		resolver: yupResolver(
+			props.trademarkNoType === 2
+				? schemaRegTmNo
+				: props.step.stageType === 'TMAMENDMENTDETAILSREQ'
+				? schemaForAmmendments
+				: schema
+		)
 	});
 
 	const { isValid, dirtyFields, errors } = formState;
@@ -127,7 +148,7 @@ const TmApplicationNoAndOtherDetails = props => {
 	}
 
 	useEffect(() => {
-		if (props.lserviceTransaction.id !== null) {
+		if (props.pricingInfoStatus === 0 && props.lserviceTransaction.id !== null) {
 			if (props.lserviceStageTransaction == null) {
 				const data = {
 					lserviceTransactionId: props.lserviceTransaction.id,
@@ -146,7 +167,13 @@ const TmApplicationNoAndOtherDetails = props => {
 					});
 			}
 		}
-	}, [props.step.id, props.step.lserviceId, props.lserviceStageTransaction, props.lserviceTransaction]);
+	}, [
+		props.step.id,
+		props.step.lserviceId,
+		props.lserviceStageTransaction,
+		props.lserviceTransaction,
+		props.pricingInfoStatus
+	]);
 
 	useDeepCompareEffect(() => {
 		dispatch(getResponseCustomerTrademarkDetailsAndAttachments()).then(() => setLoading(false));
@@ -253,6 +280,10 @@ const TmApplicationNoAndOtherDetails = props => {
 			if (stateCustomerTrademarkDetailsId && !props.stage.addMoreAllowed) {
 				customerTrademarkDetailsDTO.id = stateCustomerTrademarkDetailsId;
 			}
+			if (props.stage.isProposeAmendmentsAllowed) {
+				customerTrademarkDetailsDTO.desc = model.proposedAmendments;
+			}
+
 			const reqData = {
 				customerTrademarkDetailsDTO,
 				email: localStorage.getItem('lg_logged_in_email')
@@ -269,6 +300,19 @@ const TmApplicationNoAndOtherDetails = props => {
 			// stageStaus = 1;
 			open = true;
 			level = 'success';
+
+			if (props.lserviceStageTransaction === null) {
+				const lserviceTransactionId = props.lserviceTransaction.id;
+				dispatch(
+					updateData({
+						lserviceTransactionId,
+						lserviceStageTransactionId: stateLserviceStageTransactionId,
+						stageStatus: 'COMPLETED',
+						lserviceStageId: props.step.id,
+						lserviceId: props.step.lserviceId
+					})
+				);
+			}
 		}
 		setMessageAndLevel({
 			message,
@@ -315,6 +359,31 @@ const TmApplicationNoAndOtherDetails = props => {
 										)}
 									/>
 								</div>
+
+								{props.stage.isProposeAmendmentsAllowed && (
+									<div className="flex">
+										<Controller
+											name="proposedAmendments"
+											control={control}
+											render={({ field }) => (
+												<TextField
+													{...field}
+													className="mt-8 mb-16"
+													id="proposedAmendments"
+													label="Proposed Amendments"
+													type="text"
+													multiline
+													rows={2}
+													variant="outlined"
+													error={!!errors.proposedAmendments}
+													helperText={errors?.proposedAmendments?.message}
+													fullWidth
+													required
+												/>
+											)}
+										/>
+									</div>
+								)}
 
 								<Button
 									type="submit"

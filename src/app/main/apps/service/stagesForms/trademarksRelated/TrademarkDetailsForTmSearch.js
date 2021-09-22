@@ -144,7 +144,7 @@ const TrademarkDetailsForTmSearch = props => {
 	});
 
 	useEffect(() => {
-		if (props.lserviceTransaction && props.lserviceTransaction.id !== null) {
+		if (props.pricingInfoStatus === 0 && props.lserviceTransaction && props.lserviceTransaction.id !== null) {
 			if (props.lserviceStageTransaction == null) {
 				const data = {
 					lserviceTransactionId: props.lserviceTransaction.id,
@@ -168,7 +168,13 @@ const TrademarkDetailsForTmSearch = props => {
 		} else {
 			setLoading(false);
 		}
-	}, [props.step.id, props.step.lserviceId, props.lserviceStageTransaction, props.lserviceTransaction]);
+	}, [
+		props.step.id,
+		props.step.lserviceId,
+		props.lserviceStageTransaction,
+		props.lserviceTransaction,
+		props.pricingInfoStatus
+	]);
 
 	// eslint-disable-next-line
 	useEffect(() => {
