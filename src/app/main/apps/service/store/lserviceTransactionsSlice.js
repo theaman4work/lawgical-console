@@ -14,6 +14,29 @@ export const getServiceTransactions = createAsyncThunk(
 	}
 );
 
+export const removeServiceTransaction = createAsyncThunk(
+	'servicesApp/serviceTransactions/removeServiceTransaction',
+	async (lserviceTransactionId, { dispatch, getState }) => {
+		await axiosInstance.put(
+			'/services/lgrest/api/lservice-transactions/inactivate-records-for-customer',
+			lserviceTransactionId
+		);
+
+		return lserviceTransactionId;
+	}
+);
+
+export const removeServiceTransactions = createAsyncThunk(
+	'servicesApp/serviceTransactions/removeServiceTransactions',
+	async (lserviceTransactionIds, { dispatch, getState }) => {
+		await axiosInstance.put(
+			'/services/lgrest/api/lservice-transactions/inactivate-records-for-customer',
+			lserviceTransactionIds
+		);
+		return lserviceTransactionIds;
+	}
+);
+
 const serviceTransactionsAdapter = createEntityAdapter({});
 
 export const {
@@ -53,7 +76,11 @@ const lserviceTransactionsSlice = createSlice({
 		}
 	},
 	extraReducers: {
-		[getServiceTransactions.fulfilled]: serviceTransactionsAdapter.setAll
+		[getServiceTransactions.fulfilled]: serviceTransactionsAdapter.setAll,
+		[removeServiceTransaction.fulfilled]: (state, action) =>
+			serviceTransactionsAdapter.removeOne(state, action.payload),
+		[removeServiceTransactions.fulfilled]: (state, action) =>
+			serviceTransactionsAdapter.removeMany(state, action.payload)
 	}
 });
 

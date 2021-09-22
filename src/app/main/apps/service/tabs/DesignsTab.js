@@ -75,68 +75,75 @@ function DesignsTab() {
 				(productServicesForDesign.length > 0 ? (
 					<motion.div className="flex flex-wrap py-24" variants={container} initial="hidden" animate="show">
 						{productServicesForDesign.map(productService => {
-							return (
-								<motion.div
-									variants={item}
-									className="w-full pb-24 sm:w-1/2 lg:w-1/3 sm:p-16"
-									key={productService.id}
-								>
-									<Card className="flex flex-col h-256 shadow">
-										<div
-											className="flex flex-shrink-0 items-center justify-between px-24 h-64"
-											style={{
-												background: '#607D8B',
-												color: theme.palette.getContrastText('#607D8B')
-											}}
-										>
-											<Typography className="font-medium truncate" color="inherit">
-												{productService.name}
-											</Typography>
-										</div>
-										<CardContent className="flex flex-col flex-auto items-start justify-start pl-6 pt-1 pr-6">
-											<List
-												component="nav"
-												style={{ maxHeight: '200px', overflow: 'auto', width: '100%' }}
-												className="p-0 pt-0"
-												autoFocus
+							if (productService.status === 'ACTIVE') {
+								return (
+									<motion.div
+										variants={item}
+										className="w-full pb-24 sm:w-1/2 lg:w-1/3 sm:p-16"
+										key={productService.id}
+									>
+										<Card className="flex flex-col h-256 shadow">
+											<div
+												className="flex flex-shrink-0 items-center justify-between px-24 h-64"
+												style={{
+													background: '#607D8B',
+													color: theme.palette.getContrastText('#607D8B')
+												}}
 											>
-												{
-													// eslint-disable-next-line
-												subServicesForDesign.map((subService, i) => {
-														const url = `/apps/services/steps/designs/${subService.id}`;
-														if (
-															subService.productLserviceId === productService.id &&
-															subService.status === 'ACTIVE'
-														) {
-															return (
-																<ListItem
-																	key={i}
-																	// onClick={() => handleOpenDialog(article)}
-																	className="pl-12"
-																	button
-																	component={Link}
-																	to={url}
-																>
-																	<ListItemIcon className="min-w-40">
-																		<Icon className="text-20">import_contacts</Icon>
-																	</ListItemIcon>
-																	<ListItemText primary={subService.name} />
-																</ListItem>
-															);
-														}
-													})
-												}
-											</List>
-										</CardContent>
-										{/* <LinearProgress
-											className="w-full"
-											variant="determinate"
-											value={(productService.activeStep * 100) / productService.totalSteps}
-											color="secondary"
-										/> */}
-									</Card>
-								</motion.div>
-							);
+												<Typography className="font-medium truncate" color="inherit">
+													{productService.name}
+												</Typography>
+											</div>
+											<CardContent className="flex flex-col flex-auto items-start justify-start pl-6 pt-1 pr-6">
+												<List
+													component="nav"
+													style={{ maxHeight: '200px', overflow: 'auto', width: '100%' }}
+													className="p-0 pt-0"
+													autoFocus
+												>
+													{
+														// eslint-disable-next-line
+													subServicesForDesign.map((subService, i) => {
+															const url = `/apps/services/steps/designs/${subService.id}`;
+															if (
+																subService.productLserviceId === productService.id &&
+																subService.status === 'ACTIVE'
+															) {
+																return (
+																	<ListItem
+																		key={i}
+																		// onClick={() => handleOpenDialog(article)}
+																		className="pl-12"
+																		button
+																		component={Link}
+																		to={url}
+																	>
+																		<ListItemIcon className="min-w-40">
+																			<Icon className="text-20">
+																				import_contacts
+																			</Icon>
+																		</ListItemIcon>
+																		<ListItemText primary={subService.name} />
+																	</ListItem>
+																);
+															}
+														})
+													}
+												</List>
+											</CardContent>
+											{/* <LinearProgress
+												className="w-full"
+												variant="determinate"
+												value={(productService.activeStep * 100) / productService.totalSteps}
+												color="secondary"
+											/> */}
+										</Card>
+									</motion.div>
+								);
+								// eslint-disable-next-line
+							} else {
+								return null;
+							}
 						})}
 					</motion.div>
 				) : (
