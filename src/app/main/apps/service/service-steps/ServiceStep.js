@@ -175,6 +175,28 @@ function ServiceStep(props) {
 		}
 	};
 
+	const findAcceptChargesStatus = (lserviceStageTransactionDTOs, stageDTOs) => {
+		const stageDTO = stageDTOs.find(eltemp => eltemp.stageType === 'PRICINGINFO');
+		if (stageDTO) {
+			const lserviceStageTransactionDTO = lserviceStageTransactionDTOs.find(
+				eltemp => eltemp.stageId === stageDTO.id
+			);
+			if (lserviceStageTransactionDTO) {
+				if (lserviceStageTransactionDTO.stageStaus === 'COMPLETED') {
+					return 0;
+					// eslint-disable-next-line
+				} else {
+					return 1;
+				}
+				// eslint-disable-next-line
+			} else {
+				return 3;
+			}
+		} else {
+			return 2;
+		}
+	};
+
 	const applicantsStatusForLserviceTransactions = (applicants, lserviceTransaction) => {
 		if (applicants !== null) {
 			const selectedRecords = [];
@@ -201,6 +223,39 @@ function ServiceStep(props) {
 		}
 		// no applicants
 		return 1;
+	};
+
+	const findMaximumGovtChargesToBeAppliedBasedOnApplicantType = (applicants, govtChargesWithTypesDTOs) => {
+		let govtCharges = 0;
+		if (applicants !== null) {
+			// eslint-disable-next-line
+			for ( const[key, value] of Object.entries(applicants) ) {
+				// console.log('inside findMaximumGovtChargesToBeAppliedBasedOnApplicantType');
+				// console.log(key);
+				// console.log(value.applicantDTO.type);
+				const chargesFoundForType = findGovtChargesUsingType(value.applicantDTO.type, govtChargesWithTypesDTOs);
+				if (chargesFoundForType > govtCharges) {
+					govtCharges = chargesFoundForType;
+				}
+			}
+		}
+		return govtCharges;
+	};
+
+	const findGovtChargesUsingType = (typeOfApplicant, govtChargesWithTypesDTOs) => {
+		// console.log(typeOfApplicant);
+		// console.log(govtChargesWithTypesDTOs);
+		const recordOfGovtChargeWithType = govtChargesWithTypesDTOs.find(
+			eltemp => eltemp.categoryForGovtChargesType === typeOfApplicant
+		);
+		// console.log(recordOfGovtChargeWithType);
+		if (recordOfGovtChargeWithType !== null && recordOfGovtChargeWithType !== undefined) {
+			if (recordOfGovtChargeWithType.charges !== null) {
+				return recordOfGovtChargeWithType.charges;
+			}
+			return 0;
+		}
+		return 0;
 	};
 
 	function createServiceNameUsingData(serviceStepsData) {
@@ -295,6 +350,10 @@ function ServiceStep(props) {
 								applicantsData,
 								serviceSteps.lserviceTransactionDTO
 							)}
+							pricingInfoStatus={findAcceptChargesStatus(
+								serviceSteps.lserviceStageTransactionDTOs,
+								serviceSteps.stageDTOs
+							)}
 						/>
 					);
 					// eslint-disable-next-line
@@ -317,6 +376,10 @@ function ServiceStep(props) {
 								applicantsData,
 								serviceSteps.lserviceTransactionDTO
 							)}
+							pricingInfoStatus={findAcceptChargesStatus(
+								serviceSteps.lserviceStageTransactionDTOs,
+								serviceSteps.stageDTOs
+							)}
 						/>
 					);
 				} else if (
@@ -325,7 +388,8 @@ function ServiceStep(props) {
 					step.stageType === 'TMREPTOEXAMREPORTREQ' ||
 					step.stageType === 'TMATTSHOWCAUHEARINGREQ' ||
 					step.stageType === 'TMCHANGAPPDETAILSREQ' ||
-					step.stageType === 'TMNOCCPRIGHTREQ'
+					step.stageType === 'TMNOCCPRIGHTREQ' ||
+					step.stageType === 'TMAMENDMENTDETAILSREQ'
 				) {
 					// return 4th step for TM Monitor, Legal Status and Trademark portfolio valuation (per Country)
 					return (
@@ -346,6 +410,10 @@ function ServiceStep(props) {
 								applicantsData,
 								serviceSteps.lserviceTransactionDTO
 							)}
+							pricingInfoStatus={findAcceptChargesStatus(
+								serviceSteps.lserviceStageTransactionDTOs,
+								serviceSteps.stageDTOs
+							)}
 						/>
 					);
 				}
@@ -363,6 +431,18 @@ function ServiceStep(props) {
 								step
 							)}
 							lservice={serviceSteps.lserviceDTO}
+							aggrementStatus={findAggreementStageStatus(
+								serviceSteps.lserviceStageTransactionDTOs,
+								serviceSteps.stageDTOs
+							)}
+							applicantsStatus={applicantsStatusForLserviceTransactions(
+								applicantsData,
+								serviceSteps.lserviceTransactionDTO
+							)}
+							govtCharges={findMaximumGovtChargesToBeAppliedBasedOnApplicantType(
+								applicantsData,
+								serviceSteps.govtChargesWithTypesDTOs
+							)}
 						/>
 					);
 				}
@@ -380,6 +460,10 @@ function ServiceStep(props) {
 							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
 							tmServiceType={step.stageType === 'TMSEARCHSREPORT' ? 1 : 2}
 							paymentStatus={findPaymentStatus(
+								serviceSteps.lserviceStageTransactionDTOs,
+								serviceSteps.stageDTOs
+							)}
+							pricingInfoStatus={findAcceptChargesStatus(
 								serviceSteps.lserviceStageTransactionDTOs,
 								serviceSteps.stageDTOs
 							)}
@@ -417,6 +501,10 @@ function ServiceStep(props) {
 									: 7
 							}
 							paymentStatus={findPaymentStatus(
+								serviceSteps.lserviceStageTransactionDTOs,
+								serviceSteps.stageDTOs
+							)}
+							pricingInfoStatus={findAcceptChargesStatus(
 								serviceSteps.lserviceStageTransactionDTOs,
 								serviceSteps.stageDTOs
 							)}

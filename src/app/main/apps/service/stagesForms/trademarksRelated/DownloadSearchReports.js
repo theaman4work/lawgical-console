@@ -64,6 +64,7 @@ function DownloadSearchReports(props) {
 
 	useEffect(() => {
 		if (
+			props.pricingInfoStatus === 0 &&
 			props.lserviceTransaction &&
 			props.lserviceTransaction.id !== null &&
 			stateLserviceStageTransactionId == null
@@ -107,7 +108,8 @@ function DownloadSearchReports(props) {
 		props.step.lserviceId,
 		props.lserviceStageTransaction,
 		props.lserviceTransaction,
-		stateLserviceStageTransactionId
+		stateLserviceStageTransactionId,
+		props.pricingInfoStatus
 	]);
 
 	useEffect(() => {
