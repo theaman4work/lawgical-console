@@ -105,11 +105,11 @@ const schema = yup.object().shape({
 	switchForDateAndCheckbox: yup.string().required('Date type is required'),
 	startDateOfUsage: yup.string().when('switchForDateAndCheckbox', {
 		is: 'dateOfUsage',
-		then: yup.string().required('You must provide a Date')
+		then: yup.string().required('You must provide a Date').nullable()
 	}),
 	isProposeToBeUsed: yup.boolean().when('switchForDateAndCheckbox', {
 		is: 'proposeToBeUsed',
-		then: yup.boolean().oneOf([true], 'Propose To be used must be selected.')
+		then: yup.boolean().oneOf([true], 'Propose To be used must be selected.').nullable()
 	})
 });
 
@@ -357,7 +357,7 @@ const TrademarkDetailsForTmFiling = props => {
 		let open = false;
 		let level = 'error';
 
-		if (props.lserviceTransaction.id == null || props.applicantsStatus !== 0) {
+		if (props.lserviceTransaction.id == null || props.applicantsStatus.length <= 0) {
 			message = 'Please complete the previous step before trying to complete this step!';
 			open = true;
 		} else {
@@ -399,7 +399,7 @@ const TrademarkDetailsForTmFiling = props => {
 								const progressDone = Math.round(
 									(snapshot.bytesTransferred / snapshot.totalBytes) * 100
 								);
-								console.log(progressDone);
+								// console.log(progressDone);
 								if (!Number.isNaN(progressDone)) {
 									setProgress(progressDone);
 								}
@@ -435,9 +435,9 @@ const TrademarkDetailsForTmFiling = props => {
 									startDateOfUsage:
 										model.switchForDateAndCheckbox === 'dateOfUsage'
 											? startDateOfUsageToBeSent
-											: '',
+											: null,
 									desc: model.description,
-									isProposeToBeUsed: model.switchForDateAndCheckbox === 'dateOfUsage' || false,
+									isProposeToBeUsed: model.switchForDateAndCheckbox === 'dateOfUsage' ? null : true,
 									lserviceStageTransactionId: lserviceStageTransactionIdForData
 								};
 								if (stateCustomerTrademarkDetailsId) {
@@ -485,7 +485,7 @@ const TrademarkDetailsForTmFiling = props => {
 					Promise.allSettled(promises)
 						// .then(() => console.log('All images successfully uploaded'))
 						.catch(err => {
-							console.log(err.code);
+							// console.log(err.code);
 							message = `Failed to upload image on server, please try again after some time- ${err.code}`;
 							open = true;
 							setProgress(0);
@@ -511,7 +511,7 @@ const TrademarkDetailsForTmFiling = props => {
 					word: model.word,
 					startDateOfUsage: model.switchForDateAndCheckbox === 'dateOfUsage' ? startDateOfUsageToBeSent : '',
 					desc: model.description,
-					isProposeToBeUsed: model.switchForDateAndCheckbox === 'dateOfUsage' || true,
+					isProposeToBeUsed: model.switchForDateAndCheckbox === 'dateOfUsage' ? null : true,
 					lserviceStageTransactionId: lserviceStageTransactionIdForData
 				};
 				if (stateCustomerTrademarkDetailsId) {
