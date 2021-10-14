@@ -108,6 +108,7 @@ function ApplicantsTable(props) {
 			avatar: 'assets/images/avatars/profile.jpg',
 			nationality: item.applicantDTO.nationality || '',
 			type: item.applicantDTO.type || '',
+			partnersName: item.applicantDTO.partnersName || '',
 			addressLine1: item.addressDTO.addressLine1 || '',
 			addressLine2: item.addressDTO.addressLine2 || '',
 			pincode: item.addressDTO.pincode || '',

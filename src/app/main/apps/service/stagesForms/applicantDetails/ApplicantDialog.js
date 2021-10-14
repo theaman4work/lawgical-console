@@ -78,7 +78,15 @@ const schema = yup.object().shape({
 	country: yup.string().required('You must enter a Country').nullable(),
 	state: yup
 		.string()
-		.when('country', { is: 'India', then: yup.string().required('You must enter a State').nullable() })
+		.when('country', { is: 'India', then: yup.string().required('You must enter a State').nullable() }),
+	partnersName: yup.string().when('type', {
+		is: ('Limited Liability Partnership', 'Trust', 'Partnership Firm'),
+		then: yup
+			.string()
+			.required(`'You must enter a Partners Name'`)
+			.nullable()
+			.max(250, 'Email must be less than or equal to 250 characters')
+	})
 });
 
 function ApplicantDialog(props) {
@@ -86,6 +94,7 @@ function ApplicantDialog(props) {
 	const statesListForStatesDropDown = statesList;
 
 	const [showState, setShowState] = useState(false);
+	const [showPartners, setShowPartners] = useState(false);
 	const dispatch = useDispatch();
 	const applicantDialog = useSelector(({ servicesApp }) => servicesApp.applicants.applicantDialog);
 
@@ -106,6 +115,12 @@ function ApplicantDialog(props) {
 			const el = applicantTypesList.find(eltemp => eltemp.label === labelOrVal);
 			if (el) {
 				return el.code;
+				// eslint-disable-next-line
+			} else {
+				const el1 = applicantTypesList.find(eltemp => eltemp.code === labelOrVal);
+				if (el1) {
+					return el1.code;
+				}
 			}
 			return 'OTHER';
 		}
@@ -134,6 +149,16 @@ function ApplicantDialog(props) {
 				} else {
 					setShowState(false);
 				}
+			}
+
+			if (
+				applicantDialog.data.type === 'TRUST' ||
+				applicantDialog.data.type === 'PARTNERSHIPFIRM' ||
+				applicantDialog.data.type === 'LIMITEDLIABILITYPARTNERSHIP'
+			) {
+				setShowPartners(true);
+			} else {
+				setShowPartners(false);
 			}
 
 			const label = findMatchingType(applicantDialog.data.type, 2);
@@ -176,9 +201,9 @@ function ApplicantDialog(props) {
 	 * Form Submit
 	 */
 	function onSubmit(data) {
-		// console.log(data.type);
+		console.log(data);
 		const typeForEnumVal = findMatchingType(data.type, 1);
-		// console.log(typeForEnumVal);
+		console.log(typeForEnumVal);
 		const applicantDTO = {
 			contactEmail: data.contactEmail,
 			contactPhoneNo: data.contactPhoneNo,
@@ -190,9 +215,13 @@ function ApplicantDialog(props) {
 			// website: data.website
 			type: typeForEnumVal
 		};
-		// if (data.type !== null || data.type !== '') {
-		// 	applicantDTO[`'type'`] = data.type;
-		// }
+		if (
+			typeForEnumVal === 'TRUST' ||
+			typeForEnumVal === 'PARTNERSHIPFIRM' ||
+			typeForEnumVal === 'LIMITEDLIABILITYPARTNERSHIP'
+		) {
+			applicantDTO.partnersName = data.partnersName;
+		}
 		const addressDTO = {
 			addressLine1: data.addressLine1,
 			addressLine2: data.addressLine2,
@@ -383,8 +412,17 @@ function ApplicantDialog(props) {
 									value={findMatchingType(value, 2)}
 									// getOptionLabel={option => option.label}
 									onChange={(event, newValue) => {
-										console.log(newValue);
+										// console.log(newValue);
 										onChange(newValue);
+										if (
+											newValue === 'Limited Liability Partnership' ||
+											newValue === 'Trust' ||
+											newValue === 'Partnership Firm'
+										) {
+											setShowPartners(true);
+										} else {
+											setShowPartners(false);
+										}
 									}}
 									renderInput={params => (
 										<TextField
@@ -405,6 +443,30 @@ function ApplicantDialog(props) {
 							)}
 						/>
 					</div>
+
+					{showPartners && (
+						<div className="flex">
+							<div className="min-w-48 pt-20" />
+							<Controller
+								control={control}
+								name="partnersName"
+								render={({ field }) => (
+									<TextField
+										{...field}
+										className="mb-24"
+										label="Partners Name"
+										id="partnersName"
+										name="partnersName"
+										error={!!errors.partnersName}
+										helperText={errors?.partnersName?.message}
+										variant="outlined"
+										required
+										fullWidth
+									/>
+								)}
+							/>
+						</div>
+					)}
 
 					<div className="flex">
 						<div className="min-w-48 pt-20" />
