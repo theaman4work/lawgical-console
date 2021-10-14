@@ -223,7 +223,7 @@ const TrademarkDetailsForTmSearch = props => {
 
 		console.log(props.applicantsStatus);
 		const classficationId = model.classification.replace(/^\D+|\D+$/g, '');
-		if (props.lserviceTransaction.id == null || props.applicantsStatus !== 0) {
+		if (props.lserviceTransaction.id == null || props.applicantsStatus.length <= 0) {
 			message = 'Please complete the previous step before trying to complete this step!';
 			open = true;
 		} else {
