@@ -201,9 +201,16 @@ const TmApplicationNoAndOtherDetails = props => {
 					: '';
 			setStateCustomerTrademarkDetailsId(data.customerTrademarkDetailsDTO.id);
 			if (!props.stage.addMoreAllowed) {
-				reset({
-					tmApplicationNo
-				});
+				if (props.step.stageType === 'TMAMENDMENTDETAILSREQ') {
+					reset({
+						tmApplicationNo,
+						proposedAmendments: data.customerTrademarkDetailsDTO.desc
+					});
+				} else {
+					reset({
+						tmApplicationNo
+					});
+				}
 			} else {
 				reset({
 					tmApplicationNo: ''
@@ -215,6 +222,7 @@ const TmApplicationNoAndOtherDetails = props => {
 		responseCustomerTrademarkDetailsAndAttachments,
 		stateLserviceStageTransactionId,
 		props.stage.addMoreAllowed,
+		props.step.stageType,
 		reset
 	]);
 
@@ -255,7 +263,7 @@ const TmApplicationNoAndOtherDetails = props => {
 		let open = false;
 		let level = 'error';
 
-		if (props.lserviceTransaction.id == null || props.applicantsStatus !== 0) {
+		if (props.lserviceTransaction.id == null || props.applicantsStatus.length <= 0) {
 			message = 'Please complete the previous step before trying to complete this step!';
 			open = true;
 		} else {
