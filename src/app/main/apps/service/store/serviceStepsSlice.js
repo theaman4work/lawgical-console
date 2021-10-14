@@ -63,6 +63,9 @@ const serviceStepsSlice = createSlice({
 			if (action.payload.lserviceTransactionDTO !== null) {
 				state.lserviceTransactionDTO = action.payload.lserviceTransactionDTO;
 			}
+			if (action.payload.currentStageCountForUser !== null) {
+				state.currentStageCountForUser += 1;
+			}
 			state.lserviceStageTransactionDTOs.push(action.payload.lserviceStageTransactionDTO);
 			state.labelForServiceTransactionDialog = {
 				type: 'edit',
@@ -76,9 +79,6 @@ const serviceStepsSlice = createSlice({
 			if (action.payload.lserviceTransactionDTO !== null) {
 				state.lserviceTransactionDTO = action.payload;
 			}
-			// if (action.payload.currentStageCountForUser !== null) {
-			// 	state.currentStageCountForUser = action.payload.currentStageCountForUser;
-			// }
 			state.labelForServiceTransactionDialog = {
 				type: 'edit',
 				props: {

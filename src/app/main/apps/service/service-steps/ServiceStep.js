@@ -210,19 +210,52 @@ function ServiceStep(props) {
 						// console.log('key1 - value1');
 						// console.log(`${key1} - ${JSON.stringify(value1)}`);
 						if (lserviceTransaction.id === value1.lserviceTransactionId && value1.status === 'ACTIVE') {
-							selectedRecords.push(value1.applicantId);
+							selectedRecords.push(value);
 						}
 					}
 				}
 			}
 			if (selectedRecords.length > 0) {
-				return 0;
+				return selectedRecords;
 			}
 			// no applicants selected for transaction
-			return 2;
+			return [];
 		}
 		// no applicants
-		return 1;
+		return [];
+	};
+
+	const applicantsTypeCheckForLserviceTransactions = (applicants, lserviceTransaction) => {
+		if (applicants !== null) {
+			const selectedRecords = [];
+			// eslint-disable-next-line
+			for ( const[key, value] of Object.entries(applicants) ) {
+				// console.log('key - value');
+				// console.log(`${key} - ${JSON.stringify(value.applicantsOfLserTransDTOs)}`);
+				if (value.applicantsOfLserTransDTOs != null && value.applicantsOfLserTransDTOs.length > 0) {
+					// eslint-disable-next-line
+					for (const [key1, value1] of Object.entries(value.applicantsOfLserTransDTOs)) {
+						// console.log('key1 - value1');
+						// console.log(`${key1} - ${JSON.stringify(value1)}`);
+						if (lserviceTransaction.id === value1.lserviceTransactionId && value1.status === 'ACTIVE') {
+							if (
+								value.applicantDTO.type === 'STARTUP' ||
+								value.applicantDTO.type === 'SMALLENTERPRISE'
+							) {
+								selectedRecords.push(value);
+							}
+						}
+					}
+				}
+			}
+			if (selectedRecords.length > 0) {
+				return 1;
+			}
+			// no applicants selected for transaction
+			return null;
+		}
+		// no applicants
+		return null;
 	};
 
 	const findMaximumGovtChargesToBeAppliedBasedOnApplicantType = (applicants, govtChargesWithTypesDTOs) => {
@@ -443,6 +476,8 @@ function ServiceStep(props) {
 								applicantsData,
 								serviceSteps.govtChargesWithTypesDTOs
 							)}
+							classifications={convertClassficationsToDropdownList(serviceSteps.classificationDTOs)}
+							classificationDTOs={serviceSteps.classificationDTOs}
 						/>
 					);
 				}
@@ -507,6 +542,10 @@ function ServiceStep(props) {
 							pricingInfoStatus={findAcceptChargesStatus(
 								serviceSteps.lserviceStageTransactionDTOs,
 								serviceSteps.stageDTOs
+							)}
+							applicantsIsOfStartUpOrMsmeType={applicantsTypeCheckForLserviceTransactions(
+								applicantsData,
+								serviceSteps.lserviceTransactionDTO
 							)}
 						/>
 					);
@@ -602,7 +641,7 @@ function ServiceStep(props) {
 								</SwipeableViews>
 							</FuseScrollbars>
 
-							<div className="flex justify-center w-full absolute left-0 right-0 top-4 pb-16 md:pb-32">
+							<div className="flex justify-center w-full absolute left-0 right-0 top-4 pb-4">
 								<div className="flex justify-between w-full max-w-xl px-8">
 									<div>
 										{activeStep !== 1 && (
