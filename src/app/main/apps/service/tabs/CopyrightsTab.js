@@ -23,7 +23,7 @@ function CopyrightsTab() {
 
 	// eslint-disable-next-line
 	Object.keys(productServices).map(function (keyName) {
-		if (productServices[keyName].productId === 3) {
+		if (productServices[keyName].productId === 3 && productServices[keyName].status == "ACTIVE") {
 			productServicesForCopyright.push(productServices[keyName]);
 
 			// eslint-disable-next-line
