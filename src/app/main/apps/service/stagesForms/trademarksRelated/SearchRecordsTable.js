@@ -39,7 +39,7 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 const findClassname = (classificationDTOs, idreq) => {
 	const el = classificationDTOs.find(eltemp => eltemp.id === idreq); // Possibly returns `undefined`
-	return `${el.name} ${el.desc}` || null; // so check result is truthy and extract `id`
+	return `${el.name} ${el.label}` || null; // so check result is truthy and extract `id`
 };
 
 // const findImageAttachmentUrlFromList = attachmentDTOs => {

@@ -9,6 +9,7 @@ import format from 'date-fns/format';
 import Checkbox from '@material-ui/core/Checkbox';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
+import WbIncandescentIcon from '@material-ui/icons/WbIncandescent';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -34,6 +35,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import AppBar from '@material-ui/core/AppBar';
+import Tooltip from '@material-ui/core/Tooltip';
 import { GetApp } from '@material-ui/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { Controller, useForm } from 'react-hook-form';
@@ -176,6 +178,10 @@ const TrademarkDetailsForTmFiling = props => {
 	const [provisionalCost, setProvisionalCost] = useState(total);
 	const [totalCost, setTotalCost] = useState(total);
 
+	const [classificationDesc, setClassificationDesc] = useState(
+		props.classificationDTOs[0].info ? props.classificationDTOs[0].info : 'Class Description'
+	);
+
 	const formatter = new Intl.NumberFormat('en-IN', {
 		style: 'currency',
 		currency: 'INR',
@@ -271,6 +277,21 @@ const TrademarkDetailsForTmFiling = props => {
 				setShowDateOrCheckBox(2);
 			}
 
+			if (data.customerTrademarkDetailsDTO.classficationId != null) {
+				if (props.classificationDTOs.length > 0) {
+					for (let i = 0; i < props.classificationDTOs.length; i += 1) {
+						if (
+							props.classificationDTOs[i].id ===
+							parseInt(data.customerTrademarkDetailsDTO.classficationId, 10)
+						) {
+							setClassificationDesc(props.classificationDTOs[i].info);
+						}
+					}
+				} else {
+					setClassificationDesc('Class Description');
+				}
+			}
+
 			reset({
 				classification: classfication,
 				word,
@@ -315,7 +336,7 @@ const TrademarkDetailsForTmFiling = props => {
 
 	const findClassificationTxtUsingId = (classificationDTOs, classficationId) => {
 		const el = classificationDTOs.find(eltemp => eltemp.id === classficationId);
-		return `${el.name} ${el.desc}` || null; // so check result is truthy
+		return `${el.name} ${el.label}` || null; // so check result is truthy
 	};
 
 	const findMatchingCustomerTradeMarkRecordAlongWithAttachment = (
@@ -326,6 +347,17 @@ const TrademarkDetailsForTmFiling = props => {
 			eltemp => eltemp.customerTrademarkDetailsDTO.lserviceStageTransactionId === transactionId
 		);
 		return el || null; // so check result is truthy and extract record
+	};
+
+	const findClassificationDescUsingId = classificationId => {
+		if (props.classificationDTOs.length > 0) {
+			for (let i = 0; i < props.classificationDTOs.length; i += 1) {
+				if (props.classificationDTOs[i].id === parseInt(classificationId, 10)) {
+					return props.classificationDTOs[i].info;
+				}
+			}
+		}
+		return 'Class Description';
 	};
 
 	function getCurrentDate() {
@@ -632,7 +664,11 @@ const TrademarkDetailsForTmFiling = props => {
 												options={props.classifications}
 												value={value}
 												onChange={(event, newValue) => {
+													const classficationId = newValue.replace(/^\D+|\D+$/g, '');
 													onChange(newValue);
+													setClassificationDesc(
+														findClassificationDescUsingId(classficationId)
+													);
 												}}
 												renderInput={params => (
 													<TextField
@@ -651,6 +687,14 @@ const TrademarkDetailsForTmFiling = props => {
 											/>
 										)}
 									/>
+
+									<div>
+										<Tooltip className="h-full" title={classificationDesc}>
+											<IconButton>
+												<WbIncandescentIcon />
+											</IconButton>
+										</Tooltip>
+									</div>
 								</div>
 
 								<div className="flex">

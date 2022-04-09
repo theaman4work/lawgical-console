@@ -11,6 +11,7 @@ import Typography from '@material-ui/core/Typography';
 import Alert from '@material-ui/lab/Alert';
 import Collapse from '@material-ui/core/Collapse';
 import CloseIcon from '@material-ui/icons/Close';
+import WbIncandescentIcon from '@material-ui/icons/WbIncandescent';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
@@ -24,6 +25,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import AppBar from '@material-ui/core/AppBar';
+import Tooltip from '@material-ui/core/Tooltip';
 import { useDispatch } from 'react-redux';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -137,6 +139,10 @@ const TrademarkDetailsForTmSearch = props => {
 	const [provisionalCost, setProvisionalCost] = useState(total);
 	const [totalCost, setTotalCost] = useState(total);
 
+	const [classificationDesc, setClassificationDesc] = useState(
+		props.classificationDTOs[0].info ? props.classificationDTOs[0].info : 'Class Description'
+	);
+
 	const formatter = new Intl.NumberFormat('en-IN', {
 		style: 'currency',
 		currency: 'INR',
@@ -193,6 +199,17 @@ const TrademarkDetailsForTmSearch = props => {
 		}
 	}, [progress]);
 
+	const findClassificationDescUsingId = classificationId => {
+		if (props.classificationDTOs.length > 0) {
+			for (let i = 0; i < props.classificationDTOs.length; i += 1) {
+				if (props.classificationDTOs[i].id === parseInt(classificationId, 10)) {
+					return props.classificationDTOs[i].info;
+				}
+			}
+		}
+		return 'Class Description';
+	};
+
 	function setProvisionCostAfterItemAdd(count) {
 		if (count !== 0) {
 			setProvisionalCost(totalCost * count);
@@ -221,7 +238,7 @@ const TrademarkDetailsForTmSearch = props => {
 		let open = false;
 		let level = 'error';
 
-		console.log(props.applicantsStatus);
+		// console.log(props.applicantsStatus);
 		const classficationId = model.classification.replace(/^\D+|\D+$/g, '');
 		if (props.lserviceTransaction.id == null || props.applicantsStatus.length <= 0) {
 			message = 'Please complete the previous step before trying to complete this step!';
@@ -453,11 +470,15 @@ const TrademarkDetailsForTmSearch = props => {
 											control={control}
 											render={({ field: { onChange, value } }) => (
 												<Autocomplete
-													className="mt-8 mb-12 w-full"
+													className="w-full"
 													options={props.classifications}
 													value={value}
 													onChange={(event, newValue) => {
+														const classficationId = newValue.replace(/^\D+|\D+$/g, '');
 														onChange(newValue);
+														setClassificationDesc(
+															findClassificationDescUsingId(classficationId)
+														);
 													}}
 													renderInput={params => (
 														<TextField
@@ -476,6 +497,14 @@ const TrademarkDetailsForTmSearch = props => {
 												/>
 											)}
 										/>
+
+										<div>
+											<Tooltip className="h-full" title={classificationDesc}>
+												<IconButton>
+													<WbIncandescentIcon />
+												</IconButton>
+											</Tooltip>
+										</div>
 									</div>
 
 									<div className="flex">
