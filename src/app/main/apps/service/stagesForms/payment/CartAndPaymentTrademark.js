@@ -262,8 +262,6 @@ const CartAndPayment = props => {
 		resolver: yupResolver(schema)
 	});
 
-	const { isValid, dirtyFields, errors } = formState;
-
 	const formatter = new Intl.NumberFormat('en-IN', {
 		style: 'currency',
 		currency: 'INR',
@@ -333,7 +331,18 @@ const CartAndPayment = props => {
 
 	const findClassname = (classificationDTOs, idreq) => {
 		const el = classificationDTOs.find(eltemp => eltemp.id === idreq); // Possibly returns `undefined`
-		return `${el.name} ${el.desc}` || null; // so check result is truthy and extract `id`
+		return `${el.name}` || null; // so check result is truthy and extract `id`
+	};
+
+	const findClassificationDescUsingId = (classificationDTOs, classificationId) => {
+		if (classificationDTOs.length > 0) {
+			for (let i = 0; i < classificationDTOs.length; i += 1) {
+				if (classificationDTOs[i].id === parseInt(classificationId, 10)) {
+					return classificationDTOs[i].info;
+				}
+			}
+		}
+		return 'Class Description';
 	};
 
 	return (
@@ -629,11 +638,18 @@ const CartAndPayment = props => {
 																	}
 																>
 																	<TableCell>
-																		<Typography>Classification</Typography>
+																		<Typography>
+																			{findClassname(
+																				props.classificationDTOs,
+																				trademarkAndAttachmentData
+																					.customerTrademarkDetailsDTO
+																					.classficationId
+																			)}
+																		</Typography>
 																	</TableCell>
 																	<TableCell className="px-16">
 																		<Typography color="textSecondary">
-																			{findClassname(
+																			{findClassificationDescUsingId(
 																				props.classificationDTOs,
 																				trademarkAndAttachmentData
 																					.customerTrademarkDetailsDTO
@@ -645,8 +661,6 @@ const CartAndPayment = props => {
 															) : null}
 															{trademarkAndAttachmentData.customerTrademarkDetailsDTO
 																.typeForTm === 'WORD' ? (
-																// {trademarkAndAttachmentData.customerTrademarkDetailsDTO.classficationId !== null
-																// }
 																<TableRow
 																	key={
 																		trademarkAndAttachmentData
