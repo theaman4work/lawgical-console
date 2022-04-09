@@ -28,11 +28,11 @@ import ApplicantDialog from '../stagesForms/applicantDetails/ApplicantDialog';
 import LabelForServiceTransactionDialog from '../stagesForms/LabelForServiceTransactionDialog';
 import TrademarkDetailsForTmSearch from '../stagesForms/trademarksRelated/TrademarkDetailsForTmSearch';
 import TrademarkDetailsForTmFiling from '../stagesForms/trademarksRelated/TrademarkDetailsForTmFiling';
-import CartAndPayment from '../stagesForms/payment/CartAndPayment';
 import DownloadSearchReports from '../stagesForms/trademarksRelated/DownloadSearchReports';
 import TmApplicationNoAndOtherDetails from '../stagesForms/trademarksRelated/TmApplicationNoAndOtherDetails';
 import UploadsForTrademarkServices from '../stagesForms/trademarksRelated/UploadsForTrademarkServices';
 import { getServiceTransactions, selectServiceTransactions } from '../store/lserviceTransactionsSlice';
+import CartAndPaymentTrademark from '../stagesForms/payment/CartAndPaymentTrademark';
 
 const useStyles = makeStyles(theme => ({
 	stepLabel: {
@@ -125,7 +125,7 @@ function ServiceStep(props) {
 	const convertClassficationsToDropdownList = classificationDTOs => {
 		const classificationsForDropDown = [];
 		for (let i = 0; i < classificationDTOs.length; i += 1) {
-			const classificationLabel = `${classificationDTOs[i].name} ${classificationDTOs[i].desc}`;
+			const classificationLabel = `${classificationDTOs[i].name} ${classificationDTOs[i].label}`;
 			classificationsForDropDown.push(classificationLabel);
 		}
 		return classificationsForDropDown;
@@ -449,12 +449,39 @@ function ServiceStep(props) {
 							)}
 						/>
 					);
+				} else if (step.stageType === 'PAYMENT') {
+					// return 4th step Payment for Copyights
+					return (
+						<CartAndPaymentTrademark
+							costDetails={serviceSteps.lserviceCostDTO}
+							stepCount={4}
+							step={step}
+							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
+							lserviceStageTransaction={findMatchingLserviceStageTransaction(
+								serviceSteps.lserviceStageTransactionDTOs,
+								step
+							)}
+							lservice={serviceSteps.lserviceDTO}
+							aggrementStatus={findAggreementStageStatus(
+								serviceSteps.lserviceStageTransactionDTOs,
+								serviceSteps.stageDTOs
+							)}
+							applicantsStatus={applicantsStatusForLserviceTransactions(
+								applicantsData,
+								serviceSteps.lserviceTransactionDTO
+							)}
+							govtCharges={findMaximumGovtChargesToBeAppliedBasedOnApplicantType(
+								applicantsData,
+								serviceSteps.govtChargesWithTypesDTOs
+							)}
+						/>
+					);
 				}
 				return '';
 			case 4:
 				if (step.stageType === 'PAYMENT') {
 					return (
-						<CartAndPayment
+						<CartAndPaymentTrademark
 							costDetails={serviceSteps.lserviceCostDTO}
 							stepCount={5}
 							step={step}
@@ -625,6 +652,7 @@ function ServiceStep(props) {
 									index={activeStep - 1}
 									enableMouseEvents
 									onChangeIndex={handleChangeActiveStep}
+									disabled={true}
 								>
 									{serviceSteps.lserviceStageDTOs.map((step, index) => (
 										<div
