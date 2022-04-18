@@ -46,7 +46,7 @@ function TradeMarkTab() {
 
 	// eslint-disable-next-line
 	Object.keys(productServices).map(function (keyName) {
-		if (productServices[keyName].productId === 1 && productServices[keyName].status == "ACTIVE") {
+		if (productServices[keyName].productId === 1 && productServices[keyName].status === 'ACTIVE') {
 			productServicesForTradeMark.push(productServices[keyName]);
 
 			// eslint-disable-next-line
