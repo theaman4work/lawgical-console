@@ -652,7 +652,7 @@ function ServiceStep(props) {
 									index={activeStep - 1}
 									enableMouseEvents
 									onChangeIndex={handleChangeActiveStep}
-									disabled={true}
+									disabled
 								>
 									{serviceSteps.lserviceStageDTOs.map((step, index) => (
 										<div
