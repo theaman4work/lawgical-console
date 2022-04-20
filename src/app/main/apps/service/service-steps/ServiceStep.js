@@ -33,6 +33,8 @@ import TmApplicationNoAndOtherDetails from '../stagesForms/trademarksRelated/TmA
 import UploadsForTrademarkServices from '../stagesForms/trademarksRelated/UploadsForTrademarkServices';
 import { getServiceTransactions, selectServiceTransactions } from '../store/lserviceTransactionsSlice';
 import CartAndPaymentTrademark from '../stagesForms/payment/CartAndPaymentTrademark';
+import CpDownloadDocuments from '../stagesForms/copyrightsRelated/CpDownloadDocuments';
+import CpUploadDocuments from '../stagesForms/copyrightsRelated/CpUploadDocuments';
 
 const useStyles = makeStyles(theme => ({
 	stepLabel: {
@@ -507,7 +509,22 @@ function ServiceStep(props) {
 							classificationDTOs={serviceSteps.classificationDTOs}
 						/>
 					);
-				}
+				} else if(step.stageType === 'CPRDOWNLOADPOAQUESTIONNOCREQ' || step.stageType === 'CPRDOWNLOADPOAREQ'){
+					return (
+						<CpDownloadDocuments
+							costDetails={serviceSteps.lserviceCostDTO}
+							stepCount={5}
+							step={step}
+							stage={findMatchingStageUsingType(serviceSteps.stageDTOs, step)}
+							lserviceStageTransaction={findMatchingLserviceStageTransaction(
+								serviceSteps.lserviceStageTransactionDTOs,
+								step
+							)}
+							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
+							lservice={serviceSteps.lserviceDTO}
+						/>
+					);
+				} 
 				return '';
 			case 5:
 				if (step.stageType === 'TMSEARCHSREPORT' || step.stageType === 'TMSEARCHSREPORTANDTXTUPDATES') {
@@ -576,7 +593,29 @@ function ServiceStep(props) {
 							)}
 						/>
 					);
-				} else {
+				} else if(step.stageType === 'CPRUPLOADPOAQUESTIONSIGNOCLOAREQ' || step.stageType === 'CPRUPLOADARTWORKANDPOAREQ'){
+					return (
+						<CpUploadDocuments
+							stepCount={6}
+							step={step}
+							stage={findMatchingStageUsingType(serviceSteps.stageDTOs, step)}
+							lserviceStageTransaction={findMatchingLserviceStageTransaction(
+								serviceSteps.lserviceStageTransactionDTOs,
+								step
+							)}
+							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
+							copyrightServiceUploadType = {
+								step.stageType === 'CPRUPLOADPOAQUESTIONSIGNOCLOAREQ' 
+								? 1 
+								: step.stageType === 'CPRUPLOADARTWORKANDPOAREQ'
+								? 2
+								:3
+							}
+						/>
+					);
+				}
+				
+				else {
 					return '';
 				}
 			case 6:
