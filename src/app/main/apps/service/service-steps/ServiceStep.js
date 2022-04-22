@@ -35,6 +35,7 @@ import { getServiceTransactions, selectServiceTransactions } from '../store/lser
 import CartAndPaymentTrademark from '../stagesForms/payment/CartAndPaymentTrademark';
 import CpDownloadDocuments from '../stagesForms/copyrightsRelated/CpDownloadDocuments';
 import CpUploadDocuments from '../stagesForms/copyrightsRelated/CpUploadDocuments';
+import CpDownloadFilingReceiptNoc from '../stagesForms/copyrightsRelated/CpDownloadFilingReceiptNoc';
 
 const useStyles = makeStyles(theme => ({
 	stepLabel: {
@@ -613,7 +614,7 @@ function ServiceStep(props) {
 							}
 						/>
 					);
-				}
+				} 
 				
 				else {
 					return '';
@@ -645,6 +646,31 @@ function ServiceStep(props) {
 								serviceSteps.lserviceStageTransactionDTOs,
 								serviceSteps.stageDTOs
 							)}
+						/>
+					);
+				} else if(
+						  step.stageType === 'CPRDOWNLOADFILINGRECEIPT' ||
+						  step.stageType === 'CPRDOWNLOADNOC'
+					) 
+				{
+					return (
+						<CpDownloadFilingReceiptNoc
+							stepCount={7}
+							step={step}
+							lserviceStageTransaction={findMatchingLserviceStageTransaction(
+								serviceSteps.lserviceStageTransactionDTOs,
+								step
+							)}
+							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
+							cpServiceType={
+								step.stageType === 'CPRDOWNLOADFILINGRECEIPT'
+									? 3
+									: step.stageType === 'CPRDOWNLOADNOC'
+									? 4
+									: 5
+							}
+							lservice={serviceSteps.lserviceDTO}
+						
 						/>
 					);
 				}
