@@ -19,6 +19,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import FuseLoading from '@fuse/core/FuseLoading';
 import { axiosInstance } from 'app/auth-service/axiosInstance';
+import storage from '../../../../firebase/index';
 
 const useStyles = makeStyles(theme => ({
 	productImageUpload: {
@@ -52,6 +53,7 @@ const schema = yup.object().shape({
 
 const CpUploadDocuments = props => {
     const classes = useStyles();
+	const dispatch = useDispatch();
 	const serviceSteps = useSelector(({ servicesApp }) => servicesApp.serviceSteps);
 
 	const [messageAndLevel, setMessageAndLevel] = useState({
@@ -60,6 +62,7 @@ const CpUploadDocuments = props => {
 		open: false
 	});
 
+	const [progress, setProgress] = useState(0);
 	const [poaUpload, setPoaUpload] = useState(null);
 	const [questionaire, setQuestionaire] = useState(null);
 	const [copyrightwork, setCopyrightWork] = useState(null);
@@ -68,12 +71,576 @@ const CpUploadDocuments = props => {
 	const [letterAuth, setLetterAuth] = useState(null);
 	const [artisticWork, setArtisticWork] = useState(null);
 	const [loading, setLoading] = useState(true);
+	const [stateLserviceStageTransactionId, setStateLserviceStageTransactionId] = useState(null);
+	const [stateCustomerCopyrightDetailsId, setStateCustomerCopyrightDetailsId] = useState(null);
+	const [statePoaId, setStatePoaId] = useState(null);
+	const [stateQuestionnaireFormId, setStateQuestionnaireFormIdId] = useState(null);
+	const [stateCopyrightWorkId, setStateCopyrightWorkId] = useState(null);
+	const [stateApplicantSignatureId, setStateApplicantSignatureId] = useState(null);
+	const [stateAuthorNOCId, setStateAuthorNOCId] = useState(null);
+	const [stateLetterOfAuthorizationId, setStateLetterOfAuthorizationId] = useState(null);
+	const [stateArtisticWorkId, setStateArtisticWorkId] = useState(null);
 
 	const { control, reset, handleSubmit, formState } = useForm({
 		mode: 'onChange',
 		defaultValues,
 		resolver: yupResolver(schema)
 	});
+
+	/*useEffect(() => {
+		if (props.pricingInfoStatus === 0 && props.lserviceTransaction.id !== null) {
+			if (props.lserviceStageTransaction == null) {
+				const data = {
+					lserviceTransactionId: props.lserviceTransaction.id,
+					stageStatus: 'INPROGRESS',
+					lserviceStageId: props.step.id,
+					lserviceId: props.step.lserviceId
+				};
+
+				axiosInstance
+					.post('/services/lgrest/api/lservice-stage-transactions/create-transaction-for-customer', {
+						email: localStorage.getItem('lg_logged_in_email'),
+						...data
+					})
+					.then(res => {
+						setStateLserviceStageTransactionId(res.data.lserviceStageTransactionDTO.id);
+					});
+			}
+		}
+	}, [
+		props.step.id,
+		props.step.lserviceId,
+		props.lserviceStageTransaction,
+		props.lserviceTransaction,
+		props.pricingInfoStatus
+	]);
+
+	useDeepCompareEffect(() => {
+		dispatch(getResponseCustomerTrademarkDetailsAndAttachments()).then(() => setLoading(false));
+	}, [dispatch]);*/
+
+	// eslint-disable-next-line
+	useEffect(() => {
+		let data = '';
+		/*if (props.lserviceStageTransaction !== null) {
+			data = findMatchingCustomerTradeMarkRecordAlongWithAttachment(
+				//responseCustomerCopyrightDetailsAndAttachments,
+				props.lserviceStageTransaction.id
+			);
+		} else {
+			data = findMatchingCustomerTradeMarkRecordAlongWithAttachment(
+				//responseCustomerCopyrightDetailsAndAttachments,
+				stateLserviceStageTransactionId
+			);
+		}*/
+
+		if (data) {
+			setStateCustomerCopyrightDetailsId(data.customerCopyrightDetailsDTO.id);
+
+			if([1,2].includes(props.copyrightServiceUploadType)) {
+				//POA
+				const poaAttachment = findRecordFromArray(
+					data.attachmentDTOs,
+					data.customerCopyrightDetailsDTO.poaId
+				);
+				if (poaAttachment) {
+					const poaData = {
+						name: poaAttachment.attachmentName,
+						url: poaAttachment.url
+					};
+					setPoaUpload(poaData);
+					setStatePoaId(data.customerCopyrightDetailsDTO.poaId);
+				}
+			}
+
+			if(props.copyrightServiceUploadType === 1){
+
+				//Questionaire
+				const questionaireAttachment = findRecordFromArray(
+					data.attachmentDTOs,
+					data.customerCopyrightDetailsDTO.questionnaireFormId
+				);
+				if (questionaireAttachment) {
+					const questionaireData = {
+						name: questionaireAttachment.attachmentName,
+						url: questionaireAttachment.url
+					};
+					setQuestionaire(questionaireData);
+					setStateQuestionnaireFormIdId(data.customerTrademarkDetailsDTO.questionnaireFormId);
+				}
+
+				//CopyrightWork
+				const copyrightWorkAttachment = findRecordFromArray(
+					data.attachmentDTOs,
+					data.customerCopyrightDetailsDTO.copyrightWorkId
+				);
+				if (copyrightWorkAttachment) {
+					const copyrightWorkData = {
+						name: copyrightWorkAttachment.attachmentName,
+						url: copyrightWorkAttachment.url
+					};
+					setCopyrightWork(copyrightWorkData);
+					setStateCopyrightWorkId(data.customerCopyrightDetailsDTO.copyrightWorkId);
+				}
+
+				//ApplicantSignature
+				const applicantSignatureAttachment = findRecordFromArray(
+					data.attachmentDTOs,
+					data.customerCopyrightDetailsDTO.applicantSignatureId
+				);
+				if (applicantSignatureAttachment) {
+					const applicantSignatureData = {
+						name: applicantSignatureAttachment.attachmentName,
+						url: applicantSignatureAttachment.url
+					};
+					setApplicantSign(applicantSignatureData);
+					setStateApplicantSignatureId(data.customerCopyrightDetailsDTO.applicantSignatureId);
+				}
+
+				//Author NOC
+				const authorNOCAttachment = findRecordFromArray(
+					data.attachmentDTOs,
+					data.customerCopyrightDetailsDTO.authorNocId
+				);
+				if (authorNOCAttachment) {
+					const authorNOCData = {
+						name: authorNOCAttachment.attachmentName,
+						url: authorNOCAttachment.url
+					};
+					setAuthorNOC(authorNOCData);
+					setStateAuthorNOCId(data.customerCopyrightDetailsDTO.authorNocId);
+				}
+
+				//Letter of Authorization
+				const letterAuthAttachment = findRecordFromArray(
+					data.attachmentDTOs,
+					data.customerCopyrightDetailsDTO.letterOfAuthorizationId
+				);
+				if (letterAuthAttachment) {
+					const letterAuthData = {
+						name: letterAuthAttachment.attachmentName,
+						url: letterAuthAttachment.url
+					};
+					setLetterAuth(letterAuthData);
+					setStateLetterOfAuthorizationId(data.customerCopyrightDetailsDTO.letterOfAuthorizationId);
+				}
+			}
+
+			//Artstic Work
+			if(props.copyrightServiceUploadType === 2){
+				const artsticWorkAttachment = findRecordFromArray(
+					data.attachmentDTOs,
+					data.customerCopyrightDetailsDTO.artisticWorkId
+				);
+				if (artsticWorkAttachment) {
+					const artisticWorkData = {
+						name: artsticWorkAttachment.attachmentName,
+						url: artsticWorkAttachment.url
+					};
+					setArtisticWork(artisticWorkData);
+					setStateArtisticWorkId(data.customerCopyrightDetailsDTO.artisticWorkId);
+				}
+			}
+				
+		}
+
+		if (progress !== 0) {
+			const timer = setInterval(() => {
+				setProgress(oldProgress => {
+					if (oldProgress === 100) {
+						return 0;
+					}
+					return Math.min(oldProgress + 15, 100);
+				});
+			}, 500);
+			return () => {
+				clearInterval(timer);
+			};
+		}
+	}, [
+		progress,
+		props.copyrightServiceUploadType,
+		props.lserviceStageTransaction,
+		//responseCustomerCopyrightkDetailsAndAttachments,
+		stateLserviceStageTransactionId,
+		reset
+	]);
+
+	const findlserviceStageTransactionUsingLserviceStage = (lserviceStageTransactionDTOs, lserviceStageId) => {
+		// const el = lserviceStageTransactionDTOs.find(eltemp => eltemp.lserviceStageId === lserviceStageId);
+		if (props.lserviceTransaction !== null) {
+			const el = lserviceStageTransactionDTOs.find(
+				eltemp =>
+					eltemp.lserviceTransactionId === props.lserviceTransaction.id &&
+					eltemp.lserviceStageId === lserviceStageId
+			);
+			return el || null;
+			// eslint-disable-next-line
+		} else {
+			return null;
+		}
+		// return el || null; // so check result is truthy and extract `id`
+	};
+
+	function findRecordFromArray(attachmentDTOs, attachmentId) {
+		return attachmentDTOs.find(element => {
+			return element.id === attachmentId;
+		});
+	}
+
+	/*const findMatchingCustomerTradeMarkRecordAlongWithAttachment = (
+		customerTrademarkDetailsAndAttachments,
+		transactionId
+	) => {
+		const el = customerTrademarkDetailsAndAttachments.find(
+			eltemp => eltemp.customerTrademarkDetailsDTO.lserviceStageTransactionId === transactionId
+		);
+		return el || null; // so check result is truthy and extract record
+	};*/
+
+	function handleClose(event, reason) {
+		if (reason === 'clickaway') {
+			return;
+		}
+		const message = '';
+		const open = false;
+		const level = messageAndLevel.level === 'success' ? 'success' : 'error';
+		setMessageAndLevel({
+			message,
+			open,
+			level
+		});
+	}
+
+	function onSubmit(model) {
+		let message = '';
+		let open = false;
+		let level = 'error';
+		const docListForUpload = [];
+		const attachmentDTOsListToBeCreated = [];
+
+		if (props.paymentStatus !== 0) {
+			message = 'Please complete the payment step first before trying to complete this step!';
+			open = true;
+			setProgress(0);
+			setPoaUpload(null);
+			setQuestionaire(null);
+			setCopyrightWork(null);
+			setApplicantSign(null);
+			setAuthorNOC(null);
+			setLetterAuth(null);
+			setArtisticWork(null);
+			setMessageAndLevel({
+				message,
+				open,
+				level
+			});
+			return;
+		}
+
+		if(props.copyrightServiceUploadType === 1){
+			//POA
+			if (poaUpload === null) {
+				message = 'Please upload Power Of Authorization before proceeding further!';
+				open = true;
+				setProgress(0);
+				// setPoaUpload(null);
+				setMessageAndLevel({
+					message,
+					open,
+					level
+				});
+				return;
+			}
+			const poaObject = {
+				fileNameForServer: 'POA',
+				docFile: poaUpload
+			};
+			if (statePoaId) {
+				poaObject.id = statePoaId;
+			}
+			docListForUpload.push(poaObject);
+
+			//Questionaire
+			if (questionaire === null) {
+				message = 'Please upload Questionaire Form before proceeding further!';
+				open = true;
+				setProgress(0);
+				// setPoaUpload(null);
+				setMessageAndLevel({
+					message,
+					open,
+					level
+				});
+				return;
+			}
+			const questionaireObject = {
+				fileNameForServer: 'QUESTIONAIRE',
+				docFile: questionaire
+			};
+			if (stateQuestionnaireFormId) {
+				questionaireObject.id = stateQuestionnaireFormId;
+			}
+			docListForUpload.push(questionaireObject);
+
+			//CopyrightWork
+			if (copyrightwork === null) {
+				message = 'Please upload Copyright work before proceeding further!';
+				open = true;
+				setProgress(0);
+				// setPoaUpload(null);
+				setMessageAndLevel({
+					message,
+					open,
+					level
+				});
+				return;
+			}
+			const copyrightworkObject = {
+				fileNameForServer: 'COPYRIGHTWORK',
+				docFile: copyrightwork
+			};
+			if (stateCopyrightWorkId) {
+				copyrightworkObject.id = stateCopyrightWorkId;
+			}
+			docListForUpload.push(copyrightworkObject);
+
+			//Upload Applicant Signature
+			if (applicantSign === null) {
+				message = 'Please upload Copyright work before proceeding further!';
+				open = true;
+				setProgress(0);
+				// setPoaUpload(null);
+				setMessageAndLevel({
+					message,
+					open,
+					level
+				});
+				return;
+			}
+			const applicantSignObject = {
+				fileNameForServer: 'APPLICANTSIGN',
+				docFile: applicantSign
+			};
+			if (stateApplicantSignatureId) {
+				applicantSignObject.id = stateApplicantSignatureId;
+			}
+			docListForUpload.push(applicantSignObject);
+
+			//Author NOC
+			if (authorNOC !== null) {
+				const authorNOCObject = {
+					fileNameForServer: 'AUTHORNOC',
+					docFile: authorNOC
+				};
+				if (stateAuthorNOCId) {
+					authorNOCObject.id = stateAuthorNOCId;
+				}
+				docListForUpload.push(authorNOCObject);
+			}
+
+			//Letter of Authorization
+			if (letterAuth !== null) {
+				const letterAuthObject = {
+					fileNameForServer: 'LETTERAUTH',
+					docFile: letterAuth
+				};
+				if (stateLetterOfAuthorizationId) {
+					letterAuthObject.id = stateLetterOfAuthorizationId;
+				}
+				docListForUpload.push(letterAuthObject);
+			}
+		} else if(props.copyrightServiceUploadType === 2){
+			//POA
+			if (poaUpload === null) {
+				message = 'Please upload Power Of Authorization before proceeding further!';
+				open = true;
+				setProgress(0);
+				// setPoaUpload(null);
+				setMessageAndLevel({
+					message,
+					open,
+					level
+				});
+				return;
+			}
+			const poaObject = {
+				fileNameForServer: 'POA',
+				docFile: poaUpload
+			};
+			if (statePoaId) {
+				poaObject.id = statePoaId;
+			}
+			docListForUpload.push(poaObject);
+
+			//Artistic Work
+			if (artisticWork !== null) {
+				const artisticWorkObject = {
+					fileNameForServer: 'ARTISTICWORK',
+					docFile: artisticWork
+				};
+				if (stateArtisticWorkId) {
+					artisticWorkObject.id = stateArtisticWorkId;
+				}
+				docListForUpload.push(artisticWorkObject);
+			}
+
+		}
+
+		if (props.lserviceTransaction.id == null) {
+			message = 'Please complete the previous step before trying to complete this step!';
+			setPoaUpload(null);
+			open = true;
+		} else {
+			// Upload image if type is image
+			// eslint-disable-next-line
+			// eslint-disable-next-line
+			const promises = [];
+
+			docListForUpload.forEach(doc => {
+				const uploadTask = storage.ref(`docsUploaded/${doc.docFile.name}`).put(doc.docFile);
+				promises.push(uploadTask);
+				uploadTask.on(
+					'state_changed',
+					snapshot => {
+						// progress function ...
+						const progressDone = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+						// console.log(progressDone);
+						if (!Number.isNaN(progressDone)) {
+							setProgress(progressDone);
+						}
+					},
+					error => {
+						// Error function ...
+						message = 'Failed to upload document on server, please try again after some time!';
+						open = true;
+						setProgress(0);
+						setMessageAndLevel({
+							message,
+							open,
+							level
+						});
+					},
+					async () => {
+						// complete function ...
+						const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+
+						const attachmentDTO = {
+							attachmentName: doc.docFile.name,
+							url: downloadURL,
+							attachmentType: 'DOCUMENT',
+							attachmentHash: doc.fileNameForServer
+						};
+						if (doc.id) {
+							attachmentDTO.id = doc.id;
+						}
+						attachmentDTOsListToBeCreated.push(attachmentDTO);
+
+						if (attachmentDTOsListToBeCreated.length === docListForUpload.length) {
+							let lserviceStageTransactionIdForData = null;
+							if (props.lserviceStageTransaction == null) {
+								lserviceStageTransactionIdForData = stateLserviceStageTransactionId;
+							} else {
+								lserviceStageTransactionIdForData = props.lserviceStageTransaction.id;
+							}
+
+							const customerCopyrightDetailsDTO = {
+								typeForTm: 'DOCUMENT',
+								status: 'ACTIVE',
+								word: '',
+								lserviceStageTransactionId: lserviceStageTransactionIdForData
+							};
+							if (stateCustomerCopyrightDetailsId) {
+								customerCopyrightDetailsDTO.id = stateCustomerCopyrightDetailsId;
+							}
+
+							const reqData = {
+								customerCopyrightDetailsDTO,
+								attachmentDTOs: attachmentDTOsListToBeCreated,
+								email: localStorage.getItem('lg_logged_in_email')
+							};
+
+							if (stateCustomerCopyrightDetailsId) {
+								reqData.id = stateCustomerCopyrightDetailsId;
+								//dispatch(updateResponseCustomerCopyrightDetailsAndAttachments(reqData));
+								message = 'Data updated successfully.';
+							} else {
+								//dispatch(addResponseCustomerCopyrightDetailsAndAttachments(reqData));
+								message = 'Data saved successfully.';
+							}
+							open = true;
+							level = 'success';
+							setProgress(0);
+							setMessageAndLevel({
+								message,
+								open,
+								level
+							});
+						}
+					}
+				);
+			});
+			// image name check (if) ends here
+
+			Promise.allSettled(promises)
+				.then(() => {
+					// console.log('Checkpoint #1');
+					// if (attachmentDTOsListToBeCreated.length !== docListForUpload.length) {
+					// 	message = `Failed to upload all documents on server, please try again after some time- 101`;
+					// 	open = true;
+					// 	setPoaUpload(null);
+					// 	setUserAffi(null);
+					// 	setMsmeCert(null);
+					// 	setEvdOfUsePdf(null);
+					// 	setSalesFigure(null);
+					// 	setMarketingDetail(null);
+					// 	setArtWork(null);
+					// 	setOtherDoc(null);
+					// 	setProgress(0);
+					// 	setMessageAndLevel({
+					// 		message,
+					// 		open,
+					// 		level
+					// 	});
+					// }
+				})
+				.catch(err => {
+					// console.log(err.code);
+					message = `Failed to upload all documents on server, please try again after some time- ${err.code}`;
+					open = true;
+					setPoaUpload(null);
+					setProgress(0);
+					setMessageAndLevel({
+						message,
+						open,
+						level
+					});
+				});
+		}
+		setMessageAndLevel({
+			message,
+			open,
+			level
+		});
+
+	}
+
+	function LinearProgressWithLabel(propsTemp) {
+		return (
+			<Box display="flex" alignItems="center">
+				<Box width="100%" mr={1}>
+					<LinearProgress variant="determinate" {...propsTemp} />
+				</Box>
+				<Box minWidth={35}>
+					<Typography variant="body2" color="textSecondary">{`${Math.round(propsTemp.value)}%`}</Typography>
+				</Box>
+			</Box>
+		);
+	}
+
+	/*if (loading) {
+		return <FuseLoading />;
+	}*/
 
     return (
         <div className="flex-grow flex-shrink-0 p-0">
@@ -101,10 +668,11 @@ const CpUploadDocuments = props => {
 							{messageAndLevel.message}
 						</Alert>
 					</Collapse>
-					<form className="justify-items-center mb-20 mt-20" >
+					<form className="justify-items-center mb-20 mt-20" onSubmit={handleSubmit(onSubmit)}>
+
 					{[1, 2].includes(props.copyrightServiceUploadType) && (
 							<>
-						<div className="flex justify-center items-center pt-20" /*onSubmit={handleSubmit(onSubmit)}*/>
+						<div className="flex justify-center items-center pt-20">
 							<Controller
 								name="poa"
 								control={control}
@@ -553,6 +1121,7 @@ const CpUploadDocuments = props => {
 						</Button>
 					
 					</form>
+					
 				</div>
 			</div>
 		</div>
