@@ -555,9 +555,9 @@ const CpUploadDocuments = props => {
 							}
 
 							const customerCopyrightDetailsDTO = {
-								typeForTm: 'DOCUMENT',
+								//typeForTm: 'DOCUMENT',
 								status: 'ACTIVE',
-								word: '',
+								//word: '',
 								lserviceStageTransactionId: lserviceStageTransactionIdForData
 							};
 							if (stateCustomerCopyrightDetailsId) {
@@ -747,7 +747,7 @@ const CpUploadDocuments = props => {
 						
 						{props.copyrightServiceUploadType === 1 && (	
 							<>			
-								<div className="flex justify-center items-center pt-20" /*onSubmit={handleSubmit(onSubmit)}*/>
+								<div className="flex justify-center items-center pt-20">
 									<Controller
 										name="questionaire"
 										control={control}
