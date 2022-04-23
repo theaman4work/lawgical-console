@@ -510,7 +510,8 @@ function ServiceStep(props) {
 							classificationDTOs={serviceSteps.classificationDTOs}
 						/>
 					);
-				} else if(step.stageType === 'CPRDOWNLOADPOAQUESTIONNOCREQ' || step.stageType === 'CPRDOWNLOADPOAREQ'){
+				} else if(step.stageType === 'CPRDOWNLOADPOAQUESTIONNOCREQ' || 
+						  step.stageType === 'CPRDOWNLOADPOAREQ'){
 					return (
 						<CpDownloadDocuments
 							costDetails={serviceSteps.lserviceCostDTO}
@@ -523,6 +524,15 @@ function ServiceStep(props) {
 							)}
 							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
 							lservice={serviceSteps.lserviceDTO}
+							
+							applicantsStatus={applicantsStatusForLserviceTransactions(
+								applicantsData,
+								serviceSteps.lserviceTransactionDTO
+							)}
+							pricingInfoStatus={findAcceptChargesStatus(
+								serviceSteps.lserviceStageTransactionDTOs,
+								serviceSteps.stageDTOs
+							)}
 						/>
 					);
 				} 
@@ -612,6 +622,14 @@ function ServiceStep(props) {
 								? 2
 								:3
 							}
+							paymentStatus={findPaymentStatus(
+								serviceSteps.lserviceStageTransactionDTOs,
+								serviceSteps.stageDTOs
+							)}
+							pricingInfoStatus={findAcceptChargesStatus(
+								serviceSteps.lserviceStageTransactionDTOs,
+								serviceSteps.stageDTOs
+							)}
 						/>
 					);
 				} 
@@ -670,6 +688,14 @@ function ServiceStep(props) {
 									: 5
 							}
 							lservice={serviceSteps.lserviceDTO}
+							paymentStatus={findPaymentStatus(
+								serviceSteps.lserviceStageTransactionDTOs,
+								serviceSteps.stageDTOs
+							)}
+							pricingInfoStatus={findAcceptChargesStatus(
+								serviceSteps.lserviceStageTransactionDTOs,
+								serviceSteps.stageDTOs
+							)}
 						
 						/>
 					);
