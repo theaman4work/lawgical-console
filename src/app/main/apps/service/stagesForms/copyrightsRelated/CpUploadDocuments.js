@@ -1,4 +1,3 @@
-import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import _ from '@lodash';
 import * as yup from 'yup';
 import { makeStyles } from '@material-ui/core/styles';
@@ -20,6 +19,10 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import FuseLoading from '@fuse/core/FuseLoading';
 import { axiosInstance } from 'app/auth-service/axiosInstance';
 import storage from '../../../../firebase/index';
+import { getResponseCustomerCopyrightDetailsAndAttachments,
+		 addResponseCustomerCopyrightDetailsAndAttachments,
+		 updateResponseCustomerCopyrightDetailsAndAttachments,
+		 selectResponseCustomerCopyrightDetailsAndAttachments } from '../../store/responseCustomerCopyrightDetailsAndAttachmentsSlice';
 
 const useStyles = makeStyles(theme => ({
 	productImageUpload: {
@@ -36,25 +39,32 @@ const useStyles = makeStyles(theme => ({
 
 const defaultValues = {
 	poa: undefined,
-	msmeCert: undefined,
-	userAff: undefined,
-	evdOfUse: undefined
+	questionaire: undefined,
+	copyrightwork: undefined,
+	applicantSign: undefined,
+	authorNOC: undefined,
+	letterAuth: undefined,
+	artisticWork: undefined
 };
 
 const schema = yup.object().shape({
 	poa: yup.mixed().nullable(),
-	msmeCert: yup.mixed().nullable(),
-	userAff: yup.mixed().nullable(),
-	evdOfUse: yup.mixed().nullable(),
-	salesFigure: yup.mixed().nullable(),
-	marketingDetail: yup.mixed().nullable(),
-	otherDoc: yup.mixed().nullable()
+	questionaire: yup.mixed().nullable(),
+	copyrightwork: yup.mixed().nullable(),
+	applicantSign: yup.mixed().nullable(),
+	authorNOC: yup.mixed().nullable(),
+	letterAuth: yup.mixed().nullable(),
+	artisticWork: yup.mixed().nullable()
 });
 
 const CpUploadDocuments = props => {
     const classes = useStyles();
 	const dispatch = useDispatch();
-	const serviceSteps = useSelector(({ servicesApp }) => servicesApp.serviceSteps);
+	//const serviceSteps = useSelector(({ servicesApp }) => servicesApp.serviceSteps);
+
+	const responseCustomerCopyrightDetailsAndAttachments = useSelector(
+		selectResponseCustomerCopyrightDetailsAndAttachments
+	);
 
 	const [messageAndLevel, setMessageAndLevel] = useState({
 		message: '',
@@ -87,7 +97,7 @@ const CpUploadDocuments = props => {
 		resolver: yupResolver(schema)
 	});
 
-	/*useEffect(() => {
+	useEffect(() => {
 		if (props.pricingInfoStatus === 0 && props.lserviceTransaction.id !== null) {
 			if (props.lserviceStageTransaction == null) {
 				const data = {
@@ -116,23 +126,23 @@ const CpUploadDocuments = props => {
 	]);
 
 	useDeepCompareEffect(() => {
-		dispatch(getResponseCustomerTrademarkDetailsAndAttachments()).then(() => setLoading(false));
-	}, [dispatch]);*/
+		dispatch(getResponseCustomerCopyrightDetailsAndAttachments()).then(() => setLoading(false));
+	}, [dispatch]);
 
 	// eslint-disable-next-line
 	useEffect(() => {
 		let data = '';
-		/*if (props.lserviceStageTransaction !== null) {
-			data = findMatchingCustomerTradeMarkRecordAlongWithAttachment(
-				//responseCustomerCopyrightDetailsAndAttachments,
+		if (props.lserviceStageTransaction !== null) {
+			data = findMatchingCustomerCopyrightRecordAlongWithAttachment(
+				responseCustomerCopyrightDetailsAndAttachments,
 				props.lserviceStageTransaction.id
 			);
 		} else {
-			data = findMatchingCustomerTradeMarkRecordAlongWithAttachment(
-				//responseCustomerCopyrightDetailsAndAttachments,
+			data = findMatchingCustomerCopyrightRecordAlongWithAttachment(
+				responseCustomerCopyrightDetailsAndAttachments,
 				stateLserviceStageTransactionId
 			);
-		}*/
+		}
 
 		if (data) {
 			setStateCustomerCopyrightDetailsId(data.customerCopyrightDetailsDTO.id);
@@ -166,7 +176,7 @@ const CpUploadDocuments = props => {
 						url: questionaireAttachment.url
 					};
 					setQuestionaire(questionaireData);
-					setStateQuestionnaireFormIdId(data.customerTrademarkDetailsDTO.questionnaireFormId);
+					setStateQuestionnaireFormIdId(data.customerCopyrightDetailsDTO.questionnaireFormId);
 				}
 
 				//CopyrightWork
@@ -261,12 +271,12 @@ const CpUploadDocuments = props => {
 		progress,
 		props.copyrightServiceUploadType,
 		props.lserviceStageTransaction,
-		//responseCustomerCopyrightkDetailsAndAttachments,
+		//responseCustomerCopyrightDetailsAndAttachments,
 		stateLserviceStageTransactionId,
 		reset
 	]);
 
-	const findlserviceStageTransactionUsingLserviceStage = (lserviceStageTransactionDTOs, lserviceStageId) => {
+	/*const findlserviceStageTransactionUsingLserviceStage = (lserviceStageTransactionDTOs, lserviceStageId) => {
 		// const el = lserviceStageTransactionDTOs.find(eltemp => eltemp.lserviceStageId === lserviceStageId);
 		if (props.lserviceTransaction !== null) {
 			const el = lserviceStageTransactionDTOs.find(
@@ -280,7 +290,7 @@ const CpUploadDocuments = props => {
 			return null;
 		}
 		// return el || null; // so check result is truthy and extract `id`
-	};
+	};*/
 
 	function findRecordFromArray(attachmentDTOs, attachmentId) {
 		return attachmentDTOs.find(element => {
@@ -288,15 +298,15 @@ const CpUploadDocuments = props => {
 		});
 	}
 
-	/*const findMatchingCustomerTradeMarkRecordAlongWithAttachment = (
-		customerTrademarkDetailsAndAttachments,
+	const findMatchingCustomerCopyrightRecordAlongWithAttachment = (
+		customerCopyrightDetailsAndAttachments,
 		transactionId
 	) => {
-		const el = customerTrademarkDetailsAndAttachments.find(
-			eltemp => eltemp.customerTrademarkDetailsDTO.lserviceStageTransactionId === transactionId
+		const el = customerCopyrightDetailsAndAttachments.find(
+			eltemp => eltemp.customerCopyrightDetailsDTO.lserviceStageTransactionId === transactionId
 		);
 		return el || null; // so check result is truthy and extract record
-	};*/
+	};
 
 	function handleClose(event, reason) {
 		if (reason === 'clickaway') {
@@ -375,7 +385,7 @@ const CpUploadDocuments = props => {
 				return;
 			}
 			const questionaireObject = {
-				fileNameForServer: 'QUESTIONAIRE',
+				fileNameForServer: 'QUESTIONFORM',
 				docFile: questionaire
 			};
 			if (stateQuestionnaireFormId) {
@@ -397,7 +407,7 @@ const CpUploadDocuments = props => {
 				return;
 			}
 			const copyrightworkObject = {
-				fileNameForServer: 'COPYRIGHTWORK',
+				fileNameForServer: 'COPYRTWORK',
 				docFile: copyrightwork
 			};
 			if (stateCopyrightWorkId) {
@@ -419,7 +429,7 @@ const CpUploadDocuments = props => {
 				return;
 			}
 			const applicantSignObject = {
-				fileNameForServer: 'APPLICANTSIGN',
+				fileNameForServer: 'UPAPPCNTSIGN',
 				docFile: applicantSign
 			};
 			if (stateApplicantSignatureId) {
@@ -442,7 +452,7 @@ const CpUploadDocuments = props => {
 			//Letter of Authorization
 			if (letterAuth !== null) {
 				const letterAuthObject = {
-					fileNameForServer: 'LETTERAUTH',
+					fileNameForServer: 'LETTOFAUTH',
 					docFile: letterAuth
 				};
 				if (stateLetterOfAuthorizationId) {
@@ -476,7 +486,7 @@ const CpUploadDocuments = props => {
 			//Artistic Work
 			if (artisticWork !== null) {
 				const artisticWorkObject = {
-					fileNameForServer: 'ARTISTICWORK',
+					fileNameForServer: 'UPARTWORK',
 					docFile: artisticWork
 				};
 				if (stateArtisticWorkId) {
@@ -562,10 +572,10 @@ const CpUploadDocuments = props => {
 
 							if (stateCustomerCopyrightDetailsId) {
 								reqData.id = stateCustomerCopyrightDetailsId;
-								//dispatch(updateResponseCustomerCopyrightDetailsAndAttachments(reqData));
+								dispatch(updateResponseCustomerCopyrightDetailsAndAttachments(reqData));
 								message = 'Data updated successfully.';
 							} else {
-								//dispatch(addResponseCustomerCopyrightDetailsAndAttachments(reqData));
+								dispatch(addResponseCustomerCopyrightDetailsAndAttachments(reqData));
 								message = 'Data saved successfully.';
 							}
 							open = true;
@@ -638,9 +648,9 @@ const CpUploadDocuments = props => {
 		);
 	}
 
-	/*if (loading) {
+	if (loading) {
 		return <FuseLoading />;
-	}*/
+	}
 
     return (
         <div className="flex-grow flex-shrink-0 p-0">
@@ -1121,7 +1131,7 @@ const CpUploadDocuments = props => {
 						</Button>
 					
 					</form>
-					
+					{progress !== 0 && <LinearProgressWithLabel value={progress} />}
 				</div>
 			</div>
 		</div>
