@@ -90,13 +90,13 @@ const CpDownloadDocuments = props => {
 													</TableCell>
 												</TableRow>
 											)}
-											{props.stage.poaDraftUrl && (
+											{props.stage.questionnaireFormUrl && (
 												<TableRow
 													className="h-36 cursor-pointer"
 													hover
 													tabIndex={-1}
-													key={props.stage.poaDraftUrl.substr(
-														props.stage.poaDraftUrl.length - 4
+													key={props.stage.questionnaireFormUrl.substr(
+														props.stage.questionnaireFormUrl.length - 4
 													)}
 												>
 													<TableCell component="th" scope="row">
@@ -113,7 +113,7 @@ const CpDownloadDocuments = props => {
 															color="primary"
 															className={classes.largeIcon}
 															onClick={() =>
-																window.open(props.stage.poaDraftUrl, '_self')
+																window.open(props.stage.questionnaireFormUrl, '_self')
 															}
 														/>
 													</TableCell>
