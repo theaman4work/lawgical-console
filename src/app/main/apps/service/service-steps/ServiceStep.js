@@ -36,6 +36,7 @@ import CartAndPaymentTrademark from '../stagesForms/payment/CartAndPaymentTradem
 import CpDownloadDocuments from '../stagesForms/copyrightsRelated/CpDownloadDocuments';
 import CpUploadDocuments from '../stagesForms/copyrightsRelated/CpUploadDocuments';
 import CpDownloadFilingReceiptNoc from '../stagesForms/copyrightsRelated/CpDownloadFilingReceiptNoc';
+import CartAndPaymentCopyright from '../stagesForms/payment/CartAndPaymentCopyright';
 
 const useStyles = makeStyles(theme => ({
 	stepLabel: {
@@ -455,15 +456,17 @@ function ServiceStep(props) {
 				} else if (step.stageType === 'PAYMENT') {
 					// return 4th step Payment for Copyights
 					return (
-						<CartAndPaymentTrademark
+						<CartAndPaymentCopyright
 							costDetails={serviceSteps.lserviceCostDTO}
 							stepCount={4}
 							step={step}
-							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
+							stage={findMatchingStageUsingType(serviceSteps.stageDTOs, step)}
+						
 							lserviceStageTransaction={findMatchingLserviceStageTransaction(
 								serviceSteps.lserviceStageTransactionDTOs,
 								step
 							)}
+							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
 							lservice={serviceSteps.lserviceDTO}
 							aggrementStatus={findAggreementStageStatus(
 								serviceSteps.lserviceStageTransactionDTOs,
