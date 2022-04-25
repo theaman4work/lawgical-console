@@ -22,7 +22,8 @@ import storage from '../../../../firebase/index';
 import { getResponseCustomerCopyrightDetailsAndAttachments,
 		 addResponseCustomerCopyrightDetailsAndAttachments,
 		 updateResponseCustomerCopyrightDetailsAndAttachments,
-		 selectResponseCustomerCopyrightDetailsAndAttachments } from '../../store/responseCustomerCopyrightDetailsAndAttachmentsSlice';
+		 selectResponseCustomerCopyrightDetailsAndAttachments 
+		} from '../../store/responseCustomerCopyrightDetailsAndAttachmentsSlice';
 
 const useStyles = makeStyles(theme => ({
 	productImageUpload: {
@@ -271,26 +272,11 @@ const CpUploadDocuments = props => {
 		progress,
 		props.copyrightServiceUploadType,
 		props.lserviceStageTransaction,
-		//responseCustomerCopyrightDetailsAndAttachments,
+		responseCustomerCopyrightDetailsAndAttachments,
 		stateLserviceStageTransactionId,
 		reset
 	]);
 
-	/*const findlserviceStageTransactionUsingLserviceStage = (lserviceStageTransactionDTOs, lserviceStageId) => {
-		// const el = lserviceStageTransactionDTOs.find(eltemp => eltemp.lserviceStageId === lserviceStageId);
-		if (props.lserviceTransaction !== null) {
-			const el = lserviceStageTransactionDTOs.find(
-				eltemp =>
-					eltemp.lserviceTransactionId === props.lserviceTransaction.id &&
-					eltemp.lserviceStageId === lserviceStageId
-			);
-			return el || null;
-			// eslint-disable-next-line
-		} else {
-			return null;
-		}
-		// return el || null; // so check result is truthy and extract `id`
-	};*/
 
 	function findRecordFromArray(attachmentDTOs, attachmentId) {
 		return attachmentDTOs.find(element => {
