@@ -26,7 +26,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { updateData } from '../../store/serviceStepsSlice';
-import { selectResponseCustomerTrademarkDetailsAndAttachments } from '../../store/responseCustomerTrademarkDetailsAndAttachmentsSlice';
+import { selectResponseCustomerCopyrightDetailsAndAttachments } from '../../store/responseCustomerCopyrightDetailsAndAttachmentsSlice';
 import { applicantTypesList } from '../applicantTypeList';
 
 const useStyles = makeStyles({
@@ -59,9 +59,9 @@ const CartAndPayment = props => {
 	const [map, setMap] = useState('applicantDetails');
 	const serviceSteps = useSelector(({ servicesApp }) => servicesApp.serviceSteps);
 
-	// const responseCustomerTrademarkDetailsAndAttachments = useSelector(
-	// 	selectResponseCustomerTrademarkDetailsAndAttachments
-	// );
+	const responseCustomerCopyrightDetailsAndAttachments = useSelector(
+		selectResponseCustomerCopyrightDetailsAndAttachments
+	 );
 
 	const [messageAndLevel, setMessageAndLevel] = useState({
 		message: '',
@@ -157,6 +157,7 @@ const CartAndPayment = props => {
 			open = true;
 			level = 'error';
 		}
+
 		setMessageAndLevel({
 			message,
 			open,
@@ -164,11 +165,11 @@ const CartAndPayment = props => {
 		});
 	}
 
-	function handleOpenDialog(applicants, trademarks) {
+	function handleOpenDialog(applicants) {
 		setDialog({
 			open: true,
 			applicantsData: applicants,
-			tradeMarksData: trademarks
+			//tradeMarksData: trademarks
 		});
 	}
 
@@ -363,8 +364,8 @@ const CartAndPayment = props => {
 					dialog,
 					map,
 					props.applicantsStatus,
-					totaFilteredRecords,
-					props.classificationDTOs,
+					//totaFilteredRecords,
+					//props.classificationDTOs,
 					props.step.stageType
 				])}
 			</div>
@@ -379,14 +380,14 @@ const CartAndPayment = props => {
 
 								{
 									// eslint-disable-next-line
-									(props.applicantsStatus.length > 0 && totaFilteredRecords.length > 0) && (
+									(props.applicantsStatus.length > 0 ) && (
 										<Button
 											variant="contained"
 											color="primary"
 											size="medium"
 											aria-label="addnew"
 											onClick={() =>
-												handleOpenDialog(props.applicantsStatus, totaFilteredRecords)
+												handleOpenDialog(props.applicantsStatus)
 											}
 										>
 											Preview
@@ -408,9 +409,7 @@ const CartAndPayment = props => {
 															: 'h6'
 													}
 													color="textSecondary"
-												>
-													{totalTextLabel}
-												</Typography>
+												/>
 											</TableCell>
 											<TableCell align="right">
 												<Typography
