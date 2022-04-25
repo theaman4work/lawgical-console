@@ -96,7 +96,7 @@ const CpDownloadDocuments = props => {
 													hover
 													tabIndex={-1}
 													key={props.stage.questionnaireFormUrl.substr(
-														props.stage.questionnaireFormUrl.length - 4
+														props.stage.questionnaireFormUrl.length - 5
 													)}
 												>
 													<TableCell component="th" scope="row">
@@ -125,7 +125,7 @@ const CpDownloadDocuments = props => {
 													hover
 													tabIndex={-1}
 													key={props.stage.nocDraftUrl.substr(
-														props.stage.nocDraftUrl.length - 4
+														props.stage.nocDraftUrl.length - 6
 													)}
 												>
 													<TableCell component="th" scope="row">
