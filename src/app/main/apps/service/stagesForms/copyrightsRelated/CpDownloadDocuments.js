@@ -25,7 +25,6 @@ import FuseLoading from '@fuse/core/FuseLoading';
 import { axiosInstance } from 'app/auth-service/axiosInstance';
 import { updateData } from '../../store/serviceStepsSlice';
 
-
 const useStyles = makeStyles({
 	table: {
 		minWidth: 650
@@ -33,7 +32,6 @@ const useStyles = makeStyles({
 });
 
 const CpDownloadDocuments = props => {
-
 	const classes = useStyles();
 
 	return (
@@ -43,122 +41,106 @@ const CpDownloadDocuments = props => {
 					<Typography className="text-16 sm:text-20 truncate font-semibold">
 						{`Step ${props.stepCount} - ${props.step.name}`}
 					</Typography>
-					{(
-						<>
-							{<Divider className="mt-20" />}
-							<div className="mt-20 w-full flex items-center justify-center">
-								<FuseScrollbars className="flex-grow overflow-x-auto">
-									<Table
-										stickyHeader
-										className={classes.table}
-										size="small"
-										aria-labelledby="tableTitle"
-									>
-										<TableHead>
-											<TableRow>
-												<TableCell>Document</TableCell>
-												<TableCell>Link</TableCell>
+					<>
+						<Divider className="mt-20" />
+						<div className="mt-20 w-full flex items-center justify-center">
+							<FuseScrollbars className="flex-grow overflow-x-auto">
+								<Table stickyHeader className={classes.table} size="small" aria-labelledby="tableTitle">
+									<TableHead>
+										<TableRow>
+											<TableCell>Document</TableCell>
+											<TableCell>Link</TableCell>
+										</TableRow>
+									</TableHead>
+									<TableBody>
+										{props.stage.poaDraftUrl && (
+											<TableRow
+												className="h-36 cursor-pointer"
+												hover
+												tabIndex={-1}
+												key={props.stage.poaDraftUrl.substr(props.stage.poaDraftUrl.length - 4)}
+											>
+												<TableCell component="th" scope="row">
+													POA Draft
+												</TableCell>
+												<TableCell
+													align="center"
+													className="w-52 px-4 md:px-0"
+													padding="none"
+													component="th"
+													scope="row"
+												>
+													<GetApp
+														color="primary"
+														className={classes.largeIcon}
+														onClick={() => window.open(props.stage.poaDraftUrl, '_self')}
+													/>
+												</TableCell>
 											</TableRow>
-										</TableHead>
-										<TableBody>
-											{props.stage.poaDraftUrl && (
-												<TableRow
-													className="h-36 cursor-pointer"
-													hover
-													tabIndex={-1}
-													key={props.stage.poaDraftUrl.substr(
-														props.stage.poaDraftUrl.length - 4
-													)}
+										)}
+										{props.stage.questionnaireFormUrl && (
+											<TableRow
+												className="h-36 cursor-pointer"
+												hover
+												tabIndex={-1}
+												key={props.stage.questionnaireFormUrl.substr(
+													props.stage.questionnaireFormUrl.length - 5
+												)}
+											>
+												<TableCell component="th" scope="row">
+													Questionaire Form
+												</TableCell>
+												<TableCell
+													align="center"
+													className="w-52 px-4 md:px-0"
+													padding="none"
+													component="th"
+													scope="row"
 												>
-													<TableCell component="th" scope="row">
-														POA Draft
-													</TableCell>
-													<TableCell
-														align="center"
-														className="w-52 px-4 md:px-0"
-														padding="none"
-														component="th"
-														scope="row"
-													>
-														<GetApp
-															color="primary"
-															className={classes.largeIcon}
-															onClick={() =>
-																window.open(props.stage.poaDraftUrl, '_self')
-															}
-														/>
-													</TableCell>
-												</TableRow>
-											)}
-											{props.stage.questionnaireFormUrl && (
-												<TableRow
-													className="h-36 cursor-pointer"
-													hover
-													tabIndex={-1}
-													key={props.stage.questionnaireFormUrl.substr(
-														props.stage.questionnaireFormUrl.length - 5
-													)}
+													<GetApp
+														color="primary"
+														className={classes.largeIcon}
+														onClick={() =>
+															window.open(props.stage.questionnaireFormUrl, '_self')
+														}
+													/>
+												</TableCell>
+											</TableRow>
+										)}
+										{props.stage.nocDraftUrl ? (
+											<TableRow
+												className="h-36 cursor-pointer"
+												hover
+												tabIndex={-1}
+												key={props.stage.nocDraftUrl.substr(props.stage.nocDraftUrl.length - 6)}
+											>
+												<TableCell component="th" scope="row">
+													NOC Draft
+												</TableCell>
+												<TableCell
+													align="center"
+													className="w-52 px-4 md:px-0"
+													padding="none"
+													component="th"
+													scope="row"
 												>
-													<TableCell component="th" scope="row">
-														Questionaire Form
-													</TableCell>
-													<TableCell
-														align="center"
-														className="w-52 px-4 md:px-0"
-														padding="none"
-														component="th"
-														scope="row"
-													>
-														<GetApp
-															color="primary"
-															className={classes.largeIcon}
-															onClick={() =>
-																window.open(props.stage.questionnaireFormUrl, '_self')
-															}
-														/>
-													</TableCell>
-												</TableRow>
-											)}
-											{props.stage.nocDraftUrl ? (
-												<TableRow
-													className="h-36 cursor-pointer"
-													hover
-													tabIndex={-1}
-													key={props.stage.nocDraftUrl.substr(
-														props.stage.nocDraftUrl.length - 6
-													)}
-												>
-													<TableCell component="th" scope="row">
-														NOC Draft
-													</TableCell>
-													<TableCell
-														align="center"
-														className="w-52 px-4 md:px-0"
-														padding="none"
-														component="th"
-														scope="row"
-													>
-														<GetApp
-															color="primary"
-															className={classes.largeIcon}
-															onClick={() =>
-																window.open(props.stage.nocDraftUrl, '_self')
-															}
-														/>
-													</TableCell>
-												</TableRow>
-											) : null}
-										</TableBody>
-									</Table>
-								</FuseScrollbars>
-							</div>
-						</>
-					)}
+													<GetApp
+														color="primary"
+														className={classes.largeIcon}
+														onClick={() => window.open(props.stage.nocDraftUrl, '_self')}
+													/>
+												</TableCell>
+											</TableRow>
+										) : null}
+									</TableBody>
+								</Table>
+							</FuseScrollbars>
+						</div>
+					</>
 				</div>
 			</div>
 		</div>
 	);
-
 };
 
 export default memo(CpDownloadDocuments);

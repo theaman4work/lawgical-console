@@ -32,17 +32,15 @@ const useStyles = makeStyles({
 	}
 });
 
-/*const Transition = forwardRef(function Transition(props, ref) {
+/* const Transition = forwardRef(function Transition(props, ref) {
 	return <Slide direction="up" ref={ref} {...props} />;
-});*/
+}); */
 
 function CpDownloadFilingReceiptNoc(props) {
-    //const dispatch = useDispatch();
 	const classes = useStyles();
-
-    //const responseDocumentReviewsAndAttachments = useSelector(selectResponseDocumentReviewAndAttachments);
-
-	/*const [loading, setLoading] = useState(true);
+	/* 
+	const responseDocumentReviewsAndAttachments = useSelector(selectResponseDocumentReviewAndAttachments);
+	const [loading, setLoading] = useState(true);
 	const [data, setData] = useState(responseDocumentReviewsAndAttachments);
 	const [updatesData, setUpdatesData] = useState(null);
 	const [page, setPage] = useState(0);
@@ -62,27 +60,20 @@ function CpDownloadFilingReceiptNoc(props) {
 			imageUrl: url,
 			imageName: name
 		});
-	}*/
-
-    return (
-        <>
-        <div>
-        
-
-                <motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1, transition: { delay: 0.1 } }}
-					className="flex flex-1 items-center justify-center h-full"
-				>
-					<Typography color="textSecondary" variant="h5">
-						There are no records!
-					</Typography>
-				</motion.div>
-        </div>
-        </>
-
-    );
-
+	} */
+	return (
+		<div>
+			<motion.div
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1, transition: { delay: 0.1 } }}
+				className="flex flex-1 items-center justify-center h-full"
+			>
+				<Typography color="textSecondary" variant="h5">
+					There are no records!
+				</Typography>
+			</motion.div>
+		</div>
+	);
 }
 
 export default withRouter(CpDownloadFilingReceiptNoc);

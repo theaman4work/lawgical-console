@@ -61,7 +61,7 @@ const CartAndPayment = props => {
 
 	const responseCustomerCopyrightDetailsAndAttachments = useSelector(
 		selectResponseCustomerCopyrightDetailsAndAttachments
-	 );
+	);
 
 	const [messageAndLevel, setMessageAndLevel] = useState({
 		message: '',
@@ -87,7 +87,7 @@ const CartAndPayment = props => {
 
 	const total = platformAndBaseTotal + tax;
 
-	let chargesToBePaid = total;
+	const chargesToBePaid = total;
 
 	let stageStatus =
 		props.lserviceStageTransaction != null
@@ -168,8 +168,7 @@ const CartAndPayment = props => {
 	function handleOpenDialog(applicants) {
 		setDialog({
 			open: true,
-			applicantsData: applicants,
-			//tradeMarksData: trademarks
+			applicantsData: applicants
 		});
 	}
 
@@ -364,8 +363,8 @@ const CartAndPayment = props => {
 					dialog,
 					map,
 					props.applicantsStatus,
-					//totaFilteredRecords,
-					//props.classificationDTOs,
+					// totaFilteredRecords,
+					// props.classificationDTOs,
 					props.step.stageType
 				])}
 			</div>
@@ -377,7 +376,6 @@ const CartAndPayment = props => {
 								<Typography className="text-16 sm:text-20 truncate font-semibold">
 									{`Step ${props.stepCount} - ${props.step.name}`}
 								</Typography>
-
 								{
 									// eslint-disable-next-line
 									(props.applicantsStatus.length > 0 ) && (
@@ -386,9 +384,7 @@ const CartAndPayment = props => {
 											color="primary"
 											size="medium"
 											aria-label="addnew"
-											onClick={() =>
-												handleOpenDialog(props.applicantsStatus)
-											}
+											onClick={() => handleOpenDialog(props.applicantsStatus)}
 										>
 											Preview
 										</Button>

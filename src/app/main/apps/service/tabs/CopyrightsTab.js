@@ -58,10 +58,6 @@ function CopyrightsTab() {
 		}
 	});
 
-	/*if (productServicesForCopyright.length < 1) {
-		return null;
-	}*/
-
 	const container = {
 		show: {
 			transition: {
@@ -214,112 +210,117 @@ function CopyrightsTab() {
 				}, [dialog, dispatch, serviceTransactions])}
 			</div>
 			<div className="flex flex-col flex-auto flex-shrink-0 w-full">
-			{productServicesForCopyright &&
-				(productServicesForCopyright.length > 0 ? (
-					<motion.div className="flex flex-wrap py-24" variants={container} initial="hidden" animate="show">
-						{productServicesForCopyright.map(productService => {
-							return (
-								<motion.div
-									variants={item}
-									className="w-full pb-24 sm:w-1/2 lg:w-1/3 sm:p-16"
-									key={productService.id}
-								>
-									<Card className="flex flex-col h-256 shadow">
-										<div
-											className="flex flex-shrink-0 items-center justify-between px-24 h-64"
-											style={{
-												background: '#607D8B',
-												color: theme.palette.getContrastText('#607D8B')
-											}}
-										>
-											<Typography className="font-medium truncate" color="inherit">
-												{productService.name}
-											</Typography>
-										</div>
-										<CardContent className="flex flex-col flex-auto items-start justify-start pl-6 pt-1 pr-6">
-											<List
-												component="nav"
-												style={{ maxHeight: '200px', overflow: 'auto', width: '100%' }}
-												className="p-0 pt-0"
-												autoFocus
+				{productServicesForCopyright &&
+					(productServicesForCopyright.length > 0 ? (
+						<motion.div
+							className="flex flex-wrap py-24"
+							variants={container}
+							initial="hidden"
+							animate="show"
+						>
+							{productServicesForCopyright.map(productService => {
+								return (
+									<motion.div
+										variants={item}
+										className="w-full pb-24 sm:w-1/2 lg:w-1/3 sm:p-16"
+										key={productService.id}
+									>
+										<Card className="flex flex-col h-256 shadow">
+											<div
+												className="flex flex-shrink-0 items-center justify-between px-24 h-64"
+												style={{
+													background: '#607D8B',
+													color: theme.palette.getContrastText('#607D8B')
+												}}
 											>
-												{
-													// eslint-disable-next-line
-												subServicesForCopyright.map((subService, i) => {
-														const url = `/apps/services/steps/copyrights/${subService.id}`;
-														if (
-															subService.productLserviceId === productService.id &&
-															subService.status === 'ACTIVE'
-														) {
-															const listOfServiceTransactions = serviceTransactions.filter(
-																rec =>
-																	rec.servicesId === subService.id &&
-																	rec.status === 'ACTIVE'
-															);
+												<Typography className="font-medium truncate" color="inherit">
+													{productService.name}
+												</Typography>
+											</div>
+											<CardContent className="flex flex-col flex-auto items-start justify-start pl-6 pt-1 pr-6">
+												<List
+													component="nav"
+													style={{ maxHeight: '200px', overflow: 'auto', width: '100%' }}
+													className="p-0 pt-0"
+													autoFocus
+												>
+													{
+														// eslint-disable-next-line
+													subServicesForCopyright.map((subService, i) => {
+															const url = `/apps/services/steps/copyrights/${subService.id}`;
+															if (
+																subService.productLserviceId === productService.id &&
+																subService.status === 'ACTIVE'
+															) {
+																const listOfServiceTransactions = serviceTransactions.filter(
+																	rec =>
+																		rec.servicesId === subService.id &&
+																		rec.status === 'ACTIVE'
+																);
 
-															if (listOfServiceTransactions.length > 0) {
-																return (
-																	<ListItem
-																		key={subService.id}
-																		onClick={() =>
-																			handleOpenDialog(
-																				subService,
-																				listOfServiceTransactions
-																			)
-																		}
-																		className="pl-12"
-																		button
-																	>
-																		<ListItemIcon className="min-w-40">
-																			<Icon className="text-20">
-																				import_contacts
-																			</Icon>
-																		</ListItemIcon>
-																		<ListItemText primary={subService.name} />
-																	</ListItem>
-																);
-																// eslint-disable-next-line
-															} else {
-																return (
-																	<ListItem
-																		key={subService.id}
-																		className="pl-12"
-																		button
-																		component={Link}
-																		to={url}
-																	>
-																		<ListItemIcon className="min-w-40">
-																			<Icon className="text-20">
-																				import_contacts
-																			</Icon>
-																		</ListItemIcon>
-																		<ListItemText primary={subService.name} />
-																	</ListItem>
-																);
+																if (listOfServiceTransactions.length > 0) {
+																	return (
+																		<ListItem
+																			key={subService.id}
+																			onClick={() =>
+																				handleOpenDialog(
+																					subService,
+																					listOfServiceTransactions
+																				)
+																			}
+																			className="pl-12"
+																			button
+																		>
+																			<ListItemIcon className="min-w-40">
+																				<Icon className="text-20">
+																					import_contacts
+																				</Icon>
+																			</ListItemIcon>
+																			<ListItemText primary={subService.name} />
+																		</ListItem>
+																	);
+																	// eslint-disable-next-line
+																} else {
+																	return (
+																		<ListItem
+																			key={subService.id}
+																			className="pl-12"
+																			button
+																			component={Link}
+																			to={url}
+																		>
+																			<ListItemIcon className="min-w-40">
+																				<Icon className="text-20">
+																					import_contacts
+																				</Icon>
+																			</ListItemIcon>
+																			<ListItemText primary={subService.name} />
+																		</ListItem>
+																	);
+																}
 															}
-														}
-													})
-												}
-											</List>
-										</CardContent>
-										{/* <LinearProgress
-											className="w-full"
-											variant="determinate"
-											value={(productService.activeStep * 100) / productService.totalSteps}
-											color="secondary"
-										/> */}
-									</Card>
-								</motion.div>
-							);
-						})}
-					</motion.div>
-				) : (
-					<div className="flex flex-1 items-center justify-center">
-						<Typography color="textSecondary" className="text-24 my-24">
-							No Copyright services found!
-						</Typography>
-					</div>
-				))}
+														})
+													}
+												</List>
+											</CardContent>
+											{/* <LinearProgress
+												className="w-full"
+												variant="determinate"
+												value={(productService.activeStep * 100) / productService.totalSteps}
+												color="secondary"
+											/> */}
+										</Card>
+									</motion.div>
+								);
+							})}
+						</motion.div>
+					) : (
+						<div className="flex flex-1 items-center justify-center">
+							<Typography color="textSecondary" className="text-24 my-24">
+								No Copyright services found!
+							</Typography>
+						</div>
+					))}
 			</div>
 		</>
 	);

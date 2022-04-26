@@ -19,11 +19,12 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import FuseLoading from '@fuse/core/FuseLoading';
 import { axiosInstance } from 'app/auth-service/axiosInstance';
 import storage from '../../../../firebase/index';
-import { getResponseCustomerCopyrightDetailsAndAttachments,
-		 addResponseCustomerCopyrightDetailsAndAttachments,
-		 updateResponseCustomerCopyrightDetailsAndAttachments,
-		 selectResponseCustomerCopyrightDetailsAndAttachments 
-		} from '../../store/responseCustomerCopyrightDetailsAndAttachmentsSlice';
+import {
+	getResponseCustomerCopyrightDetailsAndAttachments,
+	addResponseCustomerCopyrightDetailsAndAttachments,
+	updateResponseCustomerCopyrightDetailsAndAttachments,
+	selectResponseCustomerCopyrightDetailsAndAttachments
+} from '../../store/responseCustomerCopyrightDetailsAndAttachmentsSlice';
 
 const useStyles = makeStyles(theme => ({
 	productImageUpload: {
@@ -59,9 +60,9 @@ const schema = yup.object().shape({
 });
 
 const CpUploadDocuments = props => {
-    const classes = useStyles();
+	const classes = useStyles();
 	const dispatch = useDispatch();
-	//const serviceSteps = useSelector(({ servicesApp }) => servicesApp.serviceSteps);
+	// const serviceSteps = useSelector(({ servicesApp }) => servicesApp.serviceSteps);
 
 	const responseCustomerCopyrightDetailsAndAttachments = useSelector(
 		selectResponseCustomerCopyrightDetailsAndAttachments
@@ -147,13 +148,9 @@ const CpUploadDocuments = props => {
 
 		if (data) {
 			setStateCustomerCopyrightDetailsId(data.customerCopyrightDetailsDTO.id);
-
-			if([1,2].includes(props.copyrightServiceUploadType)) {
-				//POA
-				const poaAttachment = findRecordFromArray(
-					data.attachmentDTOs,
-					data.customerCopyrightDetailsDTO.poaId
-				);
+			if ([1, 2].includes(props.copyrightServiceUploadType)) {
+				// POA
+				const poaAttachment = findRecordFromArray(data.attachmentDTOs, data.customerCopyrightDetailsDTO.poaId);
 				if (poaAttachment) {
 					const poaData = {
 						name: poaAttachment.attachmentName,
@@ -163,10 +160,8 @@ const CpUploadDocuments = props => {
 					setStatePoaId(data.customerCopyrightDetailsDTO.poaId);
 				}
 			}
-
-			if(props.copyrightServiceUploadType === 1){
-
-				//Questionaire
+			if (props.copyrightServiceUploadType === 1) {
+				// Questionaire
 				const questionaireAttachment = findRecordFromArray(
 					data.attachmentDTOs,
 					data.customerCopyrightDetailsDTO.questionnaireFormId
@@ -179,8 +174,7 @@ const CpUploadDocuments = props => {
 					setQuestionaire(questionaireData);
 					setStateQuestionnaireFormIdId(data.customerCopyrightDetailsDTO.questionnaireFormId);
 				}
-
-				//CopyrightWork
+				// CopyrightWork
 				const copyrightWorkAttachment = findRecordFromArray(
 					data.attachmentDTOs,
 					data.customerCopyrightDetailsDTO.copyrightWorkId
@@ -193,8 +187,7 @@ const CpUploadDocuments = props => {
 					setCopyrightWork(copyrightWorkData);
 					setStateCopyrightWorkId(data.customerCopyrightDetailsDTO.copyrightWorkId);
 				}
-
-				//ApplicantSignature
+				// ApplicantSignature
 				const applicantSignatureAttachment = findRecordFromArray(
 					data.attachmentDTOs,
 					data.customerCopyrightDetailsDTO.applicantSignatureId
@@ -207,8 +200,7 @@ const CpUploadDocuments = props => {
 					setApplicantSign(applicantSignatureData);
 					setStateApplicantSignatureId(data.customerCopyrightDetailsDTO.applicantSignatureId);
 				}
-
-				//Author NOC
+				// Author NOC
 				const authorNOCAttachment = findRecordFromArray(
 					data.attachmentDTOs,
 					data.customerCopyrightDetailsDTO.authorNocId
@@ -221,8 +213,7 @@ const CpUploadDocuments = props => {
 					setAuthorNOC(authorNOCData);
 					setStateAuthorNOCId(data.customerCopyrightDetailsDTO.authorNocId);
 				}
-
-				//Letter of Authorization
+				// Letter of Authorization
 				const letterAuthAttachment = findRecordFromArray(
 					data.attachmentDTOs,
 					data.customerCopyrightDetailsDTO.letterOfAuthorizationId
@@ -236,9 +227,8 @@ const CpUploadDocuments = props => {
 					setStateLetterOfAuthorizationId(data.customerCopyrightDetailsDTO.letterOfAuthorizationId);
 				}
 			}
-
-			//Artstic Work
-			if(props.copyrightServiceUploadType === 2){
+			// Artstic Work
+			if (props.copyrightServiceUploadType === 2) {
 				const artsticWorkAttachment = findRecordFromArray(
 					data.attachmentDTOs,
 					data.customerCopyrightDetailsDTO.artisticWorkId
@@ -252,7 +242,6 @@ const CpUploadDocuments = props => {
 					setStateArtisticWorkId(data.customerCopyrightDetailsDTO.artisticWorkId);
 				}
 			}
-				
 		}
 
 		if (progress !== 0) {
@@ -276,7 +265,6 @@ const CpUploadDocuments = props => {
 		stateLserviceStageTransactionId,
 		reset
 	]);
-
 
 	function findRecordFromArray(attachmentDTOs, attachmentId) {
 		return attachmentDTOs.find(element => {
@@ -334,8 +322,8 @@ const CpUploadDocuments = props => {
 			return;
 		}
 
-		if(props.copyrightServiceUploadType === 1){
-			//POA
+		if (props.copyrightServiceUploadType === 1) {
+			// POA
 			if (poaUpload === null) {
 				message = 'Please upload Power Of Authorization before proceeding further!';
 				open = true;
@@ -357,7 +345,7 @@ const CpUploadDocuments = props => {
 			}
 			docListForUpload.push(poaObject);
 
-			//Questionaire
+			// Questionaire
 			if (questionaire === null) {
 				message = 'Please upload Questionaire Form before proceeding further!';
 				open = true;
@@ -379,7 +367,7 @@ const CpUploadDocuments = props => {
 			}
 			docListForUpload.push(questionaireObject);
 
-			//CopyrightWork
+			// CopyrightWork
 			if (copyrightwork === null) {
 				message = 'Please upload Copyright work before proceeding further!';
 				open = true;
@@ -401,7 +389,7 @@ const CpUploadDocuments = props => {
 			}
 			docListForUpload.push(copyrightworkObject);
 
-			//Upload Applicant Signature
+			// Upload Applicant Signature
 			if (applicantSign === null) {
 				message = 'Please upload Copyright work before proceeding further!';
 				open = true;
@@ -423,7 +411,7 @@ const CpUploadDocuments = props => {
 			}
 			docListForUpload.push(applicantSignObject);
 
-			//Author NOC
+			// Author NOC
 			if (authorNOC !== null) {
 				const authorNOCObject = {
 					fileNameForServer: 'AUTHORNOC',
@@ -435,7 +423,7 @@ const CpUploadDocuments = props => {
 				docListForUpload.push(authorNOCObject);
 			}
 
-			//Letter of Authorization
+			// Letter of Authorization
 			if (letterAuth !== null) {
 				const letterAuthObject = {
 					fileNameForServer: 'LETTOFAUTH',
@@ -446,8 +434,8 @@ const CpUploadDocuments = props => {
 				}
 				docListForUpload.push(letterAuthObject);
 			}
-		} else if(props.copyrightServiceUploadType === 2){
-			//POA
+		} else if (props.copyrightServiceUploadType === 2) {
+			// POA
 			if (poaUpload === null) {
 				message = 'Please upload Power Of Authorization before proceeding further!';
 				open = true;
@@ -469,7 +457,7 @@ const CpUploadDocuments = props => {
 			}
 			docListForUpload.push(poaObject);
 
-			//Artistic Work
+			// Artistic Work
 			if (artisticWork !== null) {
 				const artisticWorkObject = {
 					fileNameForServer: 'UPARTWORK',
@@ -480,7 +468,6 @@ const CpUploadDocuments = props => {
 				}
 				docListForUpload.push(artisticWorkObject);
 			}
-
 		}
 
 		if (props.lserviceTransaction.id == null) {
@@ -541,9 +528,9 @@ const CpUploadDocuments = props => {
 							}
 
 							const customerCopyrightDetailsDTO = {
-								//typeForTm: 'DOCUMENT',
+								// typeForTm: 'DOCUMENT',
 								status: 'ACTIVE',
-								//word: '',
+								// word: '',
 								lserviceStageTransactionId: lserviceStageTransactionIdForData
 							};
 							if (stateCustomerCopyrightDetailsId) {
@@ -618,7 +605,6 @@ const CpUploadDocuments = props => {
 			open,
 			level
 		});
-
 	}
 
 	function LinearProgressWithLabel(propsTemp) {
@@ -637,9 +623,8 @@ const CpUploadDocuments = props => {
 	if (loading) {
 		return <FuseLoading />;
 	}
-
-    return (
-        <div className="flex-grow flex-shrink-0 p-0">
+	return (
+		<div className="flex-grow flex-shrink-0 p-0">
 			<div>
 				<div>
 					<Typography className="text-16 sm:text-20 truncate font-semibold">
@@ -665,47 +650,46 @@ const CpUploadDocuments = props => {
 						</Alert>
 					</Collapse>
 					<form className="justify-items-center mb-20 mt-20" onSubmit={handleSubmit(onSubmit)}>
-
-					{[1, 2].includes(props.copyrightServiceUploadType) && (
+						{[1, 2].includes(props.copyrightServiceUploadType) && (
 							<>
-						<div className="flex justify-center items-center pt-20">
-							<Controller
-								name="poa"
-								control={control}
-								defaultValue={[]}
-								required
-								render={({ field: { name, onChange } }) => (
-									<Button
-										variant="contained"
-										className="w-1/2"
-										component="label"
-										color="primary"
-										startIcon={<CloudUploadIcon />}
-									>
-										Power Of Authorization*
-										<input
-											accept="application/pdf"
-											className="hidden"
-											id="poa-file"
-											name="poa"
-											type="file"
-											onChange={async e => {
-												const reader = new FileReader();
-												const file = e.target.files[0];
+								<div className="flex justify-center items-center pt-20">
+									<Controller
+										name="poa"
+										control={control}
+										defaultValue={[]}
+										required
+										render={({ field: { name, onChange } }) => (
+											<Button
+												variant="contained"
+												className="w-1/2"
+												component="label"
+												color="primary"
+												startIcon={<CloudUploadIcon />}
+											>
+												Power Of Authorization*
+												<input
+													accept="application/pdf"
+													className="hidden"
+													id="poa-file"
+													name="poa"
+													type="file"
+													onChange={async e => {
+														const reader = new FileReader();
+														const file = e.target.files[0];
 
-												reader.onloadend = () => {
-													setPoaUpload(file);
-												};
-												if (file instanceof Blob) {
-													reader.readAsDataURL(file);
-												}
-											}}
-										/>
-									</Button>
-								)}
-							/>
-						</div>
-						<div className="flex justify-center items-center pt-1">
+														reader.onloadend = () => {
+															setPoaUpload(file);
+														};
+														if (file instanceof Blob) {
+															reader.readAsDataURL(file);
+														}
+													}}
+												/>
+											</Button>
+										)}
+									/>
+								</div>
+								<div className="flex justify-center items-center pt-1">
 									{poaUpload ? (
 										<Typography className="mb-16" component="p">
 											{poaUpload.url && !poaUpload.url.includes('data:application') ? (
@@ -727,12 +711,11 @@ const CpUploadDocuments = props => {
 									) : (
 										''
 									)}
-						</div>
-						</>
+								</div>
+							</>
 						)}
-						
-						{props.copyrightServiceUploadType === 1 && (	
-							<>			
+						{props.copyrightServiceUploadType === 1 && (
+							<>
 								<div className="flex justify-center items-center pt-20">
 									<Controller
 										name="questionaire"
@@ -771,30 +754,29 @@ const CpUploadDocuments = props => {
 									/>
 								</div>
 								<div className="flex justify-center items-center pt-1">
-											{questionaire ? (
-												<Typography className="mb-16" component="p">
-													{questionaire.url && !questionaire.url.includes('data:application') ? (
-														<Link
-															color="primary"
-															underline="always"
-															target="_blank"
-															href={questionaire.url ? questionaire.url : '#'}
-															style={{ textDecoration: 'none' }}
-														>
-															{questionaire.name ? questionaire.name : ''}
-														</Link>
-													) : questionaire.name ? (
-														questionaire.name
-													) : (
-														''
-													)}
-												</Typography>
+									{questionaire ? (
+										<Typography className="mb-16" component="p">
+											{questionaire.url && !questionaire.url.includes('data:application') ? (
+												<Link
+													color="primary"
+													underline="always"
+													target="_blank"
+													href={questionaire.url ? questionaire.url : '#'}
+													style={{ textDecoration: 'none' }}
+												>
+													{questionaire.name ? questionaire.name : ''}
+												</Link>
+											) : questionaire.name ? (
+												questionaire.name
 											) : (
 												''
 											)}
+										</Typography>
+									) : (
+										''
+									)}
 								</div>
-
-								<div className="flex justify-center items-center pt-20" /*onSubmit={handleSubmit(onSubmit)}*/>
+								<div className="flex justify-center items-center pt-20">
 									<Controller
 										name="copyrightwork"
 										control={control}
@@ -832,215 +814,211 @@ const CpUploadDocuments = props => {
 									/>
 								</div>
 								<div className="flex justify-center items-center pt-1">
-											{copyrightwork ? (
-												<Typography className="mb-16" component="p">
-													{copyrightwork.url && !copyrightwork.url.includes('data:application') ? (
-														<Link
-															color="primary"
-															underline="always"
-															target="_blank"
-															href={copyrightwork.url ? copyrightwork.url : '#'}
-															style={{ textDecoration: 'none' }}
-														>
-															{copyrightwork.name ? copyrightwork.name : ''}
-														</Link>
-													) : copyrightwork.name ? (
-														copyrightwork.name
-													) : (
-														''
-													)}
-												</Typography>
+									{copyrightwork ? (
+										<Typography className="mb-16" component="p">
+											{copyrightwork.url && !copyrightwork.url.includes('data:application') ? (
+												<Link
+													color="primary"
+													underline="always"
+													target="_blank"
+													href={copyrightwork.url ? copyrightwork.url : '#'}
+													style={{ textDecoration: 'none' }}
+												>
+													{copyrightwork.name ? copyrightwork.name : ''}
+												</Link>
+											) : copyrightwork.name ? (
+												copyrightwork.name
 											) : (
 												''
 											)}
+										</Typography>
+									) : (
+										''
+									)}
 								</div>
-
 								<div className="flex justify-center items-center pt-20">
-											<Controller
-												name="applicantSign"
-												control={control}
-												defaultValue={[]}
-												required
-												render={({ field: { name, onChange } }) => (
-													<Button
-														variant="contained"
-														className="w-1/2"
-														component="label"
-														color="primary"
-														startIcon={<CloudUploadIcon />}
-													>
-														Upload applicant sinature*
-														<input
-															accept="application/pdf"
-															className="hidden"
-															id="applicantSign-file"
-															name="applicantSign"
-															type="file"
-															onChange={async e => {
-																const reader = new FileReader();
-																const file = e.target.files[0];
+									<Controller
+										name="applicantSign"
+										control={control}
+										defaultValue={[]}
+										required
+										render={({ field: { name, onChange } }) => (
+											<Button
+												variant="contained"
+												className="w-1/2"
+												component="label"
+												color="primary"
+												startIcon={<CloudUploadIcon />}
+											>
+												Upload applicant sinature*
+												<input
+													accept="application/pdf"
+													className="hidden"
+													id="applicantSign-file"
+													name="applicantSign"
+													type="file"
+													onChange={async e => {
+														const reader = new FileReader();
+														const file = e.target.files[0];
 
-																reader.onloadend = () => {
-																	setApplicantSign(file);
-																};
-																if (file instanceof Blob) {
-																	reader.readAsDataURL(file);
-																}
-															}}
-														/>
-													</Button>
-												)}
-											/>
-										</div>
-										<div className="flex justify-center items-center pt-1">
-											{applicantSign ? (
-												<Typography className="mb-16" component="p">
-													{applicantSign.url && !applicantSign.url.includes('data:application') ? (
-														<Link
-															color="primary"
-															underline="always"
-															target="_blank"
-															href={applicantSign.url ? applicantSign.url : '#'}
-															style={{ textDecoration: 'none' }}
-														>
-															{applicantSign.name ? applicantSign.name : ''}
-														</Link>
-													) : applicantSign.name ? (
-														applicantSign.name
-													) : (
-														''
-													)}
-												</Typography>
-											) : (
-												''
-											)}
+														reader.onloadend = () => {
+															setApplicantSign(file);
+														};
+														if (file instanceof Blob) {
+															reader.readAsDataURL(file);
+														}
+													}}
+												/>
+											</Button>
+										)}
+									/>
 								</div>
-
-								<div className="flex justify-center items-center pt-20">
-											<Controller
-												name="authorNOC"
-												control={control}
-												defaultValue={[]}
-												required
-												render={({ field: { name, onChange } }) => (
-													<Button
-														variant="contained"
-														className="w-1/2"
-														component="label"
-														color="primary"
-														startIcon={<CloudUploadIcon />}
-													>
-														Author NOC
-														<input
-															accept="application/pdf"
-															className="hidden"
-															id="authorNOC-file"
-															name="authorNOC"
-															type="file"
-															onChange={async e => {
-																const reader = new FileReader();
-																const file = e.target.files[0];
-
-																reader.onloadend = () => {
-																	setAuthorNOC(file);
-																};
-																if (file instanceof Blob) {
-																	reader.readAsDataURL(file);
-																}
-															}}
-														/>
-													</Button>
-												)}
-											/>
-										</div>
-										<div className="flex justify-center items-center pt-1">
-											{authorNOC ? (
-												<Typography className="mb-16" component="p">
-													{authorNOC.url && !authorNOC.url.includes('data:application') ? (
-														<Link
-															color="primary"
-															underline="always"
-															target="_blank"
-															href={authorNOC.url ? authorNOC.url : '#'}
-															style={{ textDecoration: 'none' }}
-														>
-															{authorNOC.name ? authorNOC.name : ''}
-														</Link>
-													) : authorNOC.name ? (
-														authorNOC.name
-													) : (
-														''
-													)}
-												</Typography>
+								<div className="flex justify-center items-center pt-1">
+									{applicantSign ? (
+										<Typography className="mb-16" component="p">
+											{applicantSign.url && !applicantSign.url.includes('data:application') ? (
+												<Link
+													color="primary"
+													underline="always"
+													target="_blank"
+													href={applicantSign.url ? applicantSign.url : '#'}
+													style={{ textDecoration: 'none' }}
+												>
+													{applicantSign.name ? applicantSign.name : ''}
+												</Link>
+											) : applicantSign.name ? (
+												applicantSign.name
 											) : (
 												''
 											)}
+										</Typography>
+									) : (
+										''
+									)}
 								</div>
-
 								<div className="flex justify-center items-center pt-20">
-											<Controller
-												name="letterAuth"
-												control={control}
-												defaultValue={[]}
-												required
-												render={({ field: { name, onChange } }) => (
-													<Button
-														variant="contained"
-														className="w-1/2"
-														component="label"
-														color="primary"
-														startIcon={<CloudUploadIcon />}
-													>
-														Letter of Authorization
-														<input
-															accept="application/pdf"
-															className="hidden"
-															id="letterAuth-file"
-															name="letterAuth"
-															type="file"
-															onChange={async e => {
-																const reader = new FileReader();
-																const file = e.target.files[0];
+									<Controller
+										name="authorNOC"
+										control={control}
+										defaultValue={[]}
+										required
+										render={({ field: { name, onChange } }) => (
+											<Button
+												variant="contained"
+												className="w-1/2"
+												component="label"
+												color="primary"
+												startIcon={<CloudUploadIcon />}
+											>
+												Author NOC
+												<input
+													accept="application/pdf"
+													className="hidden"
+													id="authorNOC-file"
+													name="authorNOC"
+													type="file"
+													onChange={async e => {
+														const reader = new FileReader();
+														const file = e.target.files[0];
 
-																reader.onloadend = () => {
-																	setLetterAuth(file);
-																};
-																if (file instanceof Blob) {
-																	reader.readAsDataURL(file);
-																}
-															}}
-														/>
-													</Button>
-												)}
-											/>
-										</div>
-										<div className="flex justify-center items-center pt-1">
-											{letterAuth ? (
-												<Typography className="mb-16" component="p">
-													{letterAuth.url && !letterAuth.url.includes('data:application') ? (
-														<Link
-															color="primary"
-															underline="always"
-															target="_blank"
-															href={letterAuth.url ? letterAuth.url : '#'}
-															style={{ textDecoration: 'none' }}
-														>
-															{letterAuth.name ? letterAuth.name : ''}
-														</Link>
-													) : letterAuth.name ? (
-														letterAuth.name
-													) : (
-														''
-													)}
-												</Typography>
+														reader.onloadend = () => {
+															setAuthorNOC(file);
+														};
+														if (file instanceof Blob) {
+															reader.readAsDataURL(file);
+														}
+													}}
+												/>
+											</Button>
+										)}
+									/>
+								</div>
+								<div className="flex justify-center items-center pt-1">
+									{authorNOC ? (
+										<Typography className="mb-16" component="p">
+											{authorNOC.url && !authorNOC.url.includes('data:application') ? (
+												<Link
+													color="primary"
+													underline="always"
+													target="_blank"
+													href={authorNOC.url ? authorNOC.url : '#'}
+													style={{ textDecoration: 'none' }}
+												>
+													{authorNOC.name ? authorNOC.name : ''}
+												</Link>
+											) : authorNOC.name ? (
+												authorNOC.name
 											) : (
 												''
 											)}
+										</Typography>
+									) : (
+										''
+									)}
+								</div>
+								<div className="flex justify-center items-center pt-20">
+									<Controller
+										name="letterAuth"
+										control={control}
+										defaultValue={[]}
+										required
+										render={({ field: { name, onChange } }) => (
+											<Button
+												variant="contained"
+												className="w-1/2"
+												component="label"
+												color="primary"
+												startIcon={<CloudUploadIcon />}
+											>
+												Letter of Authorization
+												<input
+													accept="application/pdf"
+													className="hidden"
+													id="letterAuth-file"
+													name="letterAuth"
+													type="file"
+													onChange={async e => {
+														const reader = new FileReader();
+														const file = e.target.files[0];
+
+														reader.onloadend = () => {
+															setLetterAuth(file);
+														};
+														if (file instanceof Blob) {
+															reader.readAsDataURL(file);
+														}
+													}}
+												/>
+											</Button>
+										)}
+									/>
+								</div>
+								<div className="flex justify-center items-center pt-1">
+									{letterAuth ? (
+										<Typography className="mb-16" component="p">
+											{letterAuth.url && !letterAuth.url.includes('data:application') ? (
+												<Link
+													color="primary"
+													underline="always"
+													target="_blank"
+													href={letterAuth.url ? letterAuth.url : '#'}
+													style={{ textDecoration: 'none' }}
+												>
+													{letterAuth.name ? letterAuth.name : ''}
+												</Link>
+											) : letterAuth.name ? (
+												letterAuth.name
+											) : (
+												''
+											)}
+										</Typography>
+									) : (
+										''
+									)}
 								</div>
 							</>
 						)}
-
-						{(props.copyrightServiceUploadType === 2) && (
+						{props.copyrightServiceUploadType === 2 && (
 							<>
 								<div className="flex justify-center items-center pt-20">
 									<Controller
@@ -1115,13 +1093,12 @@ const CpUploadDocuments = props => {
 						>
 							Submit
 						</Button>
-					
 					</form>
 					{progress !== 0 && <LinearProgressWithLabel value={progress} />}
 				</div>
 			</div>
 		</div>
-    );
+	);
 };
 
 export default memo(CpUploadDocuments);

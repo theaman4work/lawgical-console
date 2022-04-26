@@ -461,7 +461,6 @@ function ServiceStep(props) {
 							stepCount={4}
 							step={step}
 							stage={findMatchingStageUsingType(serviceSteps.stageDTOs, step)}
-						
 							lserviceStageTransaction={findMatchingLserviceStageTransaction(
 								serviceSteps.lserviceStageTransactionDTOs,
 								step
@@ -513,8 +512,8 @@ function ServiceStep(props) {
 							classificationDTOs={serviceSteps.classificationDTOs}
 						/>
 					);
-				} else if(step.stageType === 'CPRDOWNLOADPOAQUESTIONNOCREQ' || 
-						  step.stageType === 'CPRDOWNLOADPOAREQ'){
+				}
+				if (step.stageType === 'CPRDOWNLOADPOAQUESTIONNOCREQ' || step.stageType === 'CPRDOWNLOADPOAREQ') {
 					return (
 						<CpDownloadDocuments
 							costDetails={serviceSteps.lserviceCostDTO}
@@ -527,7 +526,6 @@ function ServiceStep(props) {
 							)}
 							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
 							lservice={serviceSteps.lserviceDTO}
-							
 							applicantsStatus={applicantsStatusForLserviceTransactions(
 								applicantsData,
 								serviceSteps.lserviceTransactionDTO
@@ -538,7 +536,7 @@ function ServiceStep(props) {
 							)}
 						/>
 					);
-				} 
+				}
 				return '';
 			case 5:
 				if (step.stageType === 'TMSEARCHSREPORT' || step.stageType === 'TMSEARCHSREPORTANDTXTUPDATES') {
@@ -607,7 +605,10 @@ function ServiceStep(props) {
 							)}
 						/>
 					);
-				} else if(step.stageType === 'CPRUPLOADPOAQUESTIONSIGNOCLOAREQ' || step.stageType === 'CPRUPLOADARTWORKANDPOAREQ'){
+				} else if (
+					step.stageType === 'CPRUPLOADPOAQUESTIONSIGNOCLOAREQ' ||
+					step.stageType === 'CPRUPLOADARTWORKANDPOAREQ'
+				) {
 					return (
 						<CpUploadDocuments
 							stepCount={6}
@@ -618,12 +619,12 @@ function ServiceStep(props) {
 								step
 							)}
 							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
-							copyrightServiceUploadType = {
-								step.stageType === 'CPRUPLOADPOAQUESTIONSIGNOCLOAREQ' 
-								? 1 
-								: step.stageType === 'CPRUPLOADARTWORKANDPOAREQ'
-								? 2
-								:3
+							copyrightServiceUploadType={
+								step.stageType === 'CPRUPLOADPOAQUESTIONSIGNOCLOAREQ'
+									? 1
+									: step.stageType === 'CPRUPLOADARTWORKANDPOAREQ'
+									? 2
+									: 3
 							}
 							paymentStatus={findPaymentStatus(
 								serviceSteps.lserviceStageTransactionDTOs,
@@ -635,9 +636,7 @@ function ServiceStep(props) {
 							)}
 						/>
 					);
-				} 
-				
-				else {
+				} else {
 					return '';
 				}
 			case 6:
@@ -669,11 +668,8 @@ function ServiceStep(props) {
 							)}
 						/>
 					);
-				} else if(
-						  step.stageType === 'CPRDOWNLOADFILINGRECEIPT' ||
-						  step.stageType === 'CPRDOWNLOADNOC'
-					) 
-				{
+				}
+				if (step.stageType === 'CPRDOWNLOADFILINGRECEIPT' || step.stageType === 'CPRDOWNLOADNOC') {
 					return (
 						<CpDownloadFilingReceiptNoc
 							stepCount={7}
@@ -699,7 +695,6 @@ function ServiceStep(props) {
 								serviceSteps.lserviceStageTransactionDTOs,
 								serviceSteps.stageDTOs
 							)}
-						
 						/>
 					);
 				}
