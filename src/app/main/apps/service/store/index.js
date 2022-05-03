@@ -7,6 +7,7 @@ import applicants from './applicantSlice';
 import responseCustomerTrademarkDetailsAndAttachments from './responseCustomerTrademarkDetailsAndAttachmentsSlice';
 import responseDocumentReviewAndAttachments from './responseDocumentReviewAndAttachmentsSlice';
 import responseCustomerCopyrightDetailsAndAttachments from './responseCustomerCopyrightDetailsAndAttachmentsSlice';
+import responseCpDocumentReviewAndAttachments from './responseCpDocumentReviewAndAttachmentsSlice';
 
 const reducer = combineReducers({
 	services,
@@ -15,8 +16,9 @@ const reducer = combineReducers({
 	serviceSteps,
 	applicants,
 	responseCustomerTrademarkDetailsAndAttachments,
+	responseCustomerCopyrightDetailsAndAttachments,
 	responseDocumentReviewAndAttachments,
-	responseCustomerCopyrightDetailsAndAttachments
+	responseCpDocumentReviewAndAttachments
 });
 
 export default reducer;
