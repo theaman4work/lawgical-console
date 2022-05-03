@@ -1,11 +1,7 @@
 import FuseScrollbars from '@fuse/core/FuseScrollbars';
 import _ from '@lodash';
-import * as yup from 'yup';
 import { makeStyles } from '@material-ui/core/styles';
-import { useDeepCompareEffect } from '@fuse/hooks';
 import { memo, useState, useEffect } from 'react';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import Table from '@material-ui/core/Table';
@@ -13,17 +9,8 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import Alert from '@material-ui/lab/Alert';
-import Collapse from '@material-ui/core/Collapse';
-import CloseIcon from '@material-ui/icons/Close';
-import IconButton from '@material-ui/core/IconButton';
 import { GetApp } from '@material-ui/icons';
-import { useDispatch, useSelector } from 'react-redux';
-import { Controller, useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import FuseLoading from '@fuse/core/FuseLoading';
 import { axiosInstance } from 'app/auth-service/axiosInstance';
-import { updateData } from '../../store/serviceStepsSlice';
 
 const useStyles = makeStyles({
 	table: {
@@ -33,6 +20,35 @@ const useStyles = makeStyles({
 
 const CpDownloadDocuments = props => {
 	const classes = useStyles();
+	/* const [stateLserviceStageTransactionId, setStateLserviceStageTransactionId] = useState(null);
+
+	useEffect(() => {
+		if (props.pricingInfoStatus === 0 && props.lserviceTransaction.id !== null) {
+			if (props.lserviceStageTransaction == null) {
+				const data = {
+					lserviceTransactionId: props.lserviceTransaction.id,
+					stageStatus: 'INPROGRESS',
+					lserviceStageId: props.step.id,
+					lserviceId: props.step.lserviceId
+				};
+
+				axiosInstance
+					.post('/services/lgrest/api/lservice-stage-transactions/create-transaction-for-customer', {
+						email: localStorage.getItem('lg_logged_in_email'),
+						...data
+					})
+					.then(res => {
+						setStateLserviceStageTransactionId(res.data.lserviceStageTransactionDTO.id);
+					});
+			}
+		}
+	}, [
+		props.step.id,
+		props.step.lserviceId,
+		props.lserviceStageTransaction,
+		props.lserviceTransaction,
+		props.pricingInfoStatus
+	]); */
 
 	return (
 		<div className="flex-grow flex-shrink-0 p-0">
