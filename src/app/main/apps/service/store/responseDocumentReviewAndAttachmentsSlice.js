@@ -5,7 +5,8 @@ export const getResponseDocumentReviewAndAttachments = createAsyncThunk(
 	'servicesApp/responseDocumentReviewAndAttachments/getResponseDocumentReviewAndAttachments',
 	async (lserviceStageTransactionId, { dispatch }) => {
 		const response = await axiosInstance.get(
-			`/services/lgrest/api/document-reviews/get-all-for-lservice-stage-transaction/${lserviceStageTransactionId}`
+			// `/services/lgrest/api/document-reviews/get-all-for-lservice-stage-transaction/${lserviceStageTransactionId}`
+			`/services/lgrest/api/document-reviews/get-all-tm-doc-reviews-for-lservice-stage-transaction/${lserviceStageTransactionId}`
 		);
 		const data = await response.data;
 
