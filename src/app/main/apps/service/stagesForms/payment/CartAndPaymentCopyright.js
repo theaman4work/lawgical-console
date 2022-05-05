@@ -130,7 +130,7 @@ const CartAndPayment = props => {
 		let open = false;
 		let level = 'error';
 
-		if (props.lserviceTransaction.id == null || props.aggrementStatus !== 0 || props.applicantsStatus.length <= 0) {
+		if (props.lserviceTransaction.id == null && props.aggrementStatus !== 0 && props.applicantsStatus.length <= 0) {
 			message = 'Please complete the previous steps before trying to complete this step!';
 			open = true;
 		} else if (serviceSteps != null) {
