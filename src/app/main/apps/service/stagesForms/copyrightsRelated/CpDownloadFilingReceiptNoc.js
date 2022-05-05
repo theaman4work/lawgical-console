@@ -265,7 +265,7 @@ function CpDownloadFilingReceiptNoc(props) {
 										return (
 											<TableRow className="h-36 cursor-pointer" hover tabIndex={-1} key={n.id}>
 												<TableCell className="w-10" component="th" scope="row">
-													{n.customerTrademarkDetailsDTO ? (
+													{n.customerCopyrightDetailsDTO ? (
 														// eslint-disable-next-line
 														<img
 															className="w-1/2 block rounded"
@@ -297,15 +297,7 @@ function CpDownloadFilingReceiptNoc(props) {
 													<GetApp
 														color="primary"
 														className={classes.largeIcon}
-														onClick={() =>
-															window.open(
-																findAttachmentMatchingWithId(
-																	n.attachmentDTOs,
-																	n.documentReviewDTO.attachmentId
-																),
-																'_self'
-															)
-														}
+														onClick={() => window.open(imageData.url, '_self')}
 													/>
 												</TableCell>
 											</TableRow>
