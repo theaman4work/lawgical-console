@@ -19,7 +19,7 @@ export const {
 	selectAll: selectResponseCpDocumentReviewAndAttachments,
 	selectById: selectResponseCpDocumentReviewAndAttachmentsById
 } = responseCpDocumentReviewAndAttachmentsAdapter.getSelectors(
-	state => state.servicesApp.responseDocumentReviewAndAttachments
+	state => state.servicesApp.responseCpDocumentReviewAndAttachments
 );
 
 const responseCpDocumentReviewAndAttachmentsSlice = createSlice({
