@@ -526,9 +526,13 @@ function ServiceStep(props) {
 							)}
 							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
 							lservice={serviceSteps.lserviceDTO}
-							applicantsStatus={applicantsStatusForLserviceTransactions(
+							/* applicantsStatus={applicantsStatusForLserviceTransactions(
 								applicantsData,
 								serviceSteps.lserviceTransactionDTO
+							)} */
+							paymentStatus={findPaymentStatus(
+								serviceSteps.lserviceStageTransactionDTOs,
+								serviceSteps.stageDTOs
 							)}
 							pricingInfoStatus={findAcceptChargesStatus(
 								serviceSteps.lserviceStageTransactionDTOs,
@@ -605,7 +609,8 @@ function ServiceStep(props) {
 							)}
 						/>
 					);
-				} else if (
+				}
+				if (
 					step.stageType === 'CPRUPLOADPOAQUESTIONSIGNOCLOAREQ' ||
 					step.stageType === 'CPRUPLOADARTWORKANDPOAREQ'
 				) {
@@ -636,9 +641,8 @@ function ServiceStep(props) {
 							)}
 						/>
 					);
-				} else {
-					return '';
 				}
+				return '';
 			case 6:
 				if (
 					step.stageType === 'TMDOWNLOADFILINGRECEIPT' ||
@@ -681,17 +685,13 @@ function ServiceStep(props) {
 							lserviceTransaction={serviceSteps.lserviceTransactionDTO}
 							cpServiceType={
 								step.stageType === 'CPRDOWNLOADFILINGRECEIPT'
-									? 3
+									? 1
 									: step.stageType === 'CPRDOWNLOADNOC'
-									? 4
-									: 5
+									? 2
+									: 3
 							}
 							lservice={serviceSteps.lserviceDTO}
 							paymentStatus={findPaymentStatus(
-								serviceSteps.lserviceStageTransactionDTOs,
-								serviceSteps.stageDTOs
-							)}
-							pricingInfoStatus={findAcceptChargesStatus(
 								serviceSteps.lserviceStageTransactionDTOs,
 								serviceSteps.stageDTOs
 							)}
