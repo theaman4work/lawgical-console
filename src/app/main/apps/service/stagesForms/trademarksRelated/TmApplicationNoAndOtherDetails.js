@@ -470,7 +470,7 @@ const TmApplicationNoAndOtherDetails = props => {
 													)}
 												>
 													<TableCell component="th" scope="row">
-														POA Draft
+														POA
 													</TableCell>
 													<TableCell
 														align="center"
@@ -499,7 +499,7 @@ const TmApplicationNoAndOtherDetails = props => {
 													)}
 												>
 													<TableCell component="th" scope="row">
-														User Affidavit Draft
+														User Affidavit
 													</TableCell>
 													<TableCell
 														align="center"
@@ -528,7 +528,7 @@ const TmApplicationNoAndOtherDetails = props => {
 													)}
 												>
 													<TableCell component="th" scope="row">
-														NOC Draft
+														NOC
 													</TableCell>
 													<TableCell
 														align="center"

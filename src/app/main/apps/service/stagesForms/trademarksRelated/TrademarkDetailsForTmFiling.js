@@ -1005,7 +1005,7 @@ const TrademarkDetailsForTmFiling = props => {
 													)}
 												>
 													<TableCell component="th" scope="row">
-														POA Draft
+														POA
 													</TableCell>
 													<TableCell
 														align="center"
@@ -1034,7 +1034,7 @@ const TrademarkDetailsForTmFiling = props => {
 													)}
 												>
 													<TableCell component="th" scope="row">
-														User Affidavit Draft
+														User Affidavit
 													</TableCell>
 													<TableCell
 														align="center"
