@@ -8,6 +8,11 @@ import Link from '@material-ui/core/Link';
 import Button from '@material-ui/core/Button';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Box from '@material-ui/core/Box';
+import Icon from '@material-ui/core/Icon';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import Alert from '@material-ui/lab/Alert';
 import Collapse from '@material-ui/core/Collapse';
@@ -19,6 +24,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import FuseLoading from '@fuse/core/FuseLoading';
 import { axiosInstance } from 'app/auth-service/axiosInstance';
 import storage from '../../../../firebase/index';
+import { updateData } from '../../store/serviceStepsSlice';
 import {
 	getResponseCustomerCopyrightDetailsAndAttachments,
 	addResponseCustomerCopyrightDetailsAndAttachments,
@@ -62,6 +68,7 @@ const schema = yup.object().shape({
 const CpUploadDocuments = props => {
 	const classes = useStyles();
 	const dispatch = useDispatch();
+	const serviceSteps = useSelector(({ servicesApp }) => servicesApp.serviceSteps);
 	// const serviceSteps = useSelector(({ servicesApp }) => servicesApp.serviceSteps);
 
 	const responseCustomerCopyrightDetailsAndAttachments = useSelector(
@@ -99,8 +106,13 @@ const CpUploadDocuments = props => {
 		resolver: yupResolver(schema)
 	});
 
+	let title = null;
+	if (props.step.desc == null) {
+		title = props.step.name;
+	}
+
 	useEffect(() => {
-		if (props.pricingInfoStatus === 0 && props.lserviceTransaction.id !== null) {
+		if (props.pricingInfoStatus === 0 && props.lserviceTransaction && props.lserviceTransaction.id !== null) {
 			if (props.lserviceStageTransaction == null) {
 				const data = {
 					lserviceTransactionId: props.lserviceTransaction.id,
@@ -551,6 +563,22 @@ const CpUploadDocuments = props => {
 								dispatch(addResponseCustomerCopyrightDetailsAndAttachments(reqData));
 								message = 'Data saved successfully.';
 							}
+
+							if (serviceSteps != null) {
+								const lserviceTransactionId =
+									props.lserviceTransaction != null
+										? props.lserviceTransaction.id
+										: serviceSteps.lserviceTransactionDTO.id;
+
+								dispatch(
+									updateData({
+										lserviceTransactionId,
+										stageStatus: 'COMPLETED',
+										lserviceStageId: props.step.id,
+										lserviceId: props.step.lserviceId
+									})
+								);
+							}
 							open = true;
 							level = 'success';
 							setProgress(0);
@@ -630,6 +658,30 @@ const CpUploadDocuments = props => {
 					<Typography className="text-16 sm:text-20 truncate font-semibold">
 						{`Step ${props.stepCount} - ${props.step.name}`}
 					</Typography>
+					<Box className="my-20" p={1} borderColor="primary.main" border={1} boxShadow={0} borderRadius={12}>
+						<Typography className="font-normal" variant="subtitle1" color="textSecondary">
+							{/* {props.step.desc} */}
+							<List dense className="p-0">
+								{props.step.desc &&
+									props.step.desc.split('---').map(item => (
+										<ListItem key={item}>
+											<ListItemIcon className="min-w-40">
+												<Icon className="text-10">radio_button_unchecked</Icon>
+											</ListItemIcon>
+											<ListItemText primary={item} />
+										</ListItem>
+									))}
+								{title && (
+									<ListItem key={title}>
+										<ListItemIcon className="min-w-40">
+											<Icon className="text-10">radio_button_unchecked</Icon>
+										</ListItemIcon>
+										<ListItemText primary={title} />
+									</ListItem>
+								)}
+							</List>
+						</Typography>
+					</Box>
 					<Collapse in={messageAndLevel.open}>
 						<Alert
 							severity={messageAndLevel.level}
