@@ -26,12 +26,16 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import AppBar from '@material-ui/core/AppBar';
 import Tooltip from '@material-ui/core/Tooltip';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import FuseLoading from '@fuse/core/FuseLoading';
 import { axiosInstance } from 'app/auth-service/axiosInstance';
-import { addResponseCustomerTrademarkDetailsAndAttachments } from '../../store/responseCustomerTrademarkDetailsAndAttachmentsSlice';
+import {
+	selectResponseCustomerTrademarkDetailsAndAttachments,
+	getResponseCustomerTrademarkDetailsAndAttachments,
+	addResponseCustomerTrademarkDetailsAndAttachments
+} from '../../store/responseCustomerTrademarkDetailsAndAttachmentsSlice';
 import SearchRecordsTable from './SearchRecordsTable';
 import storage from '../../../../firebase/index';
 
@@ -96,6 +100,9 @@ const TrademarkDetailsForTmSearch = props => {
 		level: 'error',
 		open: false
 	});
+	const responseCustomerTrademarkDetailsAndAttachments = useSelector(
+		selectResponseCustomerTrademarkDetailsAndAttachments
+	);
 	const [showUploadOrText, setShowUploadOrText] = useState(2);
 	const [showImageSelected, setShowImageSelected] = useState(false);
 	const [progress, setProgress] = useState(0);
@@ -148,6 +155,7 @@ const TrademarkDetailsForTmSearch = props => {
 		currency: 'INR',
 		minimumFractionDigits: 2
 	});
+	const [dataTM, setData] = useState(responseCustomerTrademarkDetailsAndAttachments);
 
 	useEffect(() => {
 		if (props.pricingInfoStatus === 0 && props.lserviceTransaction && props.lserviceTransaction.id !== null) {
@@ -199,6 +207,20 @@ const TrademarkDetailsForTmSearch = props => {
 		}
 	}, [progress]);
 
+	useEffect(() => {
+		dispatch(getResponseCustomerTrademarkDetailsAndAttachments()).then(() => setLoading(false));
+	}, [dispatch]);
+
+	useEffect(() => {
+		setData(
+			responseCustomerTrademarkDetailsAndAttachments.filter(
+				eachRec =>
+					eachRec.customerTrademarkDetailsDTO.lserviceStageTransactionId === props.lserviceStageTransactionId
+			)
+		);
+		// props.onRecordAdditionOrRemoval(dataTM.length);
+	}, [responseCustomerTrademarkDetailsAndAttachments, props, dataTM.length]);
+
 	const findClassificationDescUsingId = classificationId => {
 		if (props.classificationDTOs.length > 0) {
 			for (let i = 0; i < props.classificationDTOs.length; i += 1) {
@@ -237,7 +259,15 @@ const TrademarkDetailsForTmSearch = props => {
 		let urlOfImage = '';
 		let open = false;
 		let level = 'error';
+		let matchFound = false;
 
+		function isMatchFound(el) {
+			if (el.customerTrademarkDetailsDTO.word === model.word) {
+				message = 'Word already exist!';
+				open = true;
+				matchFound = true;
+			}
+		}
 		// console.log(props.applicantsStatus);
 		const classficationId = model.classification.replace(/^\D+|\D+$/g, '');
 		if (props.lserviceTransaction.id == null || props.applicantsStatus.length <= 0) {
@@ -348,23 +378,33 @@ const TrademarkDetailsForTmSearch = props => {
 					lserviceStageTransactionIdForData = props.lserviceStageTransaction.id;
 				}
 
-				const customerTrademarkDetailsDTO = {
-					classficationId,
-					typeForTm: model.switchForImageAndWord === 'word' ? 'WORD' : 'IMAGE',
-					status: 'ACTIVE',
-					word: model.word,
-					lserviceStageTransactionId: lserviceStageTransactionIdForData
-				};
-				const reqData = {
-					customerTrademarkDetailsDTO,
-					email: localStorage.getItem('lg_logged_in_email')
-				};
+				const listOfServiceTransactions = responseCustomerTrademarkDetailsAndAttachments.filter(
+					rec =>
+						rec.customerTrademarkDetailsDTO.word === model.word &&
+						rec.customerTrademarkDetailsDTO.lserviceStageTransactionId === lserviceStageTransactionIdForData
+				);
+				// console.log(listOfServiceTransactions);
+				listOfServiceTransactions.forEach(isMatchFound);
+				// console.log(matchFound);
+				if (matchFound === false) {
+					const customerTrademarkDetailsDTO = {
+						classficationId,
+						typeForTm: model.switchForImageAndWord === 'word' ? 'WORD' : 'IMAGE',
+						status: 'ACTIVE',
+						word: model.word,
+						lserviceStageTransactionId: lserviceStageTransactionIdForData
+					};
+					const reqData = {
+						customerTrademarkDetailsDTO,
+						email: localStorage.getItem('lg_logged_in_email')
+					};
 
-				dispatch(addResponseCustomerTrademarkDetailsAndAttachments(reqData));
-				// stageStaus = 1;
-				message = 'Data saved successfully.';
-				open = true;
-				level = 'success';
+					dispatch(addResponseCustomerTrademarkDetailsAndAttachments(reqData));
+					// stageStaus = 1;
+					message = 'Data saved successfully.';
+					open = true;
+					level = 'success';
+				}
 			}
 		}
 		setMessageAndLevel({

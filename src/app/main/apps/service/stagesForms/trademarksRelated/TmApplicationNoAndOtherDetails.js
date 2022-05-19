@@ -90,6 +90,7 @@ const TmApplicationNoAndOtherDetails = props => {
 	const [loading, setLoading] = useState(true);
 	const [stateLserviceStageTransactionId, setStateLserviceStageTransactionId] = useState(null);
 	const [stateCustomerTrademarkDetailsId, setStateCustomerTrademarkDetailsId] = useState(null);
+	const [dataTM, setData] = useState(responseCustomerTrademarkDetailsAndAttachments);
 
 	// let stageStaus =
 	// 	props.lserviceStageTransaction != null
@@ -179,6 +180,15 @@ const TmApplicationNoAndOtherDetails = props => {
 		dispatch(getResponseCustomerTrademarkDetailsAndAttachments()).then(() => setLoading(false));
 	}, [dispatch]);
 
+	useEffect(() => {
+		setData(
+			responseCustomerTrademarkDetailsAndAttachments.filter(
+				eachRec =>
+					eachRec.customerTrademarkDetailsDTO.lserviceStageTransactionId === props.lserviceStageTransactionId
+			)
+		);
+	}, [responseCustomerTrademarkDetailsAndAttachments, props, dataTM.length]);
+
 	// eslint-disable-next-line
 	useEffect(() => {
 		let data = '';
@@ -262,64 +272,96 @@ const TmApplicationNoAndOtherDetails = props => {
 		let message = '';
 		let open = false;
 		let level = 'error';
+		let matchFound = false;
+		let listOfAppTmNoTransactions = '';
+
+		function isMatchFound(el) {
+			if (
+				props.trademarkNoType === 1
+					? el.customerTrademarkDetailsDTO.applicationTmNo
+					: // eslint-disable-next-line
+					el.customerTrademarkDetailsDTO.registeredTmNo == model.tmApplicationNo
+			) {
+				message =
+					props.trademarkNoType === 1
+						? 'TM Application No. already exists!'
+						: 'Registered TM No. already exists!';
+				open = true;
+				matchFound = true;
+			}
+		}
 
 		if (props.lserviceTransaction.id == null || props.applicantsStatus.length <= 0) {
 			message = 'Please complete the previous step before trying to complete this step!';
 			open = true;
 		} else {
-			const tmApplicationNoForData = model.tmApplicationNo;
 			let lserviceStageTransactionIdForData = null;
+			const tmApplicationNoForData = model.tmApplicationNo;
 			if (props.lserviceStageTransaction == null) {
 				lserviceStageTransactionIdForData = stateLserviceStageTransactionId;
 			} else {
 				lserviceStageTransactionIdForData = props.lserviceStageTransaction.id;
 			}
 
-			const customerTrademarkDetailsDTO = {
-				typeForTm: props.trademarkNoType === 1 ? 'TMAPPLNO' : 'TMREGNO',
-				status: 'ACTIVE',
-				applicationTmNo: tmApplicationNoForData,
-				lserviceStageTransactionId: lserviceStageTransactionIdForData
-			};
-			if (props.trademarkNoType === 2) {
-				customerTrademarkDetailsDTO.registeredTmNo = tmApplicationNoForData;
-				customerTrademarkDetailsDTO.applicationTmNo = '';
-			}
-			if (stateCustomerTrademarkDetailsId && !props.stage.addMoreAllowed) {
-				customerTrademarkDetailsDTO.id = stateCustomerTrademarkDetailsId;
-			}
-			if (props.stage.isProposeAmendmentsAllowed) {
-				customerTrademarkDetailsDTO.desc = model.proposedAmendments;
-			}
+			listOfAppTmNoTransactions = responseCustomerTrademarkDetailsAndAttachments.filter(
+				rec =>
+					(props.trademarkNoType === 1
+						? // eslint-disable-next-line
+						rec.customerTrademarkDetailsDTO.applicationTmNo == model.tmApplicationNo
+						: // eslint-disable-next-line
+						rec.customerTrademarkDetailsDTO.registeredTmNo == model.tmApplicationNo) && 
+					rec.customerTrademarkDetailsDTO.lserviceStageTransactionId === lserviceStageTransactionIdForData
+			);
+			// console.log(listOfAppTmNoTransactions);
+			listOfAppTmNoTransactions.forEach(isMatchFound);
+			// console.log(matchFound);
+			if (matchFound === false) {
+				const customerTrademarkDetailsDTO = {
+					typeForTm: props.trademarkNoType === 1 ? 'TMAPPLNO' : 'TMREGNO',
+					status: 'ACTIVE',
+					applicationTmNo: tmApplicationNoForData,
+					lserviceStageTransactionId: lserviceStageTransactionIdForData
+				};
+				if (props.trademarkNoType === 2) {
+					customerTrademarkDetailsDTO.registeredTmNo = tmApplicationNoForData;
+					customerTrademarkDetailsDTO.applicationTmNo = '';
+				}
+				if (stateCustomerTrademarkDetailsId && !props.stage.addMoreAllowed) {
+					customerTrademarkDetailsDTO.id = stateCustomerTrademarkDetailsId;
+				}
+				if (props.stage.isProposeAmendmentsAllowed) {
+					customerTrademarkDetailsDTO.desc = model.proposedAmendments;
+				}
 
-			const reqData = {
-				customerTrademarkDetailsDTO,
-				email: localStorage.getItem('lg_logged_in_email')
-			};
+				const reqData = {
+					customerTrademarkDetailsDTO,
+					email: localStorage.getItem('lg_logged_in_email')
+				};
 
-			if (stateCustomerTrademarkDetailsId && !props.stage.addMoreAllowed) {
-				reqData.id = stateCustomerTrademarkDetailsId;
-				dispatch(updateResponseCustomerTrademarkDetailsAndAttachments(reqData));
-				message = 'Data updated successfully.';
-			} else {
-				dispatch(addResponseCustomerTrademarkDetailsAndAttachments(reqData));
-				message = 'Data saved successfully.';
-			}
-			// stageStaus = 1;
-			open = true;
-			level = 'success';
+				if (stateCustomerTrademarkDetailsId && !props.stage.addMoreAllowed) {
+					reqData.id = stateCustomerTrademarkDetailsId;
+					dispatch(updateResponseCustomerTrademarkDetailsAndAttachments(reqData));
+					message = 'Data updated successfully.';
+				} else {
+					dispatch(addResponseCustomerTrademarkDetailsAndAttachments(reqData));
+					message = 'Data saved successfully.';
+				}
+				// stageStaus = 1;
+				open = true;
+				level = 'success';
 
-			if (props.lserviceStageTransaction === null) {
-				const lserviceTransactionId = props.lserviceTransaction.id;
-				dispatch(
-					updateData({
-						lserviceTransactionId,
-						lserviceStageTransactionId: stateLserviceStageTransactionId,
-						stageStatus: 'COMPLETED',
-						lserviceStageId: props.step.id,
-						lserviceId: props.step.lserviceId
-					})
-				);
+				if (props.lserviceStageTransaction === null) {
+					const lserviceTransactionId = props.lserviceTransaction.id;
+					dispatch(
+						updateData({
+							lserviceTransactionId,
+							lserviceStageTransactionId: stateLserviceStageTransactionId,
+							stageStatus: 'COMPLETED',
+							lserviceStageId: props.step.id,
+							lserviceId: props.step.lserviceId
+						})
+					);
+				}
 			}
 		}
 		setMessageAndLevel({

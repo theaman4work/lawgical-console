@@ -109,10 +109,7 @@ const schema = yup.object().shape({
 		is: 'dateOfUsage',
 		then: yup.string().required('You must provide a Date').nullable()
 	}),
-	isProposeToBeUsed: yup.boolean().when('switchForDateAndCheckbox', {
-		is: 'proposeToBeUsed',
-		then: yup.boolean().oneOf([true], 'Propose To be used must be selected.').nullable()
-	})
+	isProposeToBeUsed: yup.boolean()
 });
 
 const Transition = forwardRef(function Transition(props, ref) {
@@ -388,7 +385,15 @@ const TrademarkDetailsForTmFiling = props => {
 		let urlOfImage = '';
 		let open = false;
 		let level = 'error';
+		let matchFound = false;
 
+		function isMatchFound(el) {
+			if (el.customerTrademarkDetailsDTO.word === model.word) {
+				message = 'Word already exist!';
+				open = true;
+				matchFound = true;
+			}
+		}
 		if (props.lserviceTransaction.id == null || props.applicantsStatus.length <= 0) {
 			message = 'Please complete the previous step before trying to complete this step!';
 			open = true;
@@ -530,41 +535,54 @@ const TrademarkDetailsForTmFiling = props => {
 				}
 			} else {
 				let lserviceStageTransactionIdForData = null;
+				let customerTrademarkDetailsDTO = null;
+				let reqData = null;
 				if (props.lserviceStageTransaction == null) {
 					lserviceStageTransactionIdForData = stateLserviceStageTransactionId;
 				} else {
 					lserviceStageTransactionIdForData = props.lserviceStageTransaction.id;
 				}
 
-				const customerTrademarkDetailsDTO = {
-					classficationId,
-					typeForTm: model.switchForImageAndWord === 'word' ? 'WORD' : 'IMAGE',
-					status: 'ACTIVE',
-					word: model.word,
-					startDateOfUsage: model.switchForDateAndCheckbox === 'dateOfUsage' ? startDateOfUsageToBeSent : '',
-					desc: model.description,
-					isProposeToBeUsed: model.switchForDateAndCheckbox === 'dateOfUsage' ? null : true,
-					lserviceStageTransactionId: lserviceStageTransactionIdForData
-				};
-				if (stateCustomerTrademarkDetailsId) {
-					customerTrademarkDetailsDTO.id = stateCustomerTrademarkDetailsId;
-				}
-				const reqData = {
-					customerTrademarkDetailsDTO,
-					email: localStorage.getItem('lg_logged_in_email')
-				};
+				const listOfServiceTransactions = responseCustomerTrademarkDetailsAndAttachments.filter(
+					rec =>
+						rec.customerTrademarkDetailsDTO.word === model.word &&
+						rec.customerTrademarkDetailsDTO.lserviceStageTransactionId === lserviceStageTransactionIdForData
+				);
+				// console.log(listOfServiceTransactions);
+				listOfServiceTransactions.forEach(isMatchFound);
+				// console.log(matchFound);
 
-				if (stateCustomerTrademarkDetailsId) {
-					reqData.id = stateCustomerTrademarkDetailsId;
-					dispatch(updateResponseCustomerTrademarkDetailsAndAttachments(reqData));
-					message = 'Data updated successfully.';
-				} else {
-					dispatch(addResponseCustomerTrademarkDetailsAndAttachments(reqData));
-					message = 'Data saved successfully.';
+				if (matchFound === false) {
+					customerTrademarkDetailsDTO = {
+						classficationId,
+						typeForTm: model.switchForImageAndWord === 'word' ? 'WORD' : 'IMAGE',
+						status: 'ACTIVE',
+						word: model.word,
+						startDateOfUsage:
+							model.switchForDateAndCheckbox === 'dateOfUsage' ? startDateOfUsageToBeSent : '',
+						desc: model.description,
+						isProposeToBeUsed: model.switchForDateAndCheckbox === 'dateOfUsage' ? null : true,
+						lserviceStageTransactionId: lserviceStageTransactionIdForData
+					};
+					if (stateCustomerTrademarkDetailsId) {
+						customerTrademarkDetailsDTO.id = stateCustomerTrademarkDetailsId;
+					}
+					reqData = {
+						customerTrademarkDetailsDTO,
+						email: localStorage.getItem('lg_logged_in_email')
+					};
+					if (stateCustomerTrademarkDetailsId) {
+						reqData.id = stateCustomerTrademarkDetailsId;
+						dispatch(updateResponseCustomerTrademarkDetailsAndAttachments(reqData));
+						message = 'Data updated successfully.';
+					} else {
+						dispatch(addResponseCustomerTrademarkDetailsAndAttachments(reqData));
+						message = 'Data saved successfully.';
+					}
+					// stageStaus = 1;
+					open = true;
+					level = 'success';
 				}
-				// stageStaus = 1;
-				open = true;
-				level = 'success';
 			}
 		}
 		setMessageAndLevel({
@@ -914,34 +932,6 @@ const TrademarkDetailsForTmFiling = props => {
 													fullWidth
 													required
 												/>
-											)}
-										/>
-									</div>
-								)}
-
-								{showDateOrCheckBox === 2 && (
-									<div className="flex justify-center">
-										<Controller
-											name="isProposeToBeUsed"
-											control={control}
-											required
-											render={({ field: { onChange, onBlur, value, name, ref } }) => (
-												<FormControl
-													className="items-center"
-													// eslint-disable-next-line
-													// disabled={stageStaus === 1 ? true : false}
-													error={!!errors.isProposeToBeUsed}
-												>
-													<FormControlLabel
-														label="Propose To Be Used"
-														control={
-															<Checkbox onChange={onChange} checked={value} name={name} />
-														}
-													/>
-													<FormHelperText>
-														{errors?.isProposeToBeUsed?.message}
-													</FormHelperText>
-												</FormControl>
 											)}
 										/>
 									</div>
