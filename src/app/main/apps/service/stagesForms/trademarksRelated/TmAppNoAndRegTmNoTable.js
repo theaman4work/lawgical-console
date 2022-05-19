@@ -87,7 +87,7 @@ function TmAppNoAndRegTmNoTable(props) {
 					<TableHead>
 						<TableRow>
 							<TableCell>
-								{props.trademarkNoType === 1 ? 'TM Applicant No' : 'Registered TM No'}
+								{props.trademarkNoType === 1 ? 'TM Application No' : 'Registered TM No'}
 							</TableCell>
 							<TableCell>Action</TableCell>
 						</TableRow>
