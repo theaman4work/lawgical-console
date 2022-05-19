@@ -97,6 +97,7 @@ function ApplicantDialog(props) {
 	const [showPartners, setShowPartners] = useState(false);
 	const dispatch = useDispatch();
 	const applicantDialog = useSelector(({ servicesApp }) => servicesApp.applicants.applicantDialog);
+	const serviceSteps = useSelector(({ servicesApp }) => servicesApp.serviceSteps);
 
 	const { control, watch, reset, handleSubmit, formState } = useForm({
 		mode: 'onChange',
@@ -476,10 +477,10 @@ function ApplicantDialog(props) {
 							render={({ field: { onChange, value } }) => (
 								<Autocomplete
 									className="mt-8 mb-24"
-									options={countriesListForCountryDropDown}
+									options={serviceSteps.lserviceDTO.id === 9 ? [] : countriesListForCountryDropDown}
 									value={value}
 									onChange={(event, newValue) => {
-										onChange(newValue);
+										onChange(serviceSteps.lserviceDTO.id === 9 ? 'India' : newValue);
 										if (newValue === 'India') {
 											setShowState(true);
 										} else {
