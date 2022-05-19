@@ -262,7 +262,7 @@ function DownloadSearchReports(props) {
 											if (n.customerTrademarkDetailsDTO.typeForTm === 'IMAGE') {
 												imageData = findAttachmentMatchingWithId(
 													n.attachmentDTOs,
-													n.customerTrademarkDetailsDTO.attachmentId
+													n.documentReviewDTO.attachmentId
 												);
 											}
 											return (
