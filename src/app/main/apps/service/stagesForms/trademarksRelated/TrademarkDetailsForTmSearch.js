@@ -261,15 +261,19 @@ const TrademarkDetailsForTmSearch = props => {
 		let level = 'error';
 		let matchFound = false;
 
+		const classficationId = model.classification.replace(/^\D+|\D+$/g, '');
+
 		function isMatchFound(el) {
-			if (el.customerTrademarkDetailsDTO.word === model.word) {
-				message = 'Word already exist!';
+			if (
+				el.customerTrademarkDetailsDTO.word === model.word &&
+				parseInt(classficationId, 10) === el.customerTrademarkDetailsDTO.classficationId
+			) {
+				message = 'Word already exists!';
 				open = true;
 				matchFound = true;
 			}
 		}
-		// console.log(props.applicantsStatus);
-		const classficationId = model.classification.replace(/^\D+|\D+$/g, '');
+
 		if (props.lserviceTransaction.id == null || props.applicantsStatus.length <= 0) {
 			message = 'Please complete the previous step before trying to complete this step!';
 			open = true;
