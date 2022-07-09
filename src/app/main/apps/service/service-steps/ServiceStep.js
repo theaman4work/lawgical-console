@@ -748,7 +748,7 @@ function ServiceStep(props) {
 											className="flex justify-center p-16 pb-64 sm:p-24 sm:pb-64 md:p-48 md:pb-64"
 											key={step.id}
 										>
-											<Paper className="w-full max-w-lg rounded-20 p-16 md:p-24 shadow leading-normal">
+											<Paper className="w-full md:max-w-md lg:max-w-lg sm:max-w-sm rounded-20 p-16 md:p-24 shadow leading-normal">
 												<div dir={theme.direction}>
 													{renderFormsUsingSwitchDecision(index, step)}
 												</div>
