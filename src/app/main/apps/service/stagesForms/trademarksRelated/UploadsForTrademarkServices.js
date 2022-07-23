@@ -1324,7 +1324,8 @@ const UploadsForTrademarkServices = props => {
 											>
 												Artistic Work*
 												<input
-													accept="application/pdf"
+													// accept="application/pdf"
+													accept="image/jpeg"
 													className="hidden"
 													id="artWork-file"
 													name="artWork"
