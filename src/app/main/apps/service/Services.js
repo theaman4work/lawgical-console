@@ -49,9 +49,9 @@ function Services(props) {
 	} else if (routeParams.tab === 'trademarks') {
 		tabIndex = 0;
 	} else if (routeParams.tab === 'patents') {
-		tabIndex = 1;
-	} else if (routeParams.tab === 'copyrights') {
 		tabIndex = 2;
+	} else if (routeParams.tab === 'copyrights') {
+		tabIndex = 1;
 	} else if (routeParams.tab === 'designs') {
 		tabIndex = 3;
 	} else if (routeParams.tab === 'otherlegalservices') {
@@ -124,8 +124,8 @@ function Services(props) {
 					classes={{ root: 'w-full h-64' }}
 				>
 					<Tab className="h-64" label="Trademarks" />
-					<Tab className="h-64" label="Patents" />
 					<Tab className="h-64" label="Copyrights" />
+					<Tab className="h-64" label="Patents" />
 					<Tab className="h-64" label="Design" />
 					<Tab className="h-64" label="Other Legal Services" />
 				</Tabs>
@@ -133,8 +133,8 @@ function Services(props) {
 			content={
 				<div className="p-8 sm:p-12 max-w-2xl w-full">
 					{tabValue === 0 && <TradeMarksTab />}
-					{tabValue === 1 && <PatentsTab />}
-					{tabValue === 2 && <CopyrightsTab />}
+					{tabValue === 2 && <PatentsTab />}
+					{tabValue === 1 && <CopyrightsTab />}
 					{tabValue === 3 && <DesignsTab />}
 					{tabValue === 4 && <OtherLegalServicesTab />}
 				</div>

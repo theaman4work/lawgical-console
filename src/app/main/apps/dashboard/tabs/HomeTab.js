@@ -42,10 +42,10 @@ function HomeTab() {
 				<Widget0 count={0} product={productNameArr[0]} />
 			</motion.div>
 			<motion.div variants={item} className="widget flex w-full sm:w-1/3 md:w-1/5 p-12">
-				<Widget1 count={0} product={productNameArr[1]} />
+				<Widget1 count={0} product={productNameArr[2]} />
 			</motion.div>
 			<motion.div variants={item} className="widget flex w-full sm:w-1/3 md:w-1/5 p-12">
-				<Widget2 count={0} product={productNameArr[2]} />
+				<Widget2 count={0} product={productNameArr[1]} />
 			</motion.div>
 			<motion.div variants={item} className="widget flex w-full sm:w-1/3 md:w-1/5 p-12">
 				<Widget3 count={0} product={productNameArr[3]} />

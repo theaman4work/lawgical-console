@@ -22,22 +22,22 @@ function PatentsTab() {
 	const subServicesForPatent = [];
 
 	// eslint-disable-next-line
-	Object.keys(productServices).map(function (keyName) {
-		if (productServices[keyName].productId === 2) {
-			productServicesForPatent.push(productServices[keyName]);
+	// Object.keys(productServices).map(function (keyName) {
+	// 	if (productServices[keyName].productId === 2) {
+	// 		productServicesForPatent.push(productServices[keyName]);
 
-			// eslint-disable-next-line
-			Object.keys(subservices).map(function (keyNameSubService) {
-				if (subservices[keyNameSubService].productLserviceId === productServices[keyName].id) {
-					subServicesForPatent.push(subservices[keyNameSubService]);
-				}
-			});
-		}
-	});
+	// 		// eslint-disable-next-line
+	// 		Object.keys(subservices).map(function (keyNameSubService) {
+	// 			if (subservices[keyNameSubService].productLserviceId === productServices[keyName].id) {
+	// 				subServicesForPatent.push(subservices[keyNameSubService]);
+	// 			}
+	// 		});
+	// 	}
+	// });
 
-	if (productServicesForPatent.length < 1) {
-		return null;
-	}
+	// if (productServicesForPatent.length < 1) {
+	// 	return null;
+	// }
 
 	const container = {
 		show: {
@@ -58,16 +58,16 @@ function PatentsTab() {
 		}
 	};
 
-	function buttonStatus(course) {
-		switch (course.activeStep) {
-			case course.totalSteps:
-				return 'Completed';
-			case 0:
-				return 'Start';
-			default:
-				return 'Continue';
-		}
-	}
+	// function buttonStatus(course) {
+	// 	switch (course.activeStep) {
+	// 		case course.totalSteps:
+	// 			return 'Completed';
+	// 		case 0:
+	// 			return 'Start';
+	// 		default:
+	// 			return 'Continue';
+	// 	}
+	// }
 
 	return (
 		<div className="flex flex-col flex-auto flex-shrink-0 w-full">
@@ -142,7 +142,7 @@ function PatentsTab() {
 				) : (
 					<div className="flex flex-1 items-center justify-center">
 						<Typography color="textSecondary" className="text-24 my-24">
-							No Patent services found!
+							Patent services coming soon...
 						</Typography>
 					</div>
 				))}

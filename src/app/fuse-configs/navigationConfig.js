@@ -34,19 +34,19 @@ const navigationConfig = [
 				exact: true
 			},
 			{
-				id: 'service-patent',
-				title: 'Patents',
-				type: 'item',
-				// icon: 'person',
-				url: '/services/patents',
-				exact: true
-			},
-			{
 				id: 'service-copyrights',
 				title: 'Copyrights',
 				type: 'item',
 				// icon: 'person',
 				url: '/services/copyrights',
+				exact: true
+			},
+			{
+				id: 'service-patent',
+				title: 'Patents',
+				type: 'item',
+				// icon: 'person',
+				url: '/services/patents',
 				exact: true
 			},
 			{

@@ -22,22 +22,22 @@ function OtherLegalServicesTab() {
 	const subServicesForAnyLegalServ = [];
 
 	// eslint-disable-next-line
-	Object.keys(productServices).map(function (keyName) {
-		if (productServices[keyName].productId === 6) {
-			productServicesForAnyLegalServ.push(productServices[keyName]);
+	// Object.keys(productServices).map(function (keyName) {
+	// 	if (productServices[keyName].productId === 6) {
+	// 		productServicesForAnyLegalServ.push(productServices[keyName]);
 
-			// eslint-disable-next-line
-			Object.keys(subservices).map(function (keyNameSubService) {
-				if (subservices[keyNameSubService].productLserviceId === productServices[keyName].id) {
-					subServicesForAnyLegalServ.push(subservices[keyNameSubService]);
-				}
-			});
-		}
-	});
+	// 		// eslint-disable-next-line
+	// 		Object.keys(subservices).map(function (keyNameSubService) {
+	// 			if (subservices[keyNameSubService].productLserviceId === productServices[keyName].id) {
+	// 				subServicesForAnyLegalServ.push(subservices[keyNameSubService]);
+	// 			}
+	// 		});
+	// 	}
+	// });
 
-	if (productServicesForAnyLegalServ.length < 1) {
-		return null;
-	}
+	// if (productServicesForAnyLegalServ.length < 1) {
+	// 	return null;
+	// }
 
 	const container = {
 		show: {
@@ -58,16 +58,16 @@ function OtherLegalServicesTab() {
 		}
 	};
 
-	function buttonStatus(course) {
-		switch (course.activeStep) {
-			case course.totalSteps:
-				return 'Completed';
-			case 0:
-				return 'Start';
-			default:
-				return 'Continue';
-		}
-	}
+	// function buttonStatus(course) {
+	// 	switch (course.activeStep) {
+	// 		case course.totalSteps:
+	// 			return 'Completed';
+	// 		case 0:
+	// 			return 'Start';
+	// 		default:
+	// 			return 'Continue';
+	// 	}
+	// }
 
 	return (
 		<div className="flex flex-col flex-auto flex-shrink-0 w-full">
@@ -142,7 +142,7 @@ function OtherLegalServicesTab() {
 				) : (
 					<div className="flex flex-1 items-center justify-center">
 						<Typography color="textSecondary" className="text-24 my-24">
-							No Other Legal Services found!
+							Other Legal Services coming soon...
 						</Typography>
 					</div>
 				))}

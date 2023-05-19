@@ -20,7 +20,7 @@ import SwipeableViews from 'react-swipeable-views';
 import Error404 from 'app/main/errors/404/Error404';
 import reducer from '../store';
 import { getData } from '../store/serviceStepsSlice';
-import { getApplicants, selectApplicants } from '../store/applicantSlice';
+import { getApplicants, openNewApplicantDialog, selectApplicants } from '../store/applicantSlice';
 import PricingInfo from '../stagesForms/PricingInfo';
 import ConfidentialityAgreement from '../stagesForms/ConfidentialityAgreement';
 import ApplicantsTable from '../stagesForms/applicantDetails/ApplicantsTable';
@@ -31,7 +31,11 @@ import TrademarkDetailsForTmFiling from '../stagesForms/trademarksRelated/Tradem
 import DownloadSearchReports from '../stagesForms/trademarksRelated/DownloadSearchReports';
 import TmApplicationNoAndOtherDetails from '../stagesForms/trademarksRelated/TmApplicationNoAndOtherDetails';
 import UploadsForTrademarkServices from '../stagesForms/trademarksRelated/UploadsForTrademarkServices';
-import { getServiceTransactions, selectServiceTransactions } from '../store/lserviceTransactionsSlice';
+import {
+	getServiceTransactions,
+	selectServiceTransactions,
+	openLabelForServiceTransactionDialog
+} from '../store/lserviceTransactionsSlice';
 import CartAndPaymentTrademark from '../stagesForms/payment/CartAndPaymentTrademark';
 import CpDownloadDocuments from '../stagesForms/copyrightsRelated/CpDownloadDocuments';
 import CpUploadDocuments from '../stagesForms/copyrightsRelated/CpUploadDocuments';
@@ -704,6 +708,12 @@ function ServiceStep(props) {
 		}
 	}
 
+	function HandleApplicationDialog() {
+		if (!createServiceNameUsingData(serviceSteps).includes('(New Application)')) {
+			dispatch(openLabelForServiceTransactionDialog(serviceSteps.lserviceTransactionDTO));
+		}
+	}
+
 	return (
 		<>
 			<FusePageSimple
@@ -726,7 +736,7 @@ function ServiceStep(props) {
 							<Icon>{theme.direction === 'ltr' ? 'arrow_back' : 'arrow_forward'}</Icon>
 						</IconButton>
 						{serviceSteps && (
-							<Typography className="flex-1 text-20 mx-16">
+							<Typography className="flex-1 text-20 mx-16" onClick={HandleApplicationDialog}>
 								{createServiceNameUsingData(serviceSteps)}
 							</Typography>
 						)}
