@@ -82,10 +82,10 @@ function Widget5(props) {
 						<MenuItem value="title">
 							<em>Trademarks</em>
 						</MenuItem>
-						<MenuItem value="patents">Patents</MenuItem>
+						{/* <MenuItem value="patents">Patents</MenuItem> */}
 						<MenuItem value="copyrights">Copyrights</MenuItem>
-						<MenuItem value="design">Design</MenuItem>
-						<MenuItem value="otherLegalServices">Other Legal Services</MenuItem>
+						{/* <MenuItem value="design">Design</MenuItem>
+						<MenuItem value="otherLegalServices">Other Legal Services</MenuItem> */}
 					</Select>
 				</FormControl>
 				<div className="w-1/2 flex justify-end">
