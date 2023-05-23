@@ -74,19 +74,19 @@ const navigationConfig = [
 		icon: 'account_circle',
 		url: '/profile'
 	},
-	{
-		id: 'invoice-list',
-		title: 'Invoice List',
-		translate: 'INVOICE',
-		type: 'item',
-		icon: 'receipt',
-		url: '/invoice'
-		// badge: {
-		// 	title: 25,
-		// 	bg: '#F44336',
-		// 	fg: '#FFFFFF'
-		// }
-	},
+	// {
+	// 	id: 'invoice-list',
+	// 	title: 'Invoice List',
+	// 	translate: 'INVOICE',
+	// 	type: 'item',
+	// 	icon: 'receipt',
+	// 	url: '/invoice'
+	// 	// badge: {
+	// 	// 	title: 25,
+	// 	// 	bg: '#F44336',
+	// 	// 	fg: '#FFFFFF'
+	// 	// }
+	// },
 	{
 		id: 'faq',
 		title: 'FAQ',
