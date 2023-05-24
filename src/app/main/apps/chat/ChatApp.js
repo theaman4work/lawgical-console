@@ -47,8 +47,8 @@ const useStyles = makeStyles(theme => ({
 		minHeight: '100%',
 		position: 'relative',
 		flex: '1 1 auto',
-		height: 'auto',
-		backgroundColor: theme.palette.background.default
+		height: '50vh',
+		// backgroundColor: theme.palette.background.default
 	},
 	topBg: {
 		position: 'absolute',
