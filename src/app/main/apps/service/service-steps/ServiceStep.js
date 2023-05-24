@@ -41,6 +41,7 @@ import CpDownloadDocuments from '../stagesForms/copyrightsRelated/CpDownloadDocu
 import CpUploadDocuments from '../stagesForms/copyrightsRelated/CpUploadDocuments';
 import CpDownloadFilingReceiptNoc from '../stagesForms/copyrightsRelated/CpDownloadFilingReceiptNoc';
 import CartAndPaymentCopyright from '../stagesForms/payment/CartAndPaymentCopyright';
+import ChatApp from '../../chat/ChatApp';
 
 const useStyles = makeStyles(theme => ({
 	stepLabel: {
@@ -755,12 +756,18 @@ function ServiceStep(props) {
 								>
 									{serviceSteps.lserviceStageDTOs.map((step, index) => (
 										<div
-											className="flex justify-center p-16 pb-64 sm:p-24 sm:pb-64 md:p-48 md:pb-64"
+											className="h-full flex justify-center p-16 pb-64 sm:p-24 sm:pb-64 md:p-48 md:pb-64"
 											key={step.id}
 										>
 											<Paper className="w-full md:max-w-md lg:max-w-lg sm:max-w-sm rounded-20 p-16 md:p-24 shadow leading-normal">
 												<div dir={theme.direction}>
 													{renderFormsUsingSwitchDecision(index, step)}
+
+													{step.stageType === 'PAYMENT' &&(
+														<div className="items-center justify-between pb-10 mt-16">
+															<ChatApp />
+														</div>
+													)}
 												</div>
 											</Paper>
 										</div>
