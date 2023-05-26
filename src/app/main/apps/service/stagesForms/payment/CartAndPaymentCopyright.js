@@ -22,6 +22,7 @@ import Accordion from '@material-ui/core/Accordion';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import JSEncrypt from 'jsencrypt';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -149,9 +150,53 @@ const CartAndPayment = props => {
 			);
 			stageStatus = 1;
 
-			message = 'Paid successfully.';
-			open = true;
-			level = 'success';
+			// CCAvenue payment integration
+			const merchantId = '232399';
+			const accessCode = 'AVXN91HC29CE29NXEC';
+			const orderId = '12345689'; // Replace with your order ID
+			const amount = 1; // Replace with the actual amount
+			const rsaKeyUrl = 'http://sotgapi.vedanshis.com:20080/vsys_payment_gw/GetRSA.php';
+			const redirectUrl = 'http://sotgapi.vedanshis.com:20080/vsys_payment_gw/ccavResponseHandler.php'; // Replace with your redirect URL
+			const cancelUrl = 'http://sotgapi.vedanshis.com:20080/vsys_payment_gw/ccavResponseHandler.php'; // Replace with your cancel URL
+
+			// Create the request payload
+			const payload = {
+				access_code: accessCode,
+				order_id: orderId
+			};
+
+			// Convert payload to form data
+			const formData = new FormData();
+			// eslint-disable-next-line
+			for (const key in payload) {
+				formData.append(key, payload[key]);
+			}
+			// Make the POST request
+			fetch(rsaKeyUrl, {
+				method: 'POST',
+				body: formData,
+				mode: 'no-cors'
+			})
+				.then(response => response.text())
+				.then(rsaKey => {
+					// Generate the request string
+					// const requestString = `${merchantId}|${orderId}|${amount}|INR|${redirectUrl}|${cancelUrl}`;
+					const requestString = `${amount}|INR`;
+
+					// Encrypt the request string using the RSA key
+					const encryptedRequest = encryptRSA(requestString, rsaKey);
+
+					// Submit the form with the encrypted request
+					submitCCavenueForm(
+						encryptedRequest,
+						accessCode,
+						merchantId,
+						orderId,
+						amount,
+						redirectUrl,
+						cancelUrl
+					);
+				});
 		} else {
 			message = 'Failed to save the data, please try again later!';
 			open = true;
@@ -163,6 +208,55 @@ const CartAndPayment = props => {
 			open,
 			level
 		});
+	}
+
+	function submitCCavenueForm(encryptedRequest, accessCode, merchantId, orderId, amount, redirectUrl, cancelUrl) {
+		const form = document.createElement('form');
+		// form.action = 'https://apitest.ccavenue.com/apis/servlet/DoWebTrans';
+		form.action = 'https://secure.ccavenue.com/transaction/initTrans';
+		form.method = 'POST';
+
+		const addField = (name, value) => {
+			const input = document.createElement('input');
+			input.type = 'hidden';
+			input.name = name;
+			input.value = value;
+			form.appendChild(input);
+		};
+
+		addField('merchant_param2', 'test');
+		addField('billing_name', 'Temp111');
+		addField('billing_email', 'jaydeep@vedanshis.com');
+		addField('billing_tel', '9876543210');
+		addField('order_id', orderId);
+		addField('access_code', accessCode);
+		addField('merchant_id', merchantId);
+		addField('amount', amount);
+		addField('currency', 'INR');
+		addField('redirect_url', redirectUrl);
+		addField('cancel_url', cancelUrl);
+		addField('language', 'EN');
+		addField('merchant_param3', 'test');
+		addField('billing_country', 'India');
+		addField('billing_city', 'Bangalore');
+		addField('billing_state', 'Karnataka');
+		addField('billing_zip', '560001');
+		addField('request_type', 'XML');
+		addField('response_type', 'JSON');
+		addField('version', '1.1');
+		addField('command', 'confirmOrder');
+		addField('language', 'EN');
+		addField('enc_request', encryptedRequest);
+		// addField('enc_request', encryptedRequest);
+		document.body.appendChild(form);
+		form.submit();
+	}
+
+	function encryptRSA(data, publicKey) {
+		const encrypt = new JSEncrypt();
+		encrypt.setPublicKey(publicKey);
+		const encryptedData = encrypt.encrypt(data);
+		return encryptedData;
 	}
 
 	function handleOpenDialog(applicants) {
