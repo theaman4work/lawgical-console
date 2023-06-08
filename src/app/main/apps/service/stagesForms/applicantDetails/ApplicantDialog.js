@@ -67,11 +67,11 @@ const schema = yup.object().shape({
 		.max(250, 'Email must be less than or equal to 250 characters')
 		.required('You must enter a email'),
 	addressLine1: yup.string().required('You must enter a Address Line1'),
-	pincode: yup
-		.string()
-		.matches(/^[0-9]+$/, 'Pincode must contain digits only')
-		.test('len', 'Pincode must be exactly 6 digits', val => val.length === 6)
-		.required('You must enter a Pincode'),
+	// pincode: yup
+	// 	.string()
+	// 	.matches(/^[0-9]+$/, 'Pincode must contain digits only')
+	// 	.test('len', 'Pincode must be exactly 6 digits', val => val.length === 6)
+	// 	.required('You must enter a Pincode'),
 	city: yup.string().max(200, 'City must be less than or equal to 200 characters').required('You must enter a City'),
 	nationality: yup.string().required('You must enter a Nationality'),
 	type: yup.string().required('You must enter a Type'),
@@ -592,10 +592,10 @@ function ApplicantDialog(props) {
 									className="mb-24"
 									label="Pincode"
 									id="pincode"
-									error={!!errors.pincode}
-									helperText={errors?.pincode?.message}
+									// error={!!errors.pincode}
+									// helperText={errors?.pincode?.message}
 									variant="outlined"
-									required
+									// required
 									fullWidth
 								/>
 							)}
