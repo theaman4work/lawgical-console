@@ -267,9 +267,22 @@ function ServiceStep(props) {
 		return null;
 	};
 
-	const findMaximumGovtChargesToBeAppliedBasedOnApplicantType = (applicants, govtChargesWithTypesDTOs) => {
+	const findMaximumGovtChargesToBeAppliedBasedOnApplicantType = (applicants, selectedApplicants, govtChargesWithTypesDTOs) => {
 		let govtCharges = 0;
-		if (applicants !== null) {
+
+		if (selectedApplicants !== null) {
+			// eslint-disable-next-line
+			for ( const[key, value] of Object.entries(selectedApplicants) ) {
+				// console.log('inside findMaximumGovtChargesToBeAppliedBasedOnApplicantType');
+				// console.log(key);
+				// console.log(value.applicantDTO.type);
+				const chargesFoundForType = findGovtChargesUsingType(value.applicantDTO.type, govtChargesWithTypesDTOs);
+				// console.log("chargesFoundForType::" + chargesFoundForType);
+				if (chargesFoundForType > govtCharges) {
+					govtCharges = chargesFoundForType;
+				}
+			}
+		} else if (applicants !== null) {
 			// eslint-disable-next-line
 			for ( const[key, value] of Object.entries(applicants) ) {
 				// console.log('inside findMaximumGovtChargesToBeAppliedBasedOnApplicantType');
@@ -290,7 +303,6 @@ function ServiceStep(props) {
 		const recordOfGovtChargeWithType = govtChargesWithTypesDTOs.find(
 			eltemp => eltemp.categoryForGovtChargesType === typeOfApplicant
 		);
-		// console.log(recordOfGovtChargeWithType);
 		if (recordOfGovtChargeWithType !== null && recordOfGovtChargeWithType !== undefined) {
 			if (recordOfGovtChargeWithType.charges !== null) {
 				return recordOfGovtChargeWithType.charges;
@@ -511,6 +523,10 @@ function ServiceStep(props) {
 							)}
 							govtCharges={findMaximumGovtChargesToBeAppliedBasedOnApplicantType(
 								applicantsData,
+								applicantsStatusForLserviceTransactions(
+									applicantsData,
+									serviceSteps.lserviceTransactionDTO
+								),
 								serviceSteps.govtChargesWithTypesDTOs
 							)}
 							classifications={convertClassficationsToDropdownList(serviceSteps.classificationDTOs)}
