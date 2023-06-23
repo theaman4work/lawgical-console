@@ -31,6 +31,8 @@ import {
 	updateResponseCustomerTrademarkDetailsAndAttachments
 } from '../../store/responseCustomerTrademarkDetailsAndAttachmentsSlice';
 import TmAppNoAndRegTmNoTable from './TmAppNoAndRegTmNoTable';
+import InfoIcon from '@material-ui/icons/Info';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const useStyles = makeStyles({
 	table: {
@@ -513,6 +515,11 @@ const TmApplicationNoAndOtherDetails = props => {
 												>
 													<TableCell component="th" scope="row">
 														POA
+														<Tooltip title={"Download POA"}>
+															<IconButton size="small">
+																<InfoIcon />
+															</IconButton>
+														</Tooltip>
 													</TableCell>
 													<TableCell
 														align="center"
@@ -542,6 +549,11 @@ const TmApplicationNoAndOtherDetails = props => {
 												>
 													<TableCell component="th" scope="row">
 														User Affidavit
+														<Tooltip title={"Download User Affidavit"}>
+															<IconButton size="small">
+																<InfoIcon />
+															</IconButton>
+														</Tooltip>
 													</TableCell>
 													<TableCell
 														align="center"
@@ -571,6 +583,11 @@ const TmApplicationNoAndOtherDetails = props => {
 												>
 													<TableCell component="th" scope="row">
 														NOC
+														<Tooltip title={"Download NOC"}>
+															<IconButton size="small">
+																<InfoIcon />
+															</IconButton>
+														</Tooltip>
 													</TableCell>
 													<TableCell
 														align="center"

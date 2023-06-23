@@ -10,6 +10,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Button from '@material-ui/core/Button';
 import Icon from '@material-ui/core/Icon';
 import WbIncandescentIcon from '@material-ui/icons/WbIncandescent';
+import InfoIcon from '@material-ui/icons/Info';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Autocomplete from '@material-ui/lab/Autocomplete';
@@ -996,6 +997,11 @@ const TrademarkDetailsForTmFiling = props => {
 												>
 													<TableCell component="th" scope="row">
 														POA
+														<Tooltip title={"Download POA"}>
+															<IconButton size="small">
+																<InfoIcon />
+															</IconButton>
+														</Tooltip>
 													</TableCell>
 													<TableCell
 														align="center"
@@ -1025,6 +1031,11 @@ const TrademarkDetailsForTmFiling = props => {
 												>
 													<TableCell component="th" scope="row">
 														User Affidavit
+														<Tooltip title={"Download User Affidavit"}>
+															<IconButton size="small">
+																<InfoIcon />
+															</IconButton>
+														</Tooltip>
 													</TableCell>
 													<TableCell
 														align="center"
