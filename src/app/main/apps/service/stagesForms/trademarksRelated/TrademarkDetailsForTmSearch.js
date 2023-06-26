@@ -156,7 +156,7 @@ const TrademarkDetailsForTmSearch = props => {
 		minimumFractionDigits: 2
 	});
 	const [dataTM, setData] = useState(responseCustomerTrademarkDetailsAndAttachments);
-
+	
 	useEffect(() => {
 		if (props.pricingInfoStatus === 0 && props.lserviceTransaction && props.lserviceTransaction.id !== null) {
 			if (props.lserviceStageTransaction == null) {
@@ -260,6 +260,7 @@ const TrademarkDetailsForTmSearch = props => {
 		let open = false;
 		let level = 'error';
 		let matchFound = false;
+		let attachmentFound = false;
 
 		const classficationId = model.classification.replace(/^\D+|\D+$/g, '');
 
@@ -294,71 +295,100 @@ const TrademarkDetailsForTmSearch = props => {
 					const { imageForUpload } = image;
 					const promises = [];
 					if (image.name != null) {
-						const uploadTask = storage.ref(`images/${image.name}`).put(image);
-						promises.push(uploadTask);
-						uploadTask.on(
-							'state_changed',
-							snapshot => {
-								// progress function ...
-								const progressDone = Math.round(
-									(snapshot.bytesTransferred / snapshot.totalBytes) * 100
-								);
-								console.log(progressDone);
-								if (!Number.isNaN(progressDone)) {
-									setProgress(progressDone);
-								}
-							},
-							error => {
-								// Error function ...
-								message = 'Failed to upload image on server, please try again after some time!';
-								open = true;
-								setProgress(0);
-								setMessageAndLevel({
-									message,
-									open,
-									level
-								});
-							},
-							async () => {
-								// complete function ...
-								const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
-								urlOfImage = downloadURL;
-
-								let lserviceStageTransactionIdForData = null;
-								if (props.lserviceStageTransaction == null) {
-									lserviceStageTransactionIdForData = stateLserviceStageTransactionId;
-								} else {
-									lserviceStageTransactionIdForData = props.lserviceStageTransaction.id;
-								}
-
-								const customerTrademarkDetailsDTO = {
-									classficationId,
-									typeForTm: model.switchForImageAndWord === 'word' ? 'WORD' : 'IMAGE',
-									status: 'ACTIVE',
-									word: '',
-									lserviceStageTransactionId: lserviceStageTransactionIdForData
-								};
-								const attachmentDTO = {
-									attachmentName: image.name,
-									url: downloadURL,
-									attachmentType: 'IMAGE'
-								};
-								const attachmentDTOs = [attachmentDTO];
-								const reqData = {
-									customerTrademarkDetailsDTO,
-									attachmentDTOs,
-									email: localStorage.getItem('lg_logged_in_email')
-								};
-
-								dispatch(addResponseCustomerTrademarkDetailsAndAttachments(reqData));
-								// stageStaus = 1;
-								message = 'Data saved successfully.';
-								open = true;
-								level = 'success';
-								setProgress(0);
-								setImage(null);
-							}
+						let lserviceStageTransactionIdForData = null;
+						if (props.lserviceStageTransaction == null) {
+							lserviceStageTransactionIdForData = stateLserviceStageTransactionId;
+						} else {
+							lserviceStageTransactionIdForData = props.lserviceStageTransaction.id;
+						}
+						const listOfTrademarkAttachments = responseCustomerTrademarkDetailsAndAttachments.filter(
+							rec =>
+								rec.customerTrademarkDetailsDTO.typeForTm === 'IMAGE' &&
+								rec.customerTrademarkDetailsDTO.lserviceStageTransactionId === lserviceStageTransactionIdForData
 						);
+						
+						// listOfTrademarkAttachments.map(items => console.log(items.attachmentDTOs))
+						
+						if(listOfTrademarkAttachments){
+							listOfTrademarkAttachments.map(items => {
+								const imageData = items.attachmentDTOs
+								imageData.map(e => {
+									if(image.name === e.attachmentName){
+										message = 'Image already exists!';
+										open = true;
+										attachmentFound = true;
+									}
+								})
+							})
+						}
+
+						if(attachmentFound === false){
+							const uploadTask = storage.ref(`images/${image.name}`).put(image);
+							promises.push(uploadTask);
+							uploadTask.on(
+								'state_changed',
+								snapshot => {
+									// progress function ...
+									const progressDone = Math.round(
+										(snapshot.bytesTransferred / snapshot.totalBytes) * 100
+									);
+									// console.log(progressDone);
+									if (!Number.isNaN(progressDone)) {
+										setProgress(progressDone);
+									}
+								},
+								error => {
+									// Error function ...
+									message = 'Failed to upload image on server, please try again after some time!';
+									open = true;
+									setProgress(0);
+									setMessageAndLevel({
+										message,
+										open,
+										level
+									});
+								},
+								async () => {
+									// complete function ...
+									const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+									urlOfImage = downloadURL;
+
+									let lserviceStageTransactionIdForData = null;
+									if (props.lserviceStageTransaction == null) {
+										lserviceStageTransactionIdForData = stateLserviceStageTransactionId;
+									} else {
+										lserviceStageTransactionIdForData = props.lserviceStageTransaction.id;
+									}
+
+									const customerTrademarkDetailsDTO = {
+										classficationId,
+										typeForTm: model.switchForImageAndWord === 'word' ? 'WORD' : 'IMAGE',
+										status: 'ACTIVE',
+										word: '',
+										lserviceStageTransactionId: lserviceStageTransactionIdForData
+									};
+									const attachmentDTO = {
+										attachmentName: image.name,
+										url: downloadURL,
+										attachmentType: 'IMAGE'
+									};
+									const attachmentDTOs = [attachmentDTO];
+									const reqData = {
+										customerTrademarkDetailsDTO,
+										attachmentDTOs,
+										email: localStorage.getItem('lg_logged_in_email')
+									};
+
+									dispatch(addResponseCustomerTrademarkDetailsAndAttachments(reqData));
+									// stageStaus = 1;
+									message = 'Data saved successfully.';
+									open = true;
+									level = 'success';
+									setProgress(0);
+									setImage(null);
+								}
+							);
+						}
 					}
 					// image name check condition ends here
 
