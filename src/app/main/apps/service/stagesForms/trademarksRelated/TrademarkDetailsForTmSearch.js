@@ -295,23 +295,25 @@ const TrademarkDetailsForTmSearch = props => {
 					const { imageForUpload } = image;
 					const promises = [];
 					if (image.name != null) {
-						let lserviceStageTransactionIdForData = null;
+						let lserviceStageTransactionIdForDataForImg = null;
 						if (props.lserviceStageTransaction == null) {
-							lserviceStageTransactionIdForData = stateLserviceStageTransactionId;
+							lserviceStageTransactionIdForDataForImg = stateLserviceStageTransactionId;
 						} else {
-							lserviceStageTransactionIdForData = props.lserviceStageTransaction.id;
+							lserviceStageTransactionIdForDataForImg = props.lserviceStageTransaction.id;
 						}
 						const listOfTrademarkAttachments = responseCustomerTrademarkDetailsAndAttachments.filter(
 							rec =>
 								rec.customerTrademarkDetailsDTO.typeForTm === 'IMAGE' &&
-								rec.customerTrademarkDetailsDTO.lserviceStageTransactionId === lserviceStageTransactionIdForData
+								rec.customerTrademarkDetailsDTO.lserviceStageTransactionId === lserviceStageTransactionIdForDataForImg
 						);
 						
 						// listOfTrademarkAttachments.map(items => console.log(items.attachmentDTOs))
 						
 						if(listOfTrademarkAttachments){
+							// eslint-disable-next-line
 							listOfTrademarkAttachments.map(items => {
 								const imageData = items.attachmentDTOs
+								 // eslint-disable-next-line
 								imageData.map(e => {
 									if(image.name === e.attachmentName){
 										message = 'Image already exists!';
@@ -724,6 +726,25 @@ const TrademarkDetailsForTmSearch = props => {
 									</Button>
 								</form>
 								{progress !== 0 && <LinearProgressWithLabel value={progress} />}
+								<Collapse in={messageAndLevel.open}>
+									<Alert
+										severity={messageAndLevel.level}
+										variant="outlined"
+										className="mt-10"
+										action={
+											<IconButton
+												aria-label="close"
+												color="inherit"
+												size="small"
+												onClick={event => handleClose(event)}
+											>
+												<CloseIcon fontSize="inherit" />
+											</IconButton>
+										}
+									>
+										{messageAndLevel.message}
+									</Alert>
+								</Collapse>
 								<Divider className="mt-20" />
 								<div className="mt-20 w-full flex items-center justify-center">
 									<SearchRecordsTable
@@ -737,25 +758,6 @@ const TrademarkDetailsForTmSearch = props => {
 									/>
 								</div>
 							</div>
-							<Collapse in={messageAndLevel.open}>
-								<Alert
-									severity={messageAndLevel.level}
-									variant="outlined"
-									className="mt-10"
-									action={
-										<IconButton
-											aria-label="close"
-											color="inherit"
-											size="small"
-											onClick={event => handleClose(event)}
-										>
-											<CloseIcon fontSize="inherit" />
-										</IconButton>
-									}
-								>
-									{messageAndLevel.message}
-								</Alert>
-							</Collapse>
 						</div>
 					)}
 				</div>
