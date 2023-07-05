@@ -997,7 +997,7 @@ const TrademarkDetailsForTmFiling = props => {
 												>
 													<TableCell component="th" scope="row">
 														POA
-														<Tooltip title={"Download POA"}>
+														<Tooltip title={"To be printed on Rs. 100/- non-judicial stamp paper, and duly signed by applicant or authorized signatory of applicant (Notarization not required)."}>
 															<IconButton size="small">
 																<InfoIcon />
 															</IconButton>
@@ -1031,7 +1031,7 @@ const TrademarkDetailsForTmFiling = props => {
 												>
 													<TableCell component="th" scope="row">
 														User Affidavit
-														<Tooltip title={"Download User Affidavit"}>
+														<Tooltip title={"To be printed on Rs. 100/- non-judicial stamp paper, duly signed by applicant or authorized signatory of applicant, and notarised by the Notary."}>
 															<IconButton size="small">
 																<InfoIcon />
 															</IconButton>
