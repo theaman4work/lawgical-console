@@ -307,15 +307,15 @@ const TrademarkDetailsForTmSearch = props => {
 								rec.customerTrademarkDetailsDTO.lserviceStageTransactionId === lserviceStageTransactionIdForDataForImg
 						);
 						
-						// listOfTrademarkAttachments.map(items => console.log(items.attachmentDTOs))
-						
+						// listOfTrademarkAttachments.map(items => console.log(items))
+
 						if(listOfTrademarkAttachments){
 							// eslint-disable-next-line
 							listOfTrademarkAttachments.map(items => {
 								const imageData = items.attachmentDTOs
 								 // eslint-disable-next-line
 								imageData.map(e => {
-									if(image.name === e.attachmentName){
+									if(image.name === e.attachmentName && parseInt(classficationId, 10) === items.customerTrademarkDetailsDTO.classficationId){
 										message = 'Image already exists!';
 										open = true;
 										attachmentFound = true;
