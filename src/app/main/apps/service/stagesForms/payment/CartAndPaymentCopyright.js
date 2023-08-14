@@ -315,7 +315,10 @@ const CartAndPayment = props => {
 						>
 							<AppBar position="static" elevation={0} className="items-center">
 								<Typography variant="h6" color="inherit" className="p-16 items-center">
-									Preview
+								{serviceSteps.lserviceDTO.name} -
+								({serviceSteps.lserviceTransactionDTO.lablelByUser != null 
+																					  ? serviceSteps.lserviceTransactionDTO.lablelByUser 
+																					  : serviceSteps.lserviceTransactionDTO.sysGenName})
 								</Typography>
 							</AppBar>
 							<DialogContent className="w-auto justify-center">
