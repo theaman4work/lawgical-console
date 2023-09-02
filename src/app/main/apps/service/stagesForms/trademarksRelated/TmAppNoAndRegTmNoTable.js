@@ -37,7 +37,7 @@ function TmAppNoAndRegTmNoTable(props) {
 
 	const [loading, setLoading] = useState(true);
 	const [data, setData] = useState(responseCustomerTrademarkDetailsAndAttachments);
-	const [page, setPage] = useState(0);
+	const [page, setPage] = useState(parseInt(0));
 	const [rowsPerPage, setRowsPerPage] = useState(5);
 
 	useEffect(() => {
@@ -54,12 +54,13 @@ function TmAppNoAndRegTmNoTable(props) {
 		props.onRecordAdditionOrRemoval(data.length);
 	}, [responseCustomerTrademarkDetailsAndAttachments, props, data.length]);
 
-	function handleChangePage(value) {
-		setPage(value);
+	function handleChangePage(value, newpage) {
+		setPage(parseInt(newpage));
 	}
 
 	function handleChangeRowsPerPage(event) {
-		setRowsPerPage(event.target.value);
+		setRowsPerPage(parseInt(event.target.value, data.length));
+		setPage(parseInt(0));
 	}
 
 	if (loading) {
