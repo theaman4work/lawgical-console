@@ -141,7 +141,7 @@ function Chat(props) {
 
 		dispatch(
 			sendMessage({
-				messageText,
+				messageText
 				// chatId: chat.id,
 				// contactId: selectedContactId
 			})

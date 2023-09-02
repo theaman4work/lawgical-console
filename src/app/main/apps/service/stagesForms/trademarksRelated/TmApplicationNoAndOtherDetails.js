@@ -22,7 +22,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import FuseLoading from '@fuse/core/FuseLoading';
+import InfoIcon from '@material-ui/icons/Info';
+import Tooltip from '@material-ui/core/Tooltip';
 import { axiosInstance } from 'app/auth-service/axiosInstance';
+import TmAppNoAndRegTmNoTable from './TmAppNoAndRegTmNoTable';
 import { updateData } from '../../store/serviceStepsSlice';
 import {
 	addResponseCustomerTrademarkDetailsAndAttachments,
@@ -30,9 +33,6 @@ import {
 	getResponseCustomerTrademarkDetailsAndAttachments,
 	updateResponseCustomerTrademarkDetailsAndAttachments
 } from '../../store/responseCustomerTrademarkDetailsAndAttachmentsSlice';
-import TmAppNoAndRegTmNoTable from './TmAppNoAndRegTmNoTable';
-import InfoIcon from '@material-ui/icons/Info';
-import Tooltip from '@material-ui/core/Tooltip';
 
 const useStyles = makeStyles({
 	table: {
@@ -515,7 +515,7 @@ const TmApplicationNoAndOtherDetails = props => {
 												>
 													<TableCell component="th" scope="row">
 														POA
-														<Tooltip title={"To be printed on Rs. 100/- non-judicial stamp paper, and duly signed by applicant or authorized signatory of applicant (Notarization not required)."}>
+														<Tooltip title="To be printed on Rs. 100/- non-judicial stamp paper, and duly signed by applicant or authorized signatory of applicant (Notarization not required).">
 															<IconButton size="small">
 																<InfoIcon />
 															</IconButton>
@@ -549,7 +549,7 @@ const TmApplicationNoAndOtherDetails = props => {
 												>
 													<TableCell component="th" scope="row">
 														User Affidavit
-														<Tooltip title={"To be printed on Rs. 100/- non-judicial stamp paper, duly signed by applicant or authorized signatory of applicant, and notarised by the Notary."}>
+														<Tooltip title="To be printed on Rs. 100/- non-judicial stamp paper, duly signed by applicant or authorized signatory of applicant, and notarised by the Notary.">
 															<IconButton size="small">
 																<InfoIcon />
 															</IconButton>
@@ -583,7 +583,7 @@ const TmApplicationNoAndOtherDetails = props => {
 												>
 													<TableCell component="th" scope="row">
 														NOC
-														<Tooltip title={"Download NOC"}>
+														<Tooltip title="Download NOC">
 															<IconButton size="small">
 																<InfoIcon />
 															</IconButton>

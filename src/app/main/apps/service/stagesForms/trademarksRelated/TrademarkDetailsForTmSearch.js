@@ -156,7 +156,7 @@ const TrademarkDetailsForTmSearch = props => {
 		minimumFractionDigits: 2
 	});
 	const [dataTM, setData] = useState(responseCustomerTrademarkDetailsAndAttachments);
-	
+
 	useEffect(() => {
 		if (props.pricingInfoStatus === 0 && props.lserviceTransaction && props.lserviceTransaction.id !== null) {
 			if (props.lserviceStageTransaction == null) {
@@ -304,27 +304,32 @@ const TrademarkDetailsForTmSearch = props => {
 						const listOfTrademarkAttachments = responseCustomerTrademarkDetailsAndAttachments.filter(
 							rec =>
 								rec.customerTrademarkDetailsDTO.typeForTm === 'IMAGE' &&
-								rec.customerTrademarkDetailsDTO.lserviceStageTransactionId === lserviceStageTransactionIdForDataForImg
+								rec.customerTrademarkDetailsDTO.lserviceStageTransactionId ===
+									lserviceStageTransactionIdForDataForImg
 						);
-						
+
 						// listOfTrademarkAttachments.map(items => console.log(items))
 
-						if(listOfTrademarkAttachments){
+						if (listOfTrademarkAttachments) {
 							// eslint-disable-next-line
 							listOfTrademarkAttachments.map(items => {
-								const imageData = items.attachmentDTOs
-								 // eslint-disable-next-line
+								const imageData = items.attachmentDTOs;
+								// eslint-disable-next-line
 								imageData.map(e => {
-									if(image.name === e.attachmentName && parseInt(classficationId, 10) === items.customerTrademarkDetailsDTO.classficationId){
+									if (
+										image.name === e.attachmentName &&
+										parseInt(classficationId, 10) ===
+											items.customerTrademarkDetailsDTO.classficationId
+									) {
 										message = 'Image already exists!';
 										open = true;
 										attachmentFound = true;
 									}
-								})
-							})
+								});
+							});
 						}
 
-						if(attachmentFound === false){
+						if (attachmentFound === false) {
 							const uploadTask = storage.ref(`images/${image.name}`).put(image);
 							promises.push(uploadTask);
 							uploadTask.on(

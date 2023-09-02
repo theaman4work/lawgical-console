@@ -267,33 +267,33 @@ function ServiceStep(props) {
 		return null;
 	};
 
-	const findMaximumGovtChargesToBeAppliedBasedOnApplicantType = (applicants, selectedApplicants, govtChargesWithTypesDTOs) => {
+	const findMaximumGovtChargesToBeAppliedBasedOnApplicantType = (
+		applicants,
+		selectedApplicants,
+		govtChargesWithTypesDTOs
+	) => {
 		let govtCharges = 0;
+		const processApplicants = applicantList => {
+			Object.keys(applicantList).forEach(key => {
+				const value = applicantList[key];
+				if (value.applicantDTO && typeof value.applicantDTO.type !== 'undefined') {
+					const chargesFoundForType = findGovtChargesUsingType(
+						value.applicantDTO.type,
+						govtChargesWithTypesDTOs
+					);
+					if (chargesFoundForType > govtCharges) {
+						govtCharges = chargesFoundForType;
+					}
+				}
+			});
+		};
 
 		if (selectedApplicants !== null) {
-			// eslint-disable-next-line
-			for ( const[key, value] of Object.entries(selectedApplicants) ) {
-				// console.log('inside findMaximumGovtChargesToBeAppliedBasedOnApplicantType');
-				// console.log(key);
-				// console.log(value.applicantDTO.type);
-				const chargesFoundForType = findGovtChargesUsingType(value.applicantDTO.type, govtChargesWithTypesDTOs);
-				// console.log("chargesFoundForType::" + chargesFoundForType);
-				if (chargesFoundForType > govtCharges) {
-					govtCharges = chargesFoundForType;
-				}
-			}
+			processApplicants(selectedApplicants);
 		} else if (applicants !== null) {
-			// eslint-disable-next-line
-			for ( const[key, value] of Object.entries(applicants) ) {
-				// console.log('inside findMaximumGovtChargesToBeAppliedBasedOnApplicantType');
-				// console.log(key);
-				// console.log(value.applicantDTO.type);
-				const chargesFoundForType = findGovtChargesUsingType(value.applicantDTO.type, govtChargesWithTypesDTOs);
-				if (chargesFoundForType > govtCharges) {
-					govtCharges = chargesFoundForType;
-				}
-			}
+			processApplicants(applicants);
 		}
+
 		return govtCharges;
 	};
 
@@ -779,7 +779,7 @@ function ServiceStep(props) {
 												<div dir={theme.direction}>
 													{renderFormsUsingSwitchDecision(index, step)}
 
-													{step.stageType === 'PAYMENT' &&(
+													{step.stageType === 'PAYMENT' && (
 														<div className="items-center justify-between pb-10 mt-16">
 															<ChatApp />
 														</div>
