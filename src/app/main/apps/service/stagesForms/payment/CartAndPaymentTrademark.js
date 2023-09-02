@@ -496,10 +496,11 @@ const CartAndPayment = props => {
 						>
 							<AppBar position="static" elevation={0} className="items-center">
 								<Typography variant="h6" color="inherit" className="p-16 items-center">
-									{serviceSteps.lserviceDTO.name} - 
-									({serviceSteps.lserviceTransactionDTO.lablelByUser != null 
-																					  ? serviceSteps.lserviceTransactionDTO.lablelByUser 
-																					  : serviceSteps.lserviceTransactionDTO.sysGenName})
+									{serviceSteps.lserviceDTO.name} - (
+									{serviceSteps.lserviceTransactionDTO.lablelByUser != null
+										? serviceSteps.lserviceTransactionDTO.lablelByUser
+										: serviceSteps.lserviceTransactionDTO.sysGenName}
+									)
 								</Typography>
 							</AppBar>
 							<DialogContent className="w-auto justify-center">
@@ -905,7 +906,10 @@ const CartAndPayment = props => {
 					props.applicantsStatus,
 					totaFilteredRecords,
 					props.classificationDTOs,
-					props.step.stageType
+					props.step.stageType,
+					serviceSteps.lserviceDTO.name,
+					serviceSteps.lserviceTransactionDTO.lablelByUser,
+					serviceSteps.lserviceTransactionDTO.sysGenName
 				])}
 			</div>
 			<div className={clsx(classes.root, 'flex-grow flex-shrink-0 p-0')}>

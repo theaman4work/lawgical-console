@@ -37,7 +37,7 @@ function TmAppNoAndRegTmNoTable(props) {
 
 	const [loading, setLoading] = useState(true);
 	const [data, setData] = useState(responseCustomerTrademarkDetailsAndAttachments);
-	const [page, setPage] = useState(parseInt(0));
+	const [page, setPage] = useState(parseInt(0, 10));
 	const [rowsPerPage, setRowsPerPage] = useState(5);
 
 	useEffect(() => {
@@ -55,12 +55,12 @@ function TmAppNoAndRegTmNoTable(props) {
 	}, [responseCustomerTrademarkDetailsAndAttachments, props, data.length]);
 
 	function handleChangePage(value, newpage) {
-		setPage(parseInt(newpage));
+		setPage(parseInt(newpage, 10));
 	}
 
 	function handleChangeRowsPerPage(event) {
 		setRowsPerPage(parseInt(event.target.value, data.length));
-		setPage(parseInt(0));
+		setPage(parseInt(0, 10));
 	}
 
 	if (loading) {

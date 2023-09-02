@@ -51,7 +51,7 @@ function DownloadSearchReports(props) {
 	const [loading, setLoading] = useState(true);
 	const [data, setData] = useState(responseDocumentReviewsAndAttachments);
 	const [updatesData, setUpdatesData] = useState(null);
-	const [page, setPage] = useState(parseInt(0));
+	const [page, setPage] = useState(parseInt(0, 10));
 	const [rowsPerPage, setRowsPerPage] = useState(5);
 	const [stateLserviceStageTransactionId, setStateLserviceStageTransactionId] = useState(
 		props.lserviceStageTransaction !== null ? props.lserviceStageTransaction.id : null
@@ -157,12 +157,12 @@ function DownloadSearchReports(props) {
 	}
 
 	function handleChangePage(event, newpage) {
-		setPage(parseInt(newpage));
+		setPage(parseInt(newpage, 10));
 	}
 
 	function handleChangeRowsPerPage(event) {
 		setRowsPerPage(parseInt(event.target.value, data.length));
-		setPage(parseInt(0));
+		setPage(parseInt(0, 10));
 	}
 
 	const findAttachmentMatchingWithId = (attachmentList, attachmentId) => {
