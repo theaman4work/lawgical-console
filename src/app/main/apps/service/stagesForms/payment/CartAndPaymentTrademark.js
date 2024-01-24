@@ -7,7 +7,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
-import React, { memo, useState, useMemo, forwardRef } from 'react';
+import React, { memo, useState, useMemo, forwardRef, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
 import Alert from '@material-ui/lab/Alert';
 import IconButton from '@material-ui/core/IconButton';
@@ -29,6 +29,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { updateData } from '../../store/serviceStepsSlice';
 import { selectResponseCustomerTrademarkDetailsAndAttachments } from '../../store/responseCustomerTrademarkDetailsAndAttachmentsSlice';
 import { applicantTypesList } from '../applicantTypeList';
+import axios from 'axios';
+import Razorpay from 'razorpay';
 
 const useStyles = makeStyles({
 	root: {
@@ -58,6 +60,20 @@ const CartAndPayment = props => {
 	const classes = useStyles();
 	const dispatch = useDispatch();
 	const [map, setMap] = useState('applicantDetails');
+	const [actualPaymentAmount, setActualPaymentAmount] = useState(null);
+	const [razorpayOrderId, setRazorpayOrderId] = useState('');
+	useEffect(() => {
+        // Load Razorpay library dynamically
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        document.body.appendChild(script);
+
+        return () => {
+            // Cleanup: Remove the script when the component unmounts
+            document.body.removeChild(script);
+        };
+    }, []);
 	const serviceSteps = useSelector(({ servicesApp }) => servicesApp.serviceSteps);
 
 	const responseCustomerTrademarkDetailsAndAttachments = useSelector(
@@ -196,7 +212,7 @@ const CartAndPayment = props => {
 			props.lservice.name.toLowerCase() === 'Reply To Examination Report'.toLowerCase() ||
 			props.lservice.name.toLowerCase() === 'Attending Show-Cause Hearing'.toLowerCase() ||
 			props.lservice.name.toLowerCase() ===
-				'Amendment in Applicant Details/ Application/ Clerical Errors'.toLowerCase()
+			'Amendment in Applicant Details/ Application/ Clerical Errors'.toLowerCase()
 		) {
 			if (serviceSteps.lserviceStageDTOs.length > 0) {
 				const lserviceStageDTO = serviceSteps.lserviceStageDTOs.filter(
@@ -250,22 +266,19 @@ const CartAndPayment = props => {
 
 	let totalTextLabel = 'SERVICE CHARGES';
 	if (props.lservice.name.toLowerCase() === 'TM search'.toLocaleLowerCase()) {
-		totalTextLabel = `TOTAL NUMBER OF TRADEMARKS -(${
-			totaFilteredRecords.length !== 0 ? totaFilteredRecords.length : 1
-		})`;
+		totalTextLabel = `TOTAL NUMBER OF TRADEMARKS -(${totaFilteredRecords.length !== 0 ? totaFilteredRecords.length : 1
+			})`;
 	} else if (
 		props.lservice.name.toLowerCase() === 'TM monitor'.toLowerCase() ||
 		props.lservice.name.toLowerCase() === 'Legal status'.toLowerCase() ||
 		props.lservice.name.toLowerCase() === 'Assignment or transfer of registered TM'.toLowerCase() ||
 		props.lservice.name.toLowerCase() === 'Trademark portfolio valuation (per Country)'.toLowerCase()
 	) {
-		totalTextLabel = `TOTAL NUMBER OF TM APPLICATION NO -(${
-			totaFilteredRecords.length !== 0 ? totaFilteredRecords.length : 1
-		})`;
+		totalTextLabel = `TOTAL NUMBER OF TM APPLICATION NO -(${totaFilteredRecords.length !== 0 ? totaFilteredRecords.length : 1
+			})`;
 	} else if (props.lservice.name.toLowerCase() === 'TM Renewal'.toLowerCase()) {
-		totalTextLabel = `TOTAL NUMBER OF REGISTERED TM NO -(${
-			totaFilteredRecords.length !== 0 ? totaFilteredRecords.length : 1
-		})`;
+		totalTextLabel = `TOTAL NUMBER OF REGISTERED TM NO -(${totaFilteredRecords.length !== 0 ? totaFilteredRecords.length : 1
+			})`;
 	}
 
 	let stageStatus =
@@ -283,6 +296,68 @@ const CartAndPayment = props => {
 		},
 		resolver: yupResolver(schema)
 	});
+
+	const paymentHandler = async () => {
+		console.log('final amount to be paid', formatter.format(chargesToBePaid));
+		try {
+            // Step 1: Create Razorpay order
+            //const response = await axios.post('YOUR_PHP_SERVER_URL/razorpay.php');
+            const { id } = 123;
+            setRazorpayOrderId(id);
+
+            // Step 2: Set up Razorpay options
+            const options = {
+                key: 'rzp_test_sC6p5nCMQEu05y',
+                amount: 50000, // Amount in paisa
+                currency: 'INR',
+                name: 'Your Company Name',
+                description: 'Payment for your order',
+                order_id: id,
+				handler: function (response) {
+                    // Step 4: Handle successful payment on the client side
+                    handlePaymentSuccess(response);
+                },
+                prefill: {
+                    name: 'John Doe',
+                    email: 'john@example.com',
+                    contact: '9876543210',
+                },
+            };
+
+            // Step 4: Open Razorpay modal
+            let razorpay = new window.Razorpay(options);
+            razorpay.open();
+        } catch (error) {
+            console.error('Error creating order:', error);
+        }
+	};
+
+	const handlePaymentSuccess = async (response) => {
+        try {
+            // Simulate server-side payment verification (Replace with your actual logic)
+            const verifyResponse = await verifyPaymentOnServer({
+                payment_id: response.razorpay_payment_id,
+                order_id: razorpayOrderId,
+            });
+
+            // Step 7: Redirect to Thank You page if payment is successful
+            if (verifyResponse.success) {
+                console.log('Payment successful! Redirecting to Thank You page.');
+                // window.location.href = '/thankyou';
+            } else {
+                console.log('Payment verification failed.');
+            }
+        } catch (error) {
+            console.error('Error verifying payment:', error);
+        }
+    };
+
+	const verifyPaymentOnServer = (data) => {
+        // Simulate server-side payment verification (Replace with your actual logic)
+        return Promise.resolve({
+            success: true,
+        });
+    };
 
 	const formatter = new Intl.NumberFormat('en-IN', {
 		style: 'currency',
@@ -552,12 +627,11 @@ const CartAndPayment = props => {
 																		{
 																			// strings appended for address
 																		}
-																		{`${applicantData.addressDTO.addressLine1}, ${
-																			applicantData.addressDTO.addressLine2 !==
-																			null
+																		{`${applicantData.addressDTO.addressLine1}, ${applicantData.addressDTO.addressLine2 !==
+																				null
 																				? `${applicantData.addressDTO.addressLine2}, `
 																				: ''
-																		} ${applicantData.addressDTO.city}, 
+																			} ${applicantData.addressDTO.city}, 
 																		${applicantData.addressDTO.pincode}, ${applicantData.addressDTO.state}, 
 																		${applicantData.addressDTO.country}`}
 																	</Typography>
@@ -646,9 +720,9 @@ const CartAndPayment = props => {
 												let startDateOfUsageOrProposeToBeUsed = 0;
 												if (
 													trademarkAndAttachmentData.customerTrademarkDetailsDTO.typeForTm ===
-														'WORD' ||
+													'WORD' ||
 													trademarkAndAttachmentData.customerTrademarkDetailsDTO.typeForTm ===
-														'IMAGE'
+													'IMAGE'
 												) {
 													if (
 														trademarkAndAttachmentData.customerTrademarkDetailsDTO
@@ -871,9 +945,9 @@ const CartAndPayment = props => {
 																		<Typography color="textSecondary">
 																			{startDateOfUsageOrProposeToBeUsed === 1
 																				? trademarkAndAttachmentData.customerTrademarkDetailsDTO.startDateOfUsage.replace(
-																						/T.*$/g,
-																						''
-																				  )
+																					/T.*$/g,
+																					''
+																				)
 																				: 'Yes'}
 																		</Typography>
 																	</TableCell>
@@ -1025,6 +1099,7 @@ const CartAndPayment = props => {
 									aria-label="REGISTER"
 									value="legacy"
 									disabled={stageStatus === 1}
+									onClick={paymentHandler}
 								>
 									{stageStatus === 1 ? 'Payment Completed' : 'Payment'}
 								</Button>
