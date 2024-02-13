@@ -7,7 +7,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 import clsx from 'clsx';
-import React, { memo, useState, useMemo, forwardRef } from 'react';
+import React, { memo, useState, useMemo, forwardRef, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
 import Alert from '@material-ui/lab/Alert';
 import IconButton from '@material-ui/core/IconButton';
@@ -29,6 +29,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { updateData } from '../../store/serviceStepsSlice';
 import { selectResponseCustomerCopyrightDetailsAndAttachments } from '../../store/responseCustomerCopyrightDetailsAndAttachmentsSlice';
 import { applicantTypesList } from '../applicantTypeList';
+import axios from 'axios';
+import Razorpay from 'razorpay';
 
 const useStyles = makeStyles({
 	root: {
@@ -58,6 +60,19 @@ const CartAndPayment = props => {
 	const classes = useStyles();
 	const dispatch = useDispatch();
 	const [map, setMap] = useState('applicantDetails');
+	const [razorpayOrderId, setRazorpayOrderId] = useState('');
+	useEffect(() => {
+        // Load Razorpay library dynamically
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        document.body.appendChild(script);
+
+        return () => {
+            // Cleanup: Remove the script when the component unmounts
+            document.body.removeChild(script);
+        };
+    }, []);
 	const serviceSteps = useSelector(({ servicesApp }) => servicesApp.serviceSteps);
 
 	const responseCustomerCopyrightDetailsAndAttachments = useSelector(
@@ -106,6 +121,88 @@ const CartAndPayment = props => {
 		resolver: yupResolver(schema)
 	});
 
+	const paymentHandler = async () => {
+		const allFinalAmountToBePaid = formatter.format(chargesToBePaid + props.govtCharges);
+		console.log('final amount to be paid', allFinalAmountToBePaid);
+
+		// Convert to number
+		const amountNumber = parseFloat(allFinalAmountToBePaid.replace(/[^0-9.-]+/g,""));
+		console.log('amountNumber', amountNumber);
+
+		// Extract the whole number part
+		const wholeNumber = Math.floor(amountNumber);
+		console.log('wholeNumber', wholeNumber);
+
+		// Convert the decimal part to paisa
+		const decimalPart = Math.round((amountNumber % 1) * 100);
+		console.log('decimalPart', decimalPart);
+
+		// Combine whole number and paisa
+		const amountInPaisa = wholeNumber * 100 + decimalPart;
+
+		console.log('final amountInPaisa', amountInPaisa);
+
+
+		try {
+            // Step 1: Create Razorpay order
+            //const response = await axios.post('YOUR_PHP_SERVER_URL/razorpay.php');
+            const { id } = 123;
+            setRazorpayOrderId(id);
+
+            // Step 2: Set up Razorpay options
+            const options = {
+                key: 'rzp_test_sC6p5nCMQEu05y',
+                amount: amountInPaisa, // Amount in paisa
+                currency: 'INR',
+                name: 'Your Company Name',
+                description: 'Payment for your order',
+                order_id: id,
+				handler: function (response) {
+                    // Step 4: Handle successful payment on the client side
+                    handlePaymentSuccess(response);
+                },
+                prefill: {
+                    name: 'John Doe',
+                    email: 'john@example.com',
+                    contact: '9876543210',
+                },
+            };
+
+            // Step 4: Open Razorpay modal
+            let razorpay = new window.Razorpay(options);
+            razorpay.open();
+        } catch (error) {
+            console.error('Error creating order:', error);
+        }
+	};
+
+	const handlePaymentSuccess = async (response) => {
+        try {
+            // Simulate server-side payment verification (Replace with your actual logic)
+            const verifyResponse = await verifyPaymentOnServer({
+                payment_id: response.razorpay_payment_id,
+                order_id: razorpayOrderId,
+            });
+			console.log('responseresponse',response);
+            // Step 7: Redirect to Thank You page if payment is successful
+            if (verifyResponse.success) {
+                console.log('Payment successful! Redirecting to Thank You page.');
+                // window.location.href = '/thankyou';
+            } else {
+                console.log('Payment verification failed.');
+            }
+        } catch (error) {
+            console.error('Error verifying payment:', error);
+        }
+    };
+
+	const verifyPaymentOnServer = (data) => {
+        // Simulate server-side payment verification (Replace with your actual logic)
+        return Promise.resolve({
+            success: true,
+        });
+    };
+
 	const formatter = new Intl.NumberFormat('en-IN', {
 		style: 'currency',
 		currency: 'INR',
@@ -150,53 +247,6 @@ const CartAndPayment = props => {
 			);
 			stageStatus = 1;
 
-			// CCAvenue payment integration
-			const merchantId = '232399';
-			const accessCode = 'AVXN91HC29CE29NXEC';
-			const orderId = '12345689'; // Replace with your order ID
-			const amount = 1; // Replace with the actual amount
-			const rsaKeyUrl = 'http://sotgapi.vedanshis.com:20080/vsys_payment_gw/GetRSA.php';
-			const redirectUrl = 'http://sotgapi.vedanshis.com:20080/vsys_payment_gw/ccavResponseHandler.php'; // Replace with your redirect URL
-			const cancelUrl = 'http://sotgapi.vedanshis.com:20080/vsys_payment_gw/ccavResponseHandler.php'; // Replace with your cancel URL
-
-			// Create the request payload
-			const payload = {
-				access_code: accessCode,
-				order_id: orderId
-			};
-
-			// Convert payload to form data
-			const formData = new FormData();
-			// eslint-disable-next-line
-			for (const key in payload) {
-				formData.append(key, payload[key]);
-			}
-			// Make the POST request
-			fetch(rsaKeyUrl, {
-				method: 'POST',
-				body: formData,
-				mode: 'no-cors'
-			})
-				.then(response => response.text())
-				.then(rsaKey => {
-					// Generate the request string
-					// const requestString = `${merchantId}|${orderId}|${amount}|INR|${redirectUrl}|${cancelUrl}`;
-					const requestString = `${amount}|INR`;
-
-					// Encrypt the request string using the RSA key
-					const encryptedRequest = encryptRSA(requestString, rsaKey);
-
-					// Submit the form with the encrypted request
-					submitCCavenueForm(
-						encryptedRequest,
-						accessCode,
-						merchantId,
-						orderId,
-						amount,
-						redirectUrl,
-						cancelUrl
-					);
-				});
 		} else {
 			message = 'Failed to save the data, please try again later!';
 			open = true;
@@ -575,6 +625,7 @@ const CartAndPayment = props => {
 									aria-label="REGISTER"
 									value="legacy"
 									disabled={stageStatus === 1}
+									onClick={paymentHandler}
 								>
 									{stageStatus === 1 ? 'Payment Completed' : 'Payment'}
 								</Button>

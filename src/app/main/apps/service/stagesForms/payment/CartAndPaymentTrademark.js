@@ -27,6 +27,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { updateData } from '../../store/serviceStepsSlice';
+import { setUserData } from 'app/auth/store/userSlice';
 import { selectResponseCustomerTrademarkDetailsAndAttachments } from '../../store/responseCustomerTrademarkDetailsAndAttachmentsSlice';
 import { applicantTypesList } from '../applicantTypeList';
 import axios from 'axios';
@@ -60,7 +61,6 @@ const CartAndPayment = props => {
 	const classes = useStyles();
 	const dispatch = useDispatch();
 	const [map, setMap] = useState('applicantDetails');
-	const [actualPaymentAmount, setActualPaymentAmount] = useState(null);
 	const [razorpayOrderId, setRazorpayOrderId] = useState('');
 	useEffect(() => {
         // Load Razorpay library dynamically
@@ -298,7 +298,27 @@ const CartAndPayment = props => {
 	});
 
 	const paymentHandler = async () => {
-		console.log('final amount to be paid', formatter.format(chargesToBePaid));
+		const allFinalAmountToBePaid = formatter.format(chargesToBePaid + props.govtCharges);
+		console.log('final amount to be paid', allFinalAmountToBePaid);
+
+		// Convert to number
+		const amountNumber = parseFloat(allFinalAmountToBePaid.replace(/[^0-9.-]+/g,""));
+		console.log('amountNumber', amountNumber);
+
+		// Extract the whole number part
+		const wholeNumber = Math.floor(amountNumber);
+		console.log('wholeNumber', wholeNumber);
+
+		// Convert the decimal part to paisa
+		const decimalPart = Math.round((amountNumber % 1) * 100);
+		console.log('decimalPart', decimalPart);
+
+		// Combine whole number and paisa
+		const amountInPaisa = wholeNumber * 100 + decimalPart;
+
+		console.log('final amountInPaisa', amountInPaisa);
+
+
 		try {
             // Step 1: Create Razorpay order
             //const response = await axios.post('YOUR_PHP_SERVER_URL/razorpay.php');
@@ -308,7 +328,7 @@ const CartAndPayment = props => {
             // Step 2: Set up Razorpay options
             const options = {
                 key: 'rzp_test_sC6p5nCMQEu05y',
-                amount: 50000, // Amount in paisa
+                amount: amountInPaisa, // Amount in paisa
                 currency: 'INR',
                 name: 'Your Company Name',
                 description: 'Payment for your order',
@@ -339,7 +359,7 @@ const CartAndPayment = props => {
                 payment_id: response.razorpay_payment_id,
                 order_id: razorpayOrderId,
             });
-
+			console.log('responseresponse',response);
             // Step 7: Redirect to Thank You page if payment is successful
             if (verifyResponse.success) {
                 console.log('Payment successful! Redirecting to Thank You page.');
@@ -402,58 +422,7 @@ const CartAndPayment = props => {
 				})
 			);
 			stageStatus = 1;
-
-			// CCAvenue payment integration
-			const merchantId = '232399';
-			const accessCode = 'AVXN91HC29CE29NXEC';
-			const orderId = '12345689'; // Replace with your order ID
-			const amount = 1; // Replace with the actual amount
-			const rsaKeyUrl = 'http://sotgapi.vedanshis.com:20080/vsys_payment_gw/GetRSA.php';
-			const redirectUrl = 'http://sotgapi.vedanshis.com:20080/vsys_payment_gw/ccavResponseHandler.php'; // Replace with your redirect URL
-			const cancelUrl = 'http://sotgapi.vedanshis.com:20080/vsys_payment_gw/ccavResponseHandler.php'; // Replace with your cancel URL
-
-			// Create the request payload
-			const payload = {
-				access_code: accessCode,
-				order_id: orderId
-			};
-
-			// Convert payload to form data
-			const formData = new FormData();
-			// eslint-disable-next-line
-			for (const key in payload) {
-				formData.append(key, payload[key]);
-			}
-			// Make the POST request
-			fetch(rsaKeyUrl, {
-				method: 'POST',
-				body: formData,
-				mode: 'no-cors'
-			})
-				.then(response => response.text())
-				.then(rsaKey => {
-					// Generate the request string
-					// const requestString = `${merchantId}|${orderId}|${amount}|INR|${redirectUrl}|${cancelUrl}`;
-					const requestString = `${amount}|INR`;
-
-					// Encrypt the request string using the RSA key
-					const encryptedRequest = encryptRSA(requestString, rsaKey);
-
-					// Submit the form with the encrypted request
-					submitCCavenueForm(
-						encryptedRequest,
-						accessCode,
-						merchantId,
-						orderId,
-						amount,
-						redirectUrl,
-						cancelUrl
-					);
-				});
-
-			message = 'Paid successfully.';
-			open = true;
-			level = 'success';
+			
 		} else {
 			message = 'Failed to save the data, please try again later!';
 			open = true;
