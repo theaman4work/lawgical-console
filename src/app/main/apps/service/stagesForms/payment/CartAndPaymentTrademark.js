@@ -62,6 +62,10 @@ const CartAndPayment = props => {
 	const dispatch = useDispatch();
 	const [map, setMap] = useState('applicantDetails');
 	const [razorpayOrderId, setRazorpayOrderId] = useState('');
+
+	const [orderId, setOrderId] = useState("");
+    const [paymentSuccess, setPaymentSuccess] = useState(false);
+
 	useEffect(() => {
         // Load Razorpay library dynamically
         const script = document.createElement('script');
@@ -377,6 +381,85 @@ const CartAndPayment = props => {
         return Promise.resolve({
             success: true,
         });
+    };
+
+	const createOrder = async () => {
+        const allFinalAmountToBePaid = formatter.format(chargesToBePaid + props.govtCharges);
+		console.log('final amount to be paid', allFinalAmountToBePaid);
+
+		// Convert to number
+		const amountNumber = parseFloat(allFinalAmountToBePaid.replace(/[^0-9.-]+/g,""));
+		console.log('amountNumber', amountNumber);
+
+		// Extract the whole number part
+		const wholeNumber = Math.floor(amountNumber);
+		console.log('wholeNumber', wholeNumber);
+
+		// Convert the decimal part to paisa
+		const decimalPart = Math.round((amountNumber % 1) * 100);
+		console.log('decimalPart', decimalPart);
+
+		// Combine whole number and paisa
+		const amountInPaisa = wholeNumber * 100 + decimalPart;
+
+		console.log('final amountInPaisa', amountInPaisa);
+        try {
+            const response = await axios.post("http://88.99.148.198:19020/api/payment-transactions", {
+                amount: amountInPaisa,
+                currency: "INR",
+                userId: "test-user101@test.com", // User's ID
+                productId: "PRODUCT_ID_HERE", // Product's ID
+                cgst: 0,
+                createdBy: 0,
+                igst: 0,
+                lserviceTransactionId: 0,
+                modifiedBy: 0,
+                modifiedOn: "2024-02-09T12:34:49.756Z",
+                paidAmount: amountInPaisa,
+                paymentGatewayInfoId: 0,
+                sgst: 0,
+                status: "INACTIVE",
+                totalAmount: amountInPaisa
+            });
+            setOrderId(response.data.id);
+        } catch (error) {
+            console.error("Error creating order:", error);
+        }
+    };
+
+    const handlePayment = async () => {
+        if (!orderId) {
+            await createOrder();
+        }
+
+        if (orderId) {
+            const options = {
+                key: "YOUR_KEY_ID",
+                amount: 50000,
+                currency: "INR",
+                name: "Acme Corp",
+                description: "Test payment",
+                order_id: orderId,
+                handler: async function (response) {
+                    console.log(response);
+                    setPaymentSuccess(true);
+                },
+                prefill: {
+                    name: "John Doe",
+                    email: "john.doe@example.com",
+                    contact: "9999999999",
+                },
+                notes: {
+                    address: "Razorpay Corporate Office",
+                },
+                theme: {
+                    color: "#3399cc",
+                },
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.open();
+        }
     };
 
 	const formatter = new Intl.NumberFormat('en-IN', {
