@@ -384,48 +384,61 @@ const CartAndPayment = props => {
     };
 
 	const createOrder = async () => {
-        const allFinalAmountToBePaid = formatter.format(chargesToBePaid + props.govtCharges);
-		console.log('final amount to be paid', allFinalAmountToBePaid);
-
+		const allFinalAmountToBePaid = formatter.format(
+		  chargesToBePaid + props.govtCharges
+		);
+		console.log("final amount to be paid", allFinalAmountToBePaid);
+	  
 		// Convert to number
-		const amountNumber = parseFloat(allFinalAmountToBePaid.replace(/[^0-9.-]+/g,""));
-		console.log('amountNumber', amountNumber);
-
+		const amountNumber = parseFloat(
+		  allFinalAmountToBePaid.replace(/[^0-9.-]+/g, "")
+		);
+		console.log("amountNumber", amountNumber);
+	  
 		// Extract the whole number part
 		const wholeNumber = Math.floor(amountNumber);
-		console.log('wholeNumber', wholeNumber);
-
+		console.log("wholeNumber", wholeNumber);
+	  
 		// Convert the decimal part to paisa
 		const decimalPart = Math.round((amountNumber % 1) * 100);
-		console.log('decimalPart', decimalPart);
-
+		console.log("decimalPart", decimalPart);
+	  
 		// Combine whole number and paisa
 		const amountInPaisa = wholeNumber * 100 + decimalPart;
-
-		console.log('final amountInPaisa', amountInPaisa);
-        try {
-            const response = await axios.post("http://88.99.148.198:19020/api/payment-transactions", {
-                amount: amountInPaisa,
-                currency: "INR",
-                userId: "test-user101@test.com", // User's ID
-                productId: "PRODUCT_ID_HERE", // Product's ID
-                cgst: 0,
-                createdBy: 0,
-                igst: 0,
-                lserviceTransactionId: 0,
-                modifiedBy: 0,
-                modifiedOn: "2024-02-09T12:34:49.756Z",
-                paidAmount: amountInPaisa,
-                paymentGatewayInfoId: 0,
-                sgst: 0,
-                status: "INACTIVE",
-                totalAmount: amountInPaisa
-            });
-            setOrderId(response.data.id);
-        } catch (error) {
-            console.error("Error creating order:", error);
-        }
-    };
+	  
+		console.log("final amountInPaisa", amountInPaisa);
+	  
+		try {
+		  // Retrieve the JWT access token from local storage
+		  const jwtAccessToken = localStorage.getItem("jwt_access_token");
+		  console.log('jwtAccessToken', jwtAccessToken);
+	  
+		  // Use the JWT access token in the headers of your API request
+		  const response = await axios.post(
+			"http://web.lawgical.io:19020/services/lgrest/api/payment-transactions",
+			{
+			  id: 1,
+			  totalAmount: 0,
+			  paidAmount: 10000,
+			  sgst: 10,
+			  cgst: 10,
+			  igst: 10,
+			  status: "ACTIVE",
+			  lserviceTransactionId: 28,
+			},
+			{
+			  headers: {
+				Authorization: `Bearer ${jwtAccessToken}`,
+			  },
+			}
+		  );
+			console.log('response response', response);
+		  setOrderId(response.data.id);
+		} catch (error) {
+		  console.error("Error creating order:", error);
+		}
+	  };
+	  
 
     const handlePayment = async () => {
         if (!orderId) {
@@ -1151,7 +1164,7 @@ const CartAndPayment = props => {
 									aria-label="REGISTER"
 									value="legacy"
 									disabled={stageStatus === 1}
-									onClick={paymentHandler}
+									onClick={handlePayment}
 								>
 									{stageStatus === 1 ? 'Payment Completed' : 'Payment'}
 								</Button>
