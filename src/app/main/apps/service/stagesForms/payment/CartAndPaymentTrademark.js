@@ -478,6 +478,7 @@ const CartAndPayment = props => {
 					}
 				);
 				const dynamicOrderId = response.data.lserviceTransactionId;
+				const payment_id = response.data.id;
 				console.log("First API Response", response);
 				setOrderId(dynamicOrderId);
 
@@ -485,12 +486,69 @@ const CartAndPayment = props => {
 					key: "rzp_test_sC6p5nCMQEu05y",
 					amount: amountInPaisa,
 					currency: "INR",
-					name: "Acme Corp",
+					name: "Lawgical",
 					description: "Test payment",
-					order_id: dynamicOrderId, // Use dynamicOrderId here
+					order_id: orderId, // Use dynamicOrderId here
 					handler: async function (response) {
 						console.log('handler response', response);
-						setPaymentSuccess(true);
+						// setPaymentSuccess(true);
+						if(response != null){
+						try {
+							const response = await axios.post(
+								"http://web.lawgical.io:19020/services/lgrest/api/payment-transaction-details/post-or-update",
+								{
+									amount: amountInPaisa,
+									bankRefNo: "string",
+									billingAddress: "string",
+									billingCity: "string",
+									billingCountry: "string",
+									billingMail: "string",
+									billingMobile: "string",
+									billingName: "string",
+									billingTel: "string",
+									billingZip: "string",
+									binCountry: "string",
+									cardName: "string",
+									// createdBy: 0,
+									// createdOn: "2024-02-09T12:32:18.395Z",
+									currency: "string",
+									discountValue: "string",
+									eciValue: "string",
+									failureMessage: "string",
+									merchantAmount: 0,
+									// modifiedBy: 0,
+									// modifiedOn: "2024-02-09T12:32:18.395Z",
+									offerCode: "string",
+									offerType: "string",
+									orderId: orderId,
+									orderStatus: "string",
+									paymentMode: "card",
+									paymentTransactionId: payment_id,
+									responseCode: "string",
+									retry: "string",
+									status: "INACTIVE",
+									statusCode: "string",
+									statusMessage: "string",
+									trackingId: 0,
+									// transactionDate: "2024-02-09T12:32:18.395Z",
+									transactionResultType: "SUCCESS",
+									vault: "string"
+								},
+								{
+									headers: {
+										Authorization: `Bearer ${jwtAccessToken}`,
+									},
+								}
+							);
+							// const dynamicOrderId = response.data.lserviceTransactionId;
+							console.log("Second API Response", response);
+							setPaymentSuccess(true);
+							} catch (error) {
+								console.error("Error creating order:", error);
+							}
+						} else {
+							setPaymentSuccess(false);
+						}
 					},
 					prefill: {	
 						name: "John Doe",
