@@ -36,3 +36,5 @@ yarn-error.log*
 .pnp.*
 yarn.lock
 *.tgz
+
+package-lock.json
