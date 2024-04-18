@@ -464,7 +464,7 @@ const CartAndPayment = props => {
 
 				// Use the JWT access token in the headers of your API request
 				const response = await axios.post(
-					"http://api.lawgical.io/services/lgrest/api/payment-transactions",
+					"https://api.lawgical.io/services/lgrest/api/payment-transactions",
 					{
 						totalAmount: amountInPaisa,
 						paidAmount: amountInPaisa,
@@ -495,7 +495,7 @@ const CartAndPayment = props => {
 						if(response != null){
 						try {
 							const response = await axios.post(
-								"http://api.lawgical.io/services/lgrest/api/payment-transaction-details/post-or-update",
+								"https://api.lawgical.io/services/lgrest/api/payment-transaction-details/post-or-update",
 								{
 									amount: amountInPaisa,
 									bankRefNo: "string",
