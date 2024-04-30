@@ -72,7 +72,7 @@ const navigationConfig = [
 		title: 'APPLICANTS',
 		type: 'item',
 		icon: 'people_outline',
-		url: '/faq'
+		url: '/applicants'
 	},
 	{
 		id: 'profile',
