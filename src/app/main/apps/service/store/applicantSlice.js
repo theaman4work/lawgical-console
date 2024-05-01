@@ -1,6 +1,5 @@
 import { createSlice, createAsyncThunk, createEntityAdapter } from '@reduxjs/toolkit';
 import { axiosInstance } from 'app/auth-service/axiosInstance';
-import { actions } from 'react-table';
 
 export const getApplicants = createAsyncThunk('servicesApp/applicants/getApplicants', async () => {
 	const email = localStorage.getItem('lg_logged_in_email');
@@ -33,14 +32,12 @@ export const updateApplicant = createAsyncThunk(
 			applicantAndAddressDTO
 		);
 		const data = await response.data;
-		console.log(data);
+
 		dispatch(getApplicants());
 
 		return data;
-		
 	}
 );
-
 
 export const removeApplicant = createAsyncThunk(
 	'servicesApp/applicants/removeApplicant',
@@ -74,7 +71,6 @@ export const setApplicantsForLserviceTransaction = createAsyncThunk(
 );
 
 const applicantsAdapter = createEntityAdapter({});
-console.log(applicantsAdapter);
 
 export const { selectAll: selectApplicants, selectById: selectApplicantsById } = applicantsAdapter.getSelectors(
 	state => state.servicesApp.applicants
@@ -145,5 +141,4 @@ export const {
 	closeEditApplicantDialog
 } = applicantsSlice.actions;
 
-console.log(applicantsSlice.actions)
 export default applicantsSlice.reducer;
